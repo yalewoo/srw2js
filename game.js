@@ -1,6 +1,7 @@
-var Game = function(cxt)
+var Game = function(canvas)
 {
-	this.cxt = cxt;
+	this.canvas = canvas;
+	this.cxt = canvas.getContext("2d");
 	this.update = function() {
 
 	}

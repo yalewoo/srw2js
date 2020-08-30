@@ -18,6 +18,8 @@ var Map = function(cxt, stage){
 		}
 		this.maprects.push(arr);
 	}
+
+
 	this.draw = function() {
 		for (var i = 0; i < this.maprects.length; ++i)
 		{
@@ -26,6 +28,11 @@ var Map = function(cxt, stage){
 				this.maprects[i][j].draw();
 			}
 		}
+	}
+
+	this.logXY = function(x, y)
+	{
+		console.log(this.maprects[x][y]);
 	}
 }
 

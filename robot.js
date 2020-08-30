@@ -17,6 +17,17 @@ var Robots = function(cxt) {
 			this.robots[i].draw();
 		}
 	}
+
+	this.logXY = function(x, y)
+	{
+		for (var i = 0; i < this.robots.length; ++i)
+		{
+			if (this.robots[i].x == x && this.robots[i].y == y)
+			{
+				log(this.robots[i]);
+			}
+		}
+	}
 }
 
 
@@ -30,9 +41,7 @@ var Robot = function(robot_data, cxt) {
 	this.people = robot_data[5];
 
 	this.img = new Image();
-	console.log(robot_data)
-	console.log(this.id)
-	console.log(g_robot_data[this.id])
+	this.img_id = g_robot_data[this.id][20];
 	this.img.src = "img/robots/1/" + g_robot_data[this.id][20] + ".png"
 
 	this.draw = function() {
