@@ -29,6 +29,8 @@ var SceneMain = function(cxt, stage) {
 
 				//self.map.logXY(x, y);
 				self.robots.logXY(x, y);
+
+				
             }
 
         })

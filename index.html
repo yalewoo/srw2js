@@ -2,22 +2,105 @@
 <html>
 <head>
 	<title>Game</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<p>数字1-9选关</p>
+
+<div id="canvas_main">
 <canvas id="myCanvas" width="400" height="350"></canvas>
-<div id="log">(2,3)</div>
-	<script type="text/javascript" charset="UTF-8" src="util.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="data/map.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="data/robots.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="data/stage_robot.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="data/stage_robot_enemy.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="map.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="robot.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="resource_load.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="scene_main.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="game.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="main.js"></script>
+</div>
+	
+
+<div id="robot_data">
+	<div class="left block">
+		<p id="robot_name">刚达</p>
+		<p>
+			<span>水平</span><span class="valueholder" id="robot_level">1</span>
+			<span>类型</span><span class="valueholder" id="robot_type">陆</span>
+		</p>
+		<p>
+			<span>机动</span><span class="valueholder" id="robot_move">6</span>
+		</p>
+		<p><span>精神</span>
+			<span id="robot_spirit" class="valueholder" >40</span>
+			<span>/</span>
+			<span id="robot_spirit_total">40</span>
+		</p>
+	</div>
+	<div id="robot_image" class="right">
+		<img id="robot_image_img" src="img/robotImg/126.png" alt="">
+	</div>
+	<div id="overflow"></div>
+
+	<div id="property5"  class="block">
+		<div class="left">
+			<p><span>强度</span><span class="valueholder" id="robot_strength">70</span></p>
+			<p><span>防卫</span><span class="valueholder" id="robot_defense">55</span></p>
+			<p><span>速度</span><span class="valueholder" id="robot_speed">72</span></p>
+		</div>
+		<div class="right">
+			<p>
+				<span>HP</span>
+				<span class="valueholder" id="robot_hp">320</span>
+				<span>/</span>
+				<span id="robot_hp_total">320</span>
+			</p>
+			<p>
+				<span>EXP</span><span class="valueholder" id="robot_exp">55</span>
+			</p>
+			<p>
+				<span>升级还需</span><span class="valueholder" id="robot_exp_need">30</span>
+			</p>
+		</div>
+	</div>
+	<div id="people"  class="block">
+		<div class="left"><img id="pilot_image_img" src="img/people/6.png" alt=""></div>
+		<div class="right"><p>
+			<span>驾驶员</span><span class="valueholder" id="robot_pilot_name">大卫</span>
+		</p>
+		</div>
+		<div id="overflow"></div>
+	</div>
+	<div id="weapon1" class="weapon block">
+		<div>
+			<p><span class="valueholder" id="weapon1_name">光剑</span></p>
+			<p><span>命中</span><span class="valueholder" id="weapon1_hitrate">110</span></p>
+			<p><span>射程</span><span class="valueholder" id="weapon1_range">1</span></p>
+			<p><span>火力</span>
+				<span> 空</span><span class="valueholder" id="weapon1_power_sky">120</span>
+				<span> 陆</span><span class="valueholder" id="weapon1_power_land">120</span>
+				<span> 海</span><span class="valueholder" id="weapon1_power_sea">110</span>
+			</p>
+		</div>
+	</div>
+	<div id="weapon2" class="weapon block">
+		<div>
+			<p><span class="valueholder" id="weapon2_name">光束枪</span></p>
+			<p><span>命中</span><span class="valueholder" id="weapon2_hitrate">85</span></p>
+			<p><span>射程</span><span class="valueholder" id="weapon2_range">1</span></p>
+			<p><span>火力</span>
+				<span> 空</span><span class="valueholder" id="weapon2_power_sky">140</span>
+				<span> 陆</span><span class="valueholder" id="weapon2_power_land">130</span>
+				<span> 海</span><span class="valueholder" id="weapon2_power_sea">-</span>
+			</p>
+		</div>
+	</div>
+
+</div>
+
+
+<script type="text/javascript" charset="UTF-8" src="util.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/map.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/people.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/robots.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/stage_robot.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/stage_robot_enemy.js"></script>
+<script type="text/javascript" charset="UTF-8" src="map.js"></script>
+<script type="text/javascript" charset="UTF-8" src="robot.js"></script>
+<script type="text/javascript" charset="UTF-8" src="resource_load.js"></script>
+<script type="text/javascript" charset="UTF-8" src="scene_main.js"></script>
+<script type="text/javascript" charset="UTF-8" src="game.js"></script>
+<script type="text/javascript" charset="UTF-8" src="main.js"></script>
 
 </body>
 </html>
