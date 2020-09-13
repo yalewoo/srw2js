@@ -97,6 +97,8 @@ var Robots = function(scene_main) {
 		}
 	}
 	this.draw = function() {
+		updateRobotUI(this.selectedRobot);
+		
 		for (var i = 0; i < this.robots.length; ++i)
 		{
 			this.robots[i].draw();
@@ -132,7 +134,7 @@ var Robots = function(scene_main) {
 	this.mousedownHandler = function (x, y) {
 		var robot = this.getRobotAt(x, y);
 		if (robot) {
-			updateRobotUI(robot);
+			
 			this.selectedRobot = robot;
 		}
 		else{
@@ -143,6 +145,11 @@ var Robots = function(scene_main) {
 
 			}
 		}
+	}
+
+	this.rightmousedownHandler = function (e) {
+		
+		this.selectedRobot = null;
 	}
 	
 }

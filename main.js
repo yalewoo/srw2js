@@ -6,7 +6,7 @@ window.g_resourceManager = new ResourceManager();
 
 var game = new Game(canvas);
 
-var scene_main = new SceneMain(cxt, 0);
+var scene_main = new SceneMain(game, 0);
 scene_main.loadStage(1);
 
 game.runWithScene(scene_main);

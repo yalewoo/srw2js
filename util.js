@@ -7,8 +7,16 @@ var updateValuebyDomId = function(id, s)
     d.innerText = s;
 
 }
+
 var updateRobotUI = function(robot)
 {
+    var d = document.getElementById("robot_data");
+    if (!robot){
+        
+        d.style.display = "none";
+        return;
+    }
+    d.style.display = "block";
 
     updateValuebyDomId("robot_name", robot.property.robotName);
 
@@ -65,4 +73,14 @@ var updateRobotUI = function(robot)
     // robot.speed;
     // robot.strength;
     // robot.defense;
+}
+
+var updateMapRectUI = function (maprect) {
+
+    updateValuebyDomId("map_rect_name", maprect.typeName);
+    updateValuebyDomId("move_consume_sky", maprect.moveConsume[0]);
+    updateValuebyDomId("move_consume_land", maprect.moveConsume[1]);
+    updateValuebyDomId("move_consume_sea", maprect.moveConsume[2]);
+  
+
 }

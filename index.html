@@ -6,12 +6,33 @@
 </head>
 <body>
 
+<audio id="music1" src="audio/music/87.wav" preload="auto" autoplay="autoplay" controls="controls" loop="loop">
+	Your browser does not support the audio element.
+</audio>
+<audio id="music2" src="audio/wav/pushbutton.mp3" preload="auto" controls="controls">
+	Your browser does not support the audio element.
+</audio>
 <div id="canvas_main">
 <canvas id="myCanvas" width="400" height="350"></canvas>
+
+<div id="map_rect_data" >
+	<p id="map_rect_name">山地</p>
+	<p>消耗移动力</p>
+	<p>
+		<span> 空</span><span class="valueholder" id="move_consume_sky">1</span>
+		<span> 陆</span><span class="valueholder" id="move_consume_land">3</span>
+		<span> 海</span><span class="valueholder" id="move_consume_sea">4</span>
+	</p>
+</div>
+
 </div>
 	
 
-<div id="robot_data">
+
+
+
+
+<div id="robot_data" class="statusBlock">
 	<div class="left block">
 		<p id="robot_name">刚达</p>
 		<p>
@@ -89,6 +110,8 @@
 </div>
 
 
+
+<script type="text/javascript" charset="UTF-8" src="telemetry.js"></script>
 <script type="text/javascript" charset="UTF-8" src="util.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/map.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/people.js"></script>
@@ -96,6 +119,7 @@
 <script type="text/javascript" charset="UTF-8" src="data/robots.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot_enemy.js"></script>
+<script type="text/javascript" charset="UTF-8" src="MusicManager.js"></script>
 <script type="text/javascript" charset="UTF-8" src="weapon.js"></script>
 <script type="text/javascript" charset="UTF-8" src="map.js"></script>
 <script type="text/javascript" charset="UTF-8" src="robot.js"></script>

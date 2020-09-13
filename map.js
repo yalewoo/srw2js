@@ -23,7 +23,7 @@ var Map = function(scene_main, stage){
 	}
 
 	this.update = function() {
-		
+
 	}
 
 	this.draw = function() {
@@ -36,9 +36,11 @@ var Map = function(scene_main, stage){
 		}
 	}
 
-	this.logXY = function(x, y)
+	this.mousehoverHandler = function(x, y)
 	{
-		console.log(this.maprects[x][y]);
+		//log(this.maprects[x][y]);
+
+		updateMapRectUI(this.maprects[x][y]);
 	}
 
 }
@@ -47,8 +49,24 @@ var MapRect = function(cxt, x, y, type){
 	this.x = x;
 	this.y = y;
 	this.cxt = cxt;
+	this.kind = type;
+
+	this.style = "A"
 	this.img = g_resourceManager.img_maprect[type];
 	this.draw = function() {
 		this.cxt.drawImage(this.img,this.x*32,this.y*32);
 	}
+	this.typeName = g_map_data_typename[type];
+
+	   
+	this.moveConsume = [1,1,1];
+	this.moveConsume[0] = g_map_data_moveConsumeTable[0][this.kind];
+	this.moveConsume[1] = g_map_data_moveConsumeTable[1][this.kind];
+	this.moveConsume[2] = g_map_data_moveConsumeTable[2][this.kind];
+
+	if (this.style == "C" && m_kind == 1)
+	{
+		m_moveConsume[2] = 1;
+	}
+
 }

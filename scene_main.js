@@ -1,5 +1,7 @@
-var SceneMain = function(cxt, stage) {
-	this.cxt = cxt;
+var SceneMain = function (game, stage) {
+	this.game = game;
+	var cxt = game.cxt
+	this.cxt = game.cxt;
 
 	this.update = function () {
 		this.map.update();
@@ -36,13 +38,19 @@ var SceneMain = function(cxt, stage) {
 			self.currentHoverX = x;
 			self.currentHoverY = y;
 
-			//self.map.logXY(x, y);
+			self.map.mousehoverHandler(x, y);
+
 			self.robots.mousehoverHandler(x, y);
 		}
 
 	})
 	
 	cxt.canvas.addEventListener('click', function (event) {
+
+		
+		self.game.musicManager.playOnce();
+
+
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 
@@ -51,6 +59,9 @@ var SceneMain = function(cxt, stage) {
 
 	var canvasDom = document.getElementById("myCanvas");
 	canvasDom.oncontextmenu = function (e) {
+			self.robots.rightmousedownHandler(e);
+
+
 			return false;
 		}; 
 

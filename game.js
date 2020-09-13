@@ -27,5 +27,7 @@ var Game = function(canvas)
 			self.scene.loadStage(Number(e.key) );
 		}
 	})
+
+	this.musicManager = new MusicManager();
 }
 
