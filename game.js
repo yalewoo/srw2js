@@ -10,6 +10,7 @@ var Game = function(canvas)
 		self.update();
 		self.cxt.clearRect(0,0,self.cxt.canvas.width,self.cxt.canvas.height);
 
+		self.scene.update();
 		self.scene.draw();
 		
 		setTimeout(self.runloop, 1000/60);

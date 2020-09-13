@@ -62,7 +62,9 @@ var Pilot = function(id)
 	this.music_id = t[28];
 }
 
-var Robots = function(cxt) {
+var Robots = function(scene_main) {
+	this.scene = scene_main;
+	var cxt = scene_main.cxt;
 
 	this.robots = []
 	this.enemy = []
@@ -89,6 +91,11 @@ var Robots = function(cxt) {
 		}
 	}
 
+	this.update = function () {
+		for (var i = 0; i < this.robots.length; ++i) {
+			this.robots[i].update();
+		}
+	}
 	this.draw = function() {
 		for (var i = 0; i < this.robots.length; ++i)
 		{
@@ -96,8 +103,9 @@ var Robots = function(cxt) {
 		}
 	}
 
-	this.logXY = function(x, y)
+	this.mousehoverHandler = function(x, y)
 	{
+		return;
 		for (var i = 0; i < this.robots.length; ++i)
 		{
 			if (this.robots[i].x == x && this.robots[i].y == y)
@@ -108,6 +116,35 @@ var Robots = function(cxt) {
 			}
 		}
 	}
+	this.getRobotAt = function(x, y) {
+		for (var i = 0; i < this.robots.length; ++i) {
+			if (this.robots[i].x == x && this.robots[i].y == y) {
+				return this.robots[i];
+			}
+		}
+		for (var i = 0; i < this.enemy.length; ++i) {
+			if (this.enemy[i].x == x && this.enemy[i].y == y) {
+				return this.enemy[i];
+			}
+		}
+		return null;
+	}
+	this.mousedownHandler = function (x, y) {
+		var robot = this.getRobotAt(x, y);
+		if (robot) {
+			updateRobotUI(robot);
+			this.selectedRobot = robot;
+		}
+		else{
+			if (this.selectedRobot)
+			{
+				this.selectedRobot.moveTo(x, y);
+				this.selectedRobot = null;
+
+			}
+		}
+	}
+	
 }
 
 
@@ -154,24 +191,57 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 	this.weapon1 = new Weapon(this.property.weapon1id);
 	this.weapon2 = new Weapon(this.property.weapon2id);
 
+	this.active = true;
+
+	this.moveSpeedUI = 0.618;
+	this.update = function () {
+		var d = 0;
+		if (this.x < this.TargetX) {
+			this.xFloat += this.moveSpeedUI;
+			this.x = Math.floor(this.xFloat);
+		}
+		else if (this.x > this.TargetX) {
+			this.xFloat -= this.moveSpeedUI;
+			this.x = Math.floor(this.xFloat);
+		}
+		else if (this.y < this.TargetY) {
+			this.yFloat += this.moveSpeedUI;
+			this.y = Math.floor(this.yFloat);
+		} else if (this.y > this.TargetY) {
+			this.yFloat -= this.moveSpeedUI;
+			this.y = Math.floor(this.yFloat);
+		}
+	}
 	this.draw = function() {
 		if (this.img.isloaded)
 		{
+			
+
 			this.cxt.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
 
-			var imgdata = this.cxt.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
-			//console.log(imgdata);
-			imgdata = toGray(imgdata);//灰白滤镜
-			this.cxt.putImageData(imgdata, this.x * 32, this.y * 32);
+			if (!this.active)
+			{
+				var imgdata = this.cxt.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
+				//console.log(imgdata);
+				imgdata = toGray(imgdata);//灰白滤镜
+				this.cxt.putImageData(imgdata, this.x * 32, this.y * 32);
 
-			// var ctx = this.cxt;
-			// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
+				// var ctx = this.cxt;
+				// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
 
-			// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);
+				// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);
+
+			}
 		}
 
 	}
 
+	this.moveTo = function (x, y) {
+		this.xFloat = this.x;
+		this.yFloat = this.y;
+		this.TargetX = x;
+		this.TargetY = y;
+	}
 	
 }
 
@@ -263,7 +333,6 @@ Robot.prototype.updateLevel = function () {
 	this.speed = this.property.robot_speed0 + this.pilot.speed + this.getLevelPropertyPlus(this.property.robot_speed_plus, this.level);
 	this.strength = this.property.robot_strength0 + this.pilot.strength + this.getLevelPropertyPlus(this.property.robot_strength_plus, this.level);
 	this.defense = this.property.robot_defense0 + this.pilot.defense + this.getLevelPropertyPlus(this.property.robot_defense_plus, this.level);
-
 }
 
 Robot.prototype.InitValue = function () {

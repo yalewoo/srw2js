@@ -1,4 +1,7 @@
-var Map = function(cxt, stage){
+var Map = function(scene_main, stage){
+	this.scene = scene_main;
+
+	var cxt = scene_main.cxt;
 	this.maprects = []
 	var stage_map_old = map_data[stage-1];
 	var stage_map = stage_map_old[0].map(function(col, i) {
@@ -19,6 +22,9 @@ var Map = function(cxt, stage){
 		this.maprects.push(arr);
 	}
 
+	this.update = function() {
+		
+	}
 
 	this.draw = function() {
 		for (var i = 0; i < this.maprects.length; ++i)
@@ -34,6 +40,7 @@ var Map = function(cxt, stage){
 	{
 		console.log(this.maprects[x][y]);
 	}
+
 }
 
 var MapRect = function(cxt, x, y, type){
