@@ -7,10 +7,92 @@ var load_maprect_image = function() {
 	{
 		map_images[i] = new Image();
 		map_images[i].src = image_path_parent + images_path[i] + ".png";
+
+		map_images[i].onerror = function () {
+			map_images[i].src = "img/robots/1enemy/undefined.png";
+		}
 	}
+	return map_images;
+}
+
+var load_robot_icon_image = function()
+{
+	var map_images = {};
+	for (var i = 0; i < g_robot_data.length; ++i)
+	{
+		var img = new Image();
+		img.src = "img/robots/1/" + g_robot_data[i][20] + ".png"
+		map_images[i] = img;
+
+		img.onerror = function () {
+			this.src = "img/robots/1/undefined.png";
+		}
+		img.onload = function () {
+			this.isloaded = true;
+		}
+	}
+
+	return map_images;
+}
+
+var load_enemy_icon_image = function () {
+	var map_images = {};
+	for (var i = 0; i < g_robot_data.length; ++i) {
+		var img = new Image();
+		img.src = "img/robots/1enemy/" + g_robot_data[i][20] + ".png"
+		map_images[i] = img;
+
+		img.onerror = function () {
+			this.src = "img/robots/1enemy/undefined.png";
+		}
+		img.onload = function () {
+			this.isloaded = true;
+		}
+	}
+
+	return map_images;
+}
+
+var load_robot_image = function() {
+	var map_images = {};
+	for (var i = 0; i < g_robot_data.length; ++i) {
+		var img = new Image();
+		img.src = "img/robotImg/" + i + ".png"
+		map_images[i] = img;
+
+		img.onerror = function () {
+			this.src = "img/robots/1/undefined.png";
+		}
+		img.onload = function () {
+			this.isloaded = true;
+		}
+	}
+
+	return map_images;
+}
+
+var load_people_image = function () {
+	var map_images = {};
+	for (var i = 0; i < g_people_data.length; ++i) {
+		var img = new Image();
+		img.src = "img/people/" + i + ".png"
+		map_images[i] = img;
+
+		img.onerror = function () {
+			this.src = "img/robots/1/undefined.png";
+		}
+		img.onload = function () {
+			this.isloaded = true;
+		}
+	}
+
 	return map_images;
 }
 
 var ResourceManager = function() {
 	this.img_maprect = load_maprect_image();
+	this.img_roboticon = load_robot_icon_image();
+	this.img_enemyicon = load_enemy_icon_image();
+	this.img_robot_image = load_robot_image();
+	this.img_people_image = load_people_image();
 }

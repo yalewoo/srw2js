@@ -39,11 +39,27 @@ var updateRobotUI = function(robot)
     updateValuebyDomId("robot_exp_need", exp_need);
 
 
-    var d = document.getElementById("robot_image_img");
-    d.src = "img/robotImg/" + robot.robot_id +".png"
+    var d = document.getElementById("robot_image");
+    d.innerHTML = "";
+    d.append(g_resourceManager.img_robot_image[robot.robot_id]);
     
-    d = document.getElementById("pilot_image_img");
-    d.src = "img/people/" + robot.pilot.id + ".png"
+    d = document.getElementById("pilot_image");
+    d.innerHTML = "";
+    d.append(g_resourceManager.img_people_image[robot.pilot.id]);
+
+    updateValuebyDomId("weapon1_name", robot.weapon1.name);
+    updateValuebyDomId("weapon1_hitrate", robot.weapon1.hitRadio);
+    updateValuebyDomId("weapon1_range", robot.weapon1.range);
+    updateValuebyDomId("weapon1_power_sky", robot.weapon1.firepower[0]);
+    updateValuebyDomId("weapon1_power_land", robot.weapon1.firepower[1]);
+    updateValuebyDomId("weapon1_power_sea", robot.weapon1.firepower[2]);
+
+    updateValuebyDomId("weapon2_name", robot.weapon2.name);
+    updateValuebyDomId("weapon2_hitrate", robot.weapon2.hitRadio);
+    updateValuebyDomId("weapon2_range", robot.weapon2.range);
+    updateValuebyDomId("weapon2_power_sky", robot.weapon2.firepower[0]);
+    updateValuebyDomId("weapon2_power_land", robot.weapon2.firepower[1]);
+    updateValuebyDomId("weapon2_power_sea", robot.weapon2.firepower[2]);
 
     // robot.move;
     // robot.speed;

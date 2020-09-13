@@ -83,6 +83,8 @@ var Robots = function(cxt) {
 		{
 			var robot = new Robot(stage_robot[i], cxt, isEnemy=true);
 			robot.updateLevel();
+			robot.InitValue();
+
 			this.robots.push(robot);
 		}
 	}
@@ -122,18 +124,8 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 		this.robot_id = robot_stage_data[5];
 		this.people = robot_stage_data[4];
 
-		this.img = new Image();
-		this.img_id = g_robot_data[this.robot_id][20];
-		this.img.src = "img/robots/1enemy/" + g_robot_data[this.robot_id][20] + ".png"
-		this.isImgReady = false;
-
-		var self = this;
-		this.img.onerror = function() {
-			self.img.src = "img/robots/1enemy/undefined.png";
-		}
-		this.img.onload = function() {
-			self.isImgReady = true;
-		}
+		this.img = g_resourceManager.img_enemyicon[this.robot_id];
+		
 		
 		this.level = robot_stage_data[6];
 
@@ -149,18 +141,9 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 		this.robot_id = robot_stage_data[7];
 		this.people = robot_stage_data[5];
 
-		this.img = new Image();
-		this.img_id = g_robot_data[this.robot_id][20];
-		this.img.src = "img/robots/1/" + g_robot_data[this.robot_id][20] + ".png"
-		this.isImgReady = false;
 
-		var self = this;
-		this.img.onerror = function() {
-			self.img.src = "img/robots/1enemy/undefined.png";
-		}
-		this.img.onload = function() {
-			self.isImgReady = true;
-		}
+		this.img = g_resourceManager.img_roboticon[this.robot_id];
+
 
 		this.exp = 0;
 	}
@@ -168,15 +151,62 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 	this.property = new RobotProperty(this.robot_id);
 	this.pilot = new Pilot(this.people);
 
+	this.weapon1 = new Weapon(this.property.weapon1id);
+	this.weapon2 = new Weapon(this.property.weapon2id);
+
 	this.draw = function() {
-		if (this.isImgReady)
+		if (this.img.isloaded)
 		{
-		this.cxt.drawImage(this.img,this.x*32,this.y*32);
+			this.cxt.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
+
+			var imgdata = this.cxt.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
+			//console.log(imgdata);
+			imgdata = toGray(imgdata);//灰白滤镜
+			this.cxt.putImageData(imgdata, this.x * 32, this.y * 32);
+
+			// var ctx = this.cxt;
+			// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
+
+			// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);
 		}
 
 	}
 
 	
+}
+
+//灰白滤镜
+function toGray(imgdata) {
+	for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
+		var r = imgdata.data[i];
+		var g = imgdata.data[i + 1];
+		var b = imgdata.data[i + 2];
+		var rgb = (r * 0.3 + g * 0.5 + b * 0.11);
+		rgb = .399 * r + .687 * g + .214 * b
+		imgdata.data[i] = rgb;
+		imgdata.data[i + 1] = rgb;
+		imgdata.data[i + 2] = rgb;
+	}
+	return imgdata;
+}
+//黑白滤镜
+function toBlack(imgdata) {
+	for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
+		var r = imgdata.data[i];
+		var g = imgdata.data[i + 1];
+		var b = imgdata.data[i + 2];
+		var rgb = (r + g + b) / 3;
+		if (rgb < 100) {
+			rgb = 0;
+		}
+		else {
+			rgb = 255;
+		}
+		imgdata.data[i] = rgb;
+		imgdata.data[i + 1] = rgb;
+		imgdata.data[i + 2] = rgb;
+	}
+	return imgdata;
 }
 
 Robot.prototype.getLevelPropertyPlus = function(plusType, level)
@@ -237,8 +267,16 @@ Robot.prototype.updateLevel = function () {
 }
 
 Robot.prototype.InitValue = function () {
+	if (this.isPlayer)
+	{
 		this.spirit = this.pilot.spirit_total0;
-		this.hp = this.hp_total;
+	}
+	else
+	{
+		this.spirit = 0;
+		this.exp = 0;
+	}
+	this.hp = this.hp_total;
 
 
 }
