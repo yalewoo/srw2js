@@ -62,6 +62,8 @@ var Pilot = function(id)
 	this.music_id = t[28];
 }
 
+
+
 var Robots = function(scene_main) {
 	this.scene = scene_main;
 	var cxt = scene_main.cxt;
@@ -90,6 +92,9 @@ var Robots = function(scene_main) {
 			this.robots.push(robot);
 		}
 	}
+
+
+
 
 	this.update = function () {
 		for (var i = 0; i < this.robots.length; ++i) {
@@ -136,12 +141,21 @@ var Robots = function(scene_main) {
 		if (robot) {
 			
 			this.selectedRobot = robot;
+
+			var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
+log(m)
+			this.scene.setBlackEffect(m);
 		}
 		else{
 			if (this.selectedRobot)
 			{
-				this.selectedRobot.moveTo(x, y);
-				this.selectedRobot = null;
+				if (this.scene.canMoveTo(x, y))
+				{
+					this.selectedRobot.moveTo(x, y);
+					this.selectedRobot = null;
+					this.scene.setBlackEffect(null);
+				}
+				
 
 			}
 		}
@@ -150,6 +164,7 @@ var Robots = function(scene_main) {
 	this.rightmousedownHandler = function (e) {
 		
 		this.selectedRobot = null;
+		this.scene.setBlackEffect(null);
 	}
 	
 }
@@ -163,8 +178,8 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 		this.isPlayer = 0;
 		//关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
 		//[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
-		this.x = robot_stage_data[2];
-		this.y = robot_stage_data[3];
+		this.x = robot_stage_data[2]+1;
+		this.y = robot_stage_data[3]+1;
 		this.robot_id = robot_stage_data[5];
 		this.people = robot_stage_data[4];
 
@@ -180,8 +195,8 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 
 		//关数,回合,x,y,编号,机师,机师名,机体,机体名
 		// [1,1,12,16,1,6,"大卫" ,126,"刚达"]
-		this.x = robot_stage_data[2];
-		this.y = robot_stage_data[3];
+		this.x = robot_stage_data[2]+1;
+		this.y = robot_stage_data[3]+1;
 		this.robot_id = robot_stage_data[7];
 		this.people = robot_stage_data[5];
 
@@ -199,6 +214,27 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 	this.weapon2 = new Weapon(this.property.weapon2id);
 
 	this.active = true;
+
+	// 实际五维，精神加成之后
+
+	this.t_move = function () {   //机动
+		//if (m_spirit[7]) return m_move + 5;
+		//if (m_spirit[1]) return m_move + 3;
+		return this.move;
+	}
+	this.t_hp_total = function () { //总hp
+		return this.hp;
+	}
+	this.t_strength = function () { //强度
+		return this.strength;
+	}
+	this.t_defense = function () { //防卫
+		return this.defense;
+	}
+	this.t_speed = function () { //速度
+		return this.speed;
+	} 
+
 
 	this.moveSpeedUI = 0.618;
 	this.update = function () {
@@ -252,39 +288,6 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 	
 }
 
-//灰白滤镜
-function toGray(imgdata) {
-	for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
-		var r = imgdata.data[i];
-		var g = imgdata.data[i + 1];
-		var b = imgdata.data[i + 2];
-		var rgb = (r * 0.3 + g * 0.5 + b * 0.11);
-		rgb = .399 * r + .687 * g + .214 * b
-		imgdata.data[i] = rgb;
-		imgdata.data[i + 1] = rgb;
-		imgdata.data[i + 2] = rgb;
-	}
-	return imgdata;
-}
-//黑白滤镜
-function toBlack(imgdata) {
-	for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
-		var r = imgdata.data[i];
-		var g = imgdata.data[i + 1];
-		var b = imgdata.data[i + 2];
-		var rgb = (r + g + b) / 3;
-		if (rgb < 100) {
-			rgb = 0;
-		}
-		else {
-			rgb = 255;
-		}
-		imgdata.data[i] = rgb;
-		imgdata.data[i + 1] = rgb;
-		imgdata.data[i + 2] = rgb;
-	}
-	return imgdata;
-}
 
 Robot.prototype.getLevelPropertyPlus = function(plusType, level)
 {

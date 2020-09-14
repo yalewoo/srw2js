@@ -3,20 +3,42 @@ var Map = function(scene_main, stage){
 
 	var cxt = scene_main.cxt;
 	this.maprects = []
+
+	// 转置
 	var stage_map_old = map_data[stage-1];
 	var stage_map = stage_map_old[0].map(function(col, i) {
         return stage_map_old.map(function(row) {
         	return row[i];
        })
-    });
-	cxt.canvas.setAttribute("width",stage_map.length*32);
-	cxt.canvas.setAttribute("height",stage_map[0].length*32);
-	for (var i = 0; i < stage_map.length; ++i)
+	});
+
+	this.width = stage_map.length + 2;
+	this.height = stage_map[0].length + 2;
+	
+	cxt.canvas.setAttribute("width", this.width*32);
+	cxt.canvas.setAttribute("height", this.height*32);
+
+
+	var stage_map2 = [];
+	for (var i = 0; i < this.width; i++) {
+		var m2 = [];
+		for (var j = 0; j < this.height; j++) {
+			m2.push(0);
+		}
+		stage_map2.push(m2);
+	}
+	for (var i = 0; i < stage_map.length; ++i) {
+		for (var j = 0; j < stage_map[i].length; ++j) {
+			stage_map2[i+1][j+1] = stage_map[i][j];
+		}
+	}
+
+	for (var i = 0; i < stage_map2.length; ++i)
 	{
 		var arr = [];
-		for (var j = 0; j < stage_map[i].length; ++j)
+		for (var j = 0; j < stage_map2[i].length; ++j)
 		{
-			var rect = new MapRect(cxt, i, j, stage_map[i][j]);
+			var rect = new MapRect(cxt, i, j, stage_map2[i][j]);
 			arr.push(rect)
 		}
 		this.maprects.push(arr);
@@ -42,6 +64,9 @@ var Map = function(scene_main, stage){
 
 		updateMapRectUI(this.maprects[x][y]);
 	}
+
+
+	
 
 }
 

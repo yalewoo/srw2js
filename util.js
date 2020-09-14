@@ -84,3 +84,38 @@ var updateMapRectUI = function (maprect) {
   
 
 }
+
+
+//灰白滤镜
+function toGray(imgdata) {
+    for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
+        var r = imgdata.data[i];
+        var g = imgdata.data[i + 1];
+        var b = imgdata.data[i + 2];
+        var rgb = (r * 0.3 + g * 0.5 + b * 0.11);
+        rgb = .399 * r + .687 * g + .214 * b
+        imgdata.data[i] = rgb;
+        imgdata.data[i + 1] = rgb;
+        imgdata.data[i + 2] = rgb;
+    }
+    return imgdata;
+}
+//黑白滤镜
+function toBlack(imgdata) {
+    for (var i = 0; i < imgdata.data.length - 4; i = i + 4) {
+        var r = imgdata.data[i];
+        var g = imgdata.data[i + 1];
+        var b = imgdata.data[i + 2];
+        var rgb = (r + g + b) / 3;
+        if (rgb < 100) {
+            rgb = 0;
+        }
+        else {
+            rgb = 255;
+        }
+        imgdata.data[i] = rgb;
+        imgdata.data[i + 1] = rgb;
+        imgdata.data[i + 2] = rgb;
+    }
+    return imgdata;
+}
