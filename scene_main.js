@@ -68,19 +68,38 @@ var SceneMain = function (game, stage) {
 	cxt.canvas.addEventListener('click', function (event) {
 
 		
-		self.game.musicManager.playOnce();
 
 
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 
+		self.map.mousedownHandler(x, y);
+
 		self.robots.mousedownHandler(x, y);
+
+		self.game.musicManager.playOnce();
+
 	})
 
 	var canvasDom = document.getElementById("myCanvas");
 	canvasDom.oncontextmenu = function (e) {
-			self.robots.rightmousedownHandler(e);
+		var robot = self.robots.selectedRobot;
+		if (robot)
+		{
+			log(robot)
+			if (robot.afterMove)
+			{
+				robot.inCancelMove = true;
+				robot.moveTo(robot.xOriginal, robot.yOriginal);
+				self.setBlackEffect(null);
+			}
+			else{
+				self.robots.selectedRobot = null;
+				self.setBlackEffect(null);
+			}
+		}
 
+		
 
 			return false;
 		}; 

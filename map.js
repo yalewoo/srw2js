@@ -62,9 +62,15 @@ var Map = function(scene_main, stage){
 	{
 		//log(this.maprects[x][y]);
 
-		updateMapRectUI(this.maprects[x][y]);
+		//updateMapRectUI(this.maprects[x][y]);
 	}
 
+	this.mousedownHandler = function (x, y) {
+		//log(this.maprects[x][y]);
+
+		updateMapRectUI(this.maprects[x][y]);
+	}
+	
 
 	
 

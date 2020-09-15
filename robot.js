@@ -76,7 +76,7 @@ var Robots = function(scene_main) {
 		var stage_robot = stage_robot_date[stage-1];
 		for (var i = 0; i < stage_robot.length; ++i)
 		{
-			var robot = new Robot(stage_robot[i], cxt, isEnemy=false);
+			var robot = new Robot(stage_robot[i], scene_main, isEnemy=false);
 			robot.updateLevel();
 			robot.InitValue();
 			this.robots.push(robot);
@@ -85,7 +85,7 @@ var Robots = function(scene_main) {
 		stage_robot = stage_enemy_data[stage-1];
 		for (var i = 0; i < stage_robot.length; ++i)
 		{
-			var robot = new Robot(stage_robot[i], cxt, isEnemy=true);
+			var robot = new Robot(stage_robot[i], scene_main, isEnemy=true);
 			robot.updateLevel();
 			robot.InitValue();
 
@@ -112,7 +112,7 @@ var Robots = function(scene_main) {
 
 	this.mousehoverHandler = function(x, y)
 	{
-		return;
+		
 		for (var i = 0; i < this.robots.length; ++i)
 		{
 			if (this.robots[i].x == x && this.robots[i].y == y)
@@ -137,40 +137,64 @@ var Robots = function(scene_main) {
 		return null;
 	}
 	this.mousedownHandler = function (x, y) {
+		if (this.selectedRobot && this.selectedRobot.afterMove)
+		{
+			this.selectedRobot.afterMove = false;
+
+			this.selectedRobot = null;
+			this.scene.setBlackEffect(null);
+			return;
+		}
+
 		var robot = this.getRobotAt(x, y);
 		if (robot) {
-			
-			this.selectedRobot = robot;
+			if (robot.inMove)
+			{
 
-			var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
-log(m)
-			this.scene.setBlackEffect(m);
+			}
+			else if (robot.afterMove)
+			{
+				this.selectedRobot = null;
+				this.scene.setBlackEffect(null);
+				robot.afterMove = false;
+			}
+			else
+			{
+				updateMapRectUI(null);
+
+				this.selectedRobot = robot;
+
+				var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
+
+				this.scene.setBlackEffect(m);
+			}
+			
 		}
 		else{
 			if (this.selectedRobot)
 			{
-				if (this.scene.canMoveTo(x, y))
-				{
+
+				if (this.scene.canMoveTo(x, y)) {
 					this.selectedRobot.moveTo(x, y);
-					this.selectedRobot = null;
+					//this.selectedRobot = null;
 					this.scene.setBlackEffect(null);
 				}
 				
+				
 
+				
 			}
 		}
 	}
 
-	this.rightmousedownHandler = function (e) {
-		
-		this.selectedRobot = null;
-		this.scene.setBlackEffect(null);
-	}
+
 	
 }
 
 
-var Robot = function(robot_stage_data, cxt, isEnemy) {
+var Robot = function (robot_stage_data, scene_main, isEnemy) {
+	this.scene = scene_main;
+	var cxt = scene_main.cxt;
 	this.cxt = cxt;
 	
 	if (isEnemy)
@@ -207,6 +231,11 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 		this.exp = 0;
 	}
 
+	this.TargetX = this.x;
+	this.TargetY = this.y;
+	this.inMove = false;
+	this.afterMove = false;
+
 	this.property = new RobotProperty(this.robot_id);
 	this.pilot = new Pilot(this.people);
 
@@ -238,6 +267,7 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 
 	this.moveSpeedUI = 0.618;
 	this.update = function () {
+		var inMoveOld = this.inMove;
 		var d = 0;
 		if (this.x < this.TargetX) {
 			this.xFloat += this.moveSpeedUI;
@@ -253,6 +283,14 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 		} else if (this.y > this.TargetY) {
 			this.yFloat -= this.moveSpeedUI;
 			this.y = Math.floor(this.yFloat);
+		}
+		else
+		{
+			this.inMove = false;
+			if (inMoveOld != this.inMove)
+			{
+				this.moveFinished(this.x, this.y);
+			}
 		}
 	}
 	this.draw = function() {
@@ -280,10 +318,32 @@ var Robot = function(robot_stage_data, cxt, isEnemy) {
 	}
 
 	this.moveTo = function (x, y) {
+		this.xOriginal = this.x;
+		this.yOriginal = this.y;
+
 		this.xFloat = this.x;
 		this.yFloat = this.y;
 		this.TargetX = x;
 		this.TargetY = y;
+		this.inMove = true;
+	}
+
+	this.moveFinished = function(x, y) {
+		if (this.inCancelMove)
+		{
+			this.afterMove = false;
+			this.inCancelMove = false;
+			var m = this.scene.calculateMoveRange(this, x, y, -1, false);
+
+			this.scene.setBlackEffect(m);
+		}
+		else{
+			this.afterMove = true;
+			var m = this.scene.calculateMoveRange(this, x, y, 1, false);
+
+			this.scene.setBlackEffect(m);
+		}
+		
 	}
 	
 }

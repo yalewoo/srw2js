@@ -16,6 +16,12 @@ var updateRobotUI = function(robot)
         d.style.display = "none";
         return;
     }
+
+    var d2 = document.getElementById("map_rect_data");
+
+    d2.style.display = "none";
+
+
     d.style.display = "block";
 
     updateValuebyDomId("robot_name", robot.property.robotName);
@@ -76,6 +82,15 @@ var updateRobotUI = function(robot)
 }
 
 var updateMapRectUI = function (maprect) {
+
+
+    var d = document.getElementById("map_rect_data");
+    if (!maprect) {
+
+        d.style.display = "none";
+        return;
+    }
+    d.style.display = "block";
 
     updateValuebyDomId("map_rect_name", maprect.typeName);
     updateValuebyDomId("move_consume_sky", maprect.moveConsume[0]);
