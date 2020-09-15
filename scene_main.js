@@ -49,7 +49,7 @@ var SceneMain = function (game, stage) {
 	var self = this;
 	cxt.canvas.addEventListener('mousemove', function(event) {
 		//console.log(event);
-
+return;
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 		if (x != self.currentHoverX || y != self.currentHoverY)
