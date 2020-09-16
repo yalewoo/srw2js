@@ -30,7 +30,7 @@ var SceneMain = function (game, stage) {
 			}
 
 		}
-
+		g_buttonManager.draw();
 	}
 
 	this.loadStage = function(stage)
@@ -94,8 +94,10 @@ return;
 				self.setBlackEffect(null);
 			}
 			else{
+				log("right click")
 				self.robots.selectedRobot = null;
 				self.setBlackEffect(null);
+				g_buttonManager.clear();
 			}
 		}
 
@@ -104,7 +106,16 @@ return;
 			return false;
 		}; 
 
-	this.getMoveConsume = function (robot, x, y, ignore_robot) {
+	this.getMoveConsume = function (robot, x, y, ignore_robot, ignore_maprect) {
+		if (this.map.maprects[x][y].moveConsume[0] == 9999)
+		{
+			return 9999;
+		}
+		if (ignore_maprect)
+		{
+			return 1;
+		}
+
 		var robot2 = this.robots.getRobotAt(x, y);
 
 		if (robot2) {
@@ -118,7 +129,7 @@ return;
 		return this.map.maprects[x][y].moveConsume[robot.property.type];
 	}
 
-	this.calculateMoveRange = function(robot, x_start, y_start, move_value, ignore_robots)
+	this.calculateMoveRange = function(robot, x_start, y_start, move_value, ignore_robots, ignore_maprect)
 	{
 		//qDebug() << robot->property.robotName << "start searching";
 
@@ -158,32 +169,32 @@ return;
 			var x = now[0];
 			var y = now[1];
 			//up
-			if (m[x][y - 1] < m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots)) {
-				m[x][y - 1] = m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots);
+			if (m[x][y - 1] < m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect)) {
+				m[x][y - 1] = m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect);
 				if (m[x][y - 1] >= 0) {
 					visited.push([x, y - 1]);
 				}
 			}
 
 			//down
-			if (m[x][y + 1] < m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots)) {
-				m[x][y + 1] = m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots);
+			if (m[x][y + 1] < m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect)) {
+				m[x][y + 1] = m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect);
 				if (m[x][y + 1] >= 0) {
 					visited.push([x, y + 1]);
 				}
 			}
 
 			//left
-			if (m[x - 1][y] < m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots)) {
-				m[x - 1][y] = m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots);
+			if (m[x - 1][y] < m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect)) {
+				m[x - 1][y] = m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect);
 				if (m[x - 1][y] >= 0) {
 					visited.push([x - 1, y]);
 				}
 			}
 
 			//right
-			if (m[x + 1][y] < m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots)) {
-				m[x + 1][y] = m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots);
+			if (m[x + 1][y] < m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect)) {
+				m[x + 1][y] = m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect);
 				if (m[x + 1][y] >= 0) {
 					visited.push([x + 1, y]);
 				}

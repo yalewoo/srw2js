@@ -139,10 +139,7 @@ var Robots = function(scene_main) {
 	this.mousedownHandler = function (x, y) {
 		if (this.selectedRobot && this.selectedRobot.afterMove)
 		{
-			this.selectedRobot.afterMove = false;
-
-			this.selectedRobot = null;
-			this.scene.setBlackEffect(null);
+			this.setSelectedRobotInactive();
 			return;
 		}
 
@@ -152,11 +149,14 @@ var Robots = function(scene_main) {
 			{
 
 			}
+			else if (robot == this.selectedRobot)
+			{
+				this.setSelectedRobotInactive();
+
+			}
 			else if (robot.afterMove)
 			{
-				this.selectedRobot = null;
-				this.scene.setBlackEffect(null);
-				robot.afterMove = false;
+				this.setSelectedRobotInactive();
 			}
 			else
 			{
@@ -167,6 +167,24 @@ var Robots = function(scene_main) {
 				var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
 
 				this.scene.setBlackEffect(m);
+				var self = this;
+				g_buttonManager.clear();
+				g_buttonManager.addButtonHandler("待命", function(){
+					self.setSelectedRobotInactive();
+				})
+
+
+				if (robot.canAttack1()) {
+					g_buttonManager.addButtonHandler(robot.weapon1.name, function () {
+						robot.attack1();
+					})
+				}
+				if (robot.canAttack2()) {
+					g_buttonManager.addButtonHandler(robot.weapon2.name, function () {
+						robot.attack2();
+					})
+				}
+
 			}
 			
 		}
@@ -187,7 +205,12 @@ var Robots = function(scene_main) {
 		}
 	}
 
-
+	this.setSelectedRobotInactive = function () {
+		this.selectedRobot.afterMove = false;
+		this.selectedRobot = null;
+		this.scene.setBlackEffect(null);
+		g_buttonManager.clear();
+	}
 	
 }
 
@@ -333,19 +356,68 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		{
 			this.afterMove = false;
 			this.inCancelMove = false;
-			var m = this.scene.calculateMoveRange(this, x, y, -1, false);
+			var m = this.scene.calculateMoveRange(this, x, y, -1, false, false);
 
 			this.scene.setBlackEffect(m);
 		}
 		else{
 			this.afterMove = true;
-			var m = this.scene.calculateMoveRange(this, x, y, 1, false);
+			var m = this.scene.calculateMoveRange(this, x, y, 1, true, true);
 
 			this.scene.setBlackEffect(m);
 		}
 		
 	}
 	
+	this.canAttack = function(weapon) {
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+
+		for (var i = 0; i < m.length; ++i) {
+			for (var j = 0; j < m[i].length; ++j) {
+				if (m[i][j] >= 0) {
+					if (weapon.range > 1 && m[i][j] == weapon.range - 1)
+					{
+						continue;
+					}
+
+					var x = i;
+					var y = j;
+
+					var enemy = this.scene.robots.getRobotAt(x, y);
+					if (enemy && enemy != this && enemy.isPlayer != this.isPlayer &&
+						weapon.firepower[enemy.property.type] > 0)
+						{
+							return enemy;
+						}
+
+					//修理装置
+					if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.m_hp < enemy.m_hp_total) {
+						return enemy;
+					}
+				}
+			}
+		}
+		return null;
+		
+	}
+	this.canAttack1 = function() {
+		return this.canAttack(this.weapon1);
+	}
+	this.canAttack2 = function () {
+		return this.canAttack(this.weapon2);
+	}
+
+	this.attack1 = function() {
+		this.selectedWeapon = selectedRobot.weapon1;
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		this.scene.setBlackEffect(m);
+	}
+
+	this.attack2 = function () {
+		this.selectedWeapon = selectedRobot.weapon1;
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		this.scene.setBlackEffect(m);
+	}
 }
 
 
