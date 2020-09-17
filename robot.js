@@ -71,6 +71,19 @@ var Robots = function(scene_main) {
 	this.robots = []
 	this.enemy = []
 
+	this.deleteRobot = function(robot)
+	{
+		var index = this.robots.indexOf(robot);
+		if (index > -1) {
+			this.robots.splice(index, 1);
+		}
+
+		index = this.enemy.indexOf(robot);
+		if (index > -1) {
+			this.enemy.splice(index, 1);
+		}
+	}
+
 	this.cxt = cxt;
 	this.loadStage = function(stage) {
 		var stage_robot = stage_robot_date[stage-1];
@@ -137,12 +150,6 @@ var Robots = function(scene_main) {
 		return null;
 	}
 	this.mousedownHandler = function (x, y) {
-		if (this.selectedRobot && this.selectedRobot.afterMove)
-		{
-			this.setSelectedRobotInactive();
-			return;
-		}
-
 		var robot = this.getRobotAt(x, y);
 		if (robot) {
 			if (robot.inMove)
@@ -154,11 +161,8 @@ var Robots = function(scene_main) {
 				this.setSelectedRobotInactive();
 
 			}
-			else if (robot.afterMove)
-			{
-				this.setSelectedRobotInactive();
-			}
-			else
+			
+			else if (this.selectedRobot == null)
 			{
 				updateMapRectUI(null);
 
@@ -167,26 +171,40 @@ var Robots = function(scene_main) {
 				var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
 
 				this.scene.setBlackEffect(m);
-				var self = this;
-				g_buttonManager.clear();
-				g_buttonManager.addButtonHandler("待命", function(){
-					self.setSelectedRobotInactive();
-				})
-
-
-				if (robot.canAttack1()) {
-					g_buttonManager.addButtonHandler(robot.weapon1.name, function () {
-						robot.attack1();
-					})
-				}
-				if (robot.canAttack2()) {
-					g_buttonManager.addButtonHandler(robot.weapon2.name, function () {
-						robot.attack2();
-					})
-				}
-
+				
+				showMenu1(this);
 			}
-			
+			else
+			{
+
+				//使用选择的武器攻击
+				if (this.selectedRobot.selectedWeapon && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.selectedWeapon)) 
+				{
+
+					this.selectedRobot.attackDo(robot);
+					
+				}
+				//两个武器都能攻击时，显示菜单让玩家选择武器
+				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)
+					&& this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2))
+				{
+					log("both weapons can attack")
+				}
+				// 只有武器1能攻击到时自动使用武器1
+				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)) {
+					this.selectedRobot.selectedWeapon = this.selectedRobot.weapon1;
+					this.selectedRobot.attackDo(robot);
+				}
+				// 只有武器2能攻击到时自动使用武器2
+				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2)) {
+					this.selectedRobot.selectedWeapon = this.selectedRobot.weapon2;
+					this.selectedRobot.attackDo(robot);
+				}
+				else if (this.selectedRobot)
+				{
+					this.setSelectedRobotInactive();
+				}
+			}
 		}
 		else{
 			if (this.selectedRobot)
@@ -198,18 +216,19 @@ var Robots = function(scene_main) {
 					this.scene.setBlackEffect(null);
 				}
 				
-				
 
-				
 			}
 		}
 	}
 
 	this.setSelectedRobotInactive = function () {
+		
 		this.selectedRobot.afterMove = false;
+		this.selectedRobot.selectedWeapon = false;
 		this.selectedRobot = null;
 		this.scene.setBlackEffect(null);
 		g_buttonManager.clear();
+
 	}
 	
 }
@@ -359,12 +378,15 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 			var m = this.scene.calculateMoveRange(this, x, y, -1, false, false);
 
 			this.scene.setBlackEffect(m);
+
+			showMenu1(this.scene.robots);
 		}
 		else{
 			this.afterMove = true;
 			var m = this.scene.calculateMoveRange(this, x, y, 1, true, true);
 
 			this.scene.setBlackEffect(m);
+			showMenu1(this.scene.robots);
 		}
 		
 	}
@@ -398,8 +420,37 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 			}
 		}
 		return null;
-		
 	}
+
+	this.canAttackRobotUsingWeapon = function(robot, weapon) 	{
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+
+		var i = robot.x;
+		var j = robot.y;
+
+		if (m[i][j] >= 0) {
+			if (weapon.range > 1 && m[i][j] == weapon.range - 1) {
+				return false;
+			}
+
+
+			var enemy = robot;
+			if (enemy && enemy != this && enemy.isPlayer != this.isPlayer &&
+				weapon.firepower[enemy.property.type] > 0) 
+			{
+				return true;
+			}
+
+			//修理装置
+			if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.m_hp < enemy.m_hp_total) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
 	this.canAttack1 = function() {
 		return this.canAttack(this.weapon1);
 	}
@@ -408,15 +459,29 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	}
 
 	this.attack1 = function() {
-		this.selectedWeapon = selectedRobot.weapon1;
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		log("attack1")
+		this.selectedWeapon = this.weapon1;
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
 	}
 
 	this.attack2 = function () {
-		this.selectedWeapon = selectedRobot.weapon1;
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		this.selectedWeapon = this.weapon1;
+		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
+	}
+
+	this.attackDo = function(enemy)
+	{
+		log("attack")
+		enemy.hp -= 100;
+
+		this.scene.robots.setSelectedRobotInactive();
+
+		if (enemy.hp < 0)
+		{
+			this.scene.robots.deleteRobot(enemy);
+		}
 	}
 }
 

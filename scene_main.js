@@ -95,14 +95,12 @@ return;
 			}
 			else{
 				log("right click")
+				self.robots.selectedRobot.selectedWeapon = null;
 				self.robots.selectedRobot = null;
 				self.setBlackEffect(null);
 				g_buttonManager.clear();
 			}
 		}
-
-		
-
 			return false;
 		}; 
 

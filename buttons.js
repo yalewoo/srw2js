@@ -53,3 +53,24 @@ var g_buttonManager = new ButtonManager();
 function buttonHandler(id) {
     g_buttonManager.runHandler(id);
 }
+
+var showMenu1 = function(robots)
+{
+    g_buttonManager.clear();
+    g_buttonManager.addButtonHandler("待命", function () {
+        robots.setSelectedRobotInactive();
+    })
+
+    var robot = robots.selectedRobot;
+    if (robot.canAttack1()) {
+        g_buttonManager.addButtonHandler(robot.weapon1.name, function () {
+            robot.attack1();
+        })
+    }
+    if (robot.canAttack2()) {
+        g_buttonManager.addButtonHandler(robot.weapon2.name, function () {
+            robot.attack2();
+        })
+    }
+
+}
