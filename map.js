@@ -72,7 +72,17 @@ var Map = function(scene_main, stage){
 	}
 	
 
-	
+	this.calcDistance = function(robot1, robot2)
+	{
+		var x1 = robot1.x;
+		var y1 = robot1.y;
+		var x2 = robot2.x;
+		var y2 = robot2.y;
+
+		var dx = Math.abs(x1 - x2);
+		var dy = Math.abs(y1 - y2);
+		return dx + dy;
+	}
 
 }
 

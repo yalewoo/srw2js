@@ -10,6 +10,7 @@ var RobotProperty = function(id)
 	//基本属性
 
 	this.robotName = data[1];  //机体名
+	this.name = data[1];  //机体名
 	this.type_original = data[3];//原始类型
 	this.type = data[3] & 3;   //类型 0=空，1=陆，2=海
 
@@ -184,12 +185,12 @@ var Robots = function(scene_main) {
 					this.selectedRobot.attackDo(robot);
 					
 				}
-				//两个武器都能攻击时，显示菜单让玩家选择武器
-				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)
-					&& this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2))
-				{
-					log("both weapons can attack")
-				}
+				// //两个武器都能攻击时，显示菜单让玩家选择武器
+				// else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)
+				// 	&& this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2))
+				// {
+				// 	log("both weapons can attack")
+				// }
 				// 只有武器1能攻击到时自动使用武器1
 				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)) {
 					this.selectedRobot.selectedWeapon = this.selectedRobot.weapon1;
@@ -205,6 +206,8 @@ var Robots = function(scene_main) {
 					this.setSelectedRobotInactive();
 				}
 			}
+
+			return true;
 		}
 		else{
 			if (this.selectedRobot)
@@ -218,6 +221,8 @@ var Robots = function(scene_main) {
 				
 
 			}
+
+			return false;
 		}
 	}
 
@@ -286,6 +291,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 	this.active = true;
 
+	this.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 	// 实际五维，精神加成之后
 
 	this.t_move = function () {   //机动
@@ -463,18 +469,24 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.selectedWeapon = this.weapon1;
 		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
+		g_buttonManager.clear();
 	}
 
 	this.attack2 = function () {
 		this.selectedWeapon = this.weapon1;
 		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
+		g_buttonManager.clear();
 	}
 
 	this.attackDo = function(enemy)
 	{
 		log("attack")
-		enemy.hp -= 100;
+
+		this.scene.game.musicManager.PlayAttackOnce();
+
+		var battle = new Battle(this.scene, this, enemy);
+		battle.DoAttack();
 
 		this.scene.robots.setSelectedRobotInactive();
 

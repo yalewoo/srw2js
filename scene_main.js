@@ -73,9 +73,12 @@ return;
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 
-		self.map.mousedownHandler(x, y);
 
-		self.robots.mousedownHandler(x, y);
+		if (!self.robots.mousedownHandler(x, y))
+		{
+			self.map.mousedownHandler(x, y);
+
+		}
 
 		self.game.musicManager.playOnce();
 

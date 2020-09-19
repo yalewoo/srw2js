@@ -6,16 +6,21 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+	<audio id="music1" src="audio/music/87.wav" preload="auto" autoplay="autoplay" controls="controls" loop="loop">
+		Your browser does not support the audio element.
+	</audio>
+	<audio id="music2" src="audio/wav/pushbutton.mp3" preload="auto">
+		Your browser does not support the audio element.
+	</audio>
+	<audio id="music3" src="audio/wav/huoqiu.mp3" preload="auto">
+		Your browser does not support the audio element.
+	</audio>
+
 <p>数字1-9切换关卡，点击机器人再点击地图移动</p>
 		<div id="overflow"></div>
 
 
-<audio id="music1" src="audio/music/87.wav" preload="auto" autoplay="autoplay" controls="controls" loop="loop">
-	Your browser does not support the audio element.
-</audio>
-<audio id="music2" src="audio/wav/pushbutton.mp3" preload="auto" controls="controls">
-	Your browser does not support the audio element.
-</audio>
+
 <div id="canvas_main">
 <canvas id="myCanvas" width="400" height="350"></canvas>
 
@@ -40,7 +45,9 @@
 
 </div>
 	
-
+<div id="attack_data" class="block statusBlock weapon">
+	刚达使用了
+</div>
 
 <div id="map_rect_data" class="block statusBlock weapon" >
 	<p id="map_rect_name">山地</p>
@@ -141,6 +148,7 @@
 <script type="text/javascript" charset="UTF-8" src="data/robots.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot_enemy.js"></script>
+<script type="text/javascript" charset="UTF-8" src="battle.js"></script>
 <script type="text/javascript" charset="UTF-8" src="MusicManager.js"></script>
 <script type="text/javascript" charset="UTF-8" src="weapon.js"></script>
 <script type="text/javascript" charset="UTF-8" src="map.js"></script>

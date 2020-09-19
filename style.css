@@ -84,3 +84,7 @@ span {
         font-weight: 900;  
         font-size:125%  
 }
+
+#attack_data , #map_rect_data{
+    display:none;
+}
