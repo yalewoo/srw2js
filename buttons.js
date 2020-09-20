@@ -46,6 +46,11 @@ var ButtonManager = function() {
         this.buttonhandlers = [null, null, null, null, null, null, null, null, null]
         this.used = 0;
     }
+
+    this.unshowButton1 = function() {
+        var d = document.getElementById("buttons1");
+        d.style.display = "block";
+    }
 }
 
 var g_buttonManager = new ButtonManager();

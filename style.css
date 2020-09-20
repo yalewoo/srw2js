@@ -85,6 +85,6 @@ span {
         font-size:125%  
 }
 
-#attack_data , #map_rect_data{
+#attack_data , #map_rect_data, #buttons1, #robot_data{
     display:none;
 }

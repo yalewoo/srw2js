@@ -67,7 +67,7 @@ var Pilot = function(id)
 
 var Robots = function(scene_main) {
 	this.scene = scene_main;
-	var cxt = scene_main.cxt;
+	var context2D = scene_main.context2D;
 
 	this.robots = []
 	this.enemy = []
@@ -85,7 +85,7 @@ var Robots = function(scene_main) {
 		}
 	}
 
-	this.cxt = cxt;
+	this.context2D = context2D;
 	this.loadStage = function(stage) {
 		var stage_robot = stage_robot_date[stage-1];
 		for (var i = 0; i < stage_robot.length; ++i)
@@ -233,6 +233,7 @@ var Robots = function(scene_main) {
 		this.selectedRobot = null;
 		this.scene.setBlackEffect(null);
 		g_buttonManager.clear();
+		g_buttonCanvasManager.clear();
 
 	}
 	
@@ -241,8 +242,8 @@ var Robots = function(scene_main) {
 
 var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.scene = scene_main;
-	var cxt = scene_main.cxt;
-	this.cxt = cxt;
+	var context2D = scene_main.context2D;
+	this.context2D = context2D;
 	
 	if (isEnemy)
 	{
@@ -346,16 +347,16 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		{
 			
 
-			this.cxt.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
+			this.context2D.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
 
 			if (!this.active)
 			{
-				var imgdata = this.cxt.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
+				var imgdata = this.context2D.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
 				//console.log(imgdata);
 				imgdata = toGray(imgdata);//灰白滤镜
-				this.cxt.putImageData(imgdata, this.x * 32, this.y * 32);
+				this.context2D.putImageData(imgdata, this.x * 32, this.y * 32);
 
-				// var ctx = this.cxt;
+				// var ctx = this.context2D;
 				// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
 
 				// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);

@@ -6,17 +6,19 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-	<audio id="music1" src="audio/music/87.wav" preload="auto" autoplay="autoplay" controls="controls" loop="loop">
-		Your browser does not support the audio element.
-	</audio>
+
+<div id="music_background">
+	
+</div>
+<div id="music_forward"></div>
+
 	<audio id="music2" src="audio/wav/pushbutton.mp3" preload="auto">
 		Your browser does not support the audio element.
 	</audio>
 	<audio id="music3" src="audio/wav/huoqiu.mp3" preload="auto">
 		Your browser does not support the audio element.
 	</audio>
-
-<p>数字1-9切换关卡，点击机器人再点击地图移动</p>
+</div>
 		<div id="overflow"></div>
 
 
@@ -142,13 +144,21 @@
 <script type="text/javascript" charset="UTF-8" src="telemetry.js"></script>
 <script type="text/javascript" charset="UTF-8" src="util.js"></script>
 <script type="text/javascript" charset="UTF-8" src="buttons.js"></script>
+<script type="text/javascript" charset="UTF-8" src="buttonCanvas.js"></script>
+
 <script type="text/javascript" charset="UTF-8" src="data/map.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/people.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/weapon.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/robots.js"></script>
+
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot.js"></script>
+<script type="text/javascript" charset="UTF-8" src="data/stage_prelude_talk.js"></script>
 <script type="text/javascript" charset="UTF-8" src="data/stage_robot_enemy.js"></script>
+<script type="text/javascript" charset="UTF-8" src="scene/scene_start.js"></script>
+<script type="text/javascript" charset="UTF-8" src="scene/scene_title.js"></script>
+<script type="text/javascript" charset="UTF-8" src="scene/scene_start_map.js"></script>
 <script type="text/javascript" charset="UTF-8" src="battle.js"></script>
+<script type="text/javascript" charset="UTF-8" src="talkdiag.js"></script>
 <script type="text/javascript" charset="UTF-8" src="MusicManager.js"></script>
 <script type="text/javascript" charset="UTF-8" src="weapon.js"></script>
 <script type="text/javascript" charset="UTF-8" src="map.js"></script>

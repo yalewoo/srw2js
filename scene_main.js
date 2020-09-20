@@ -1,14 +1,88 @@
-var SceneMain = function (game, stage) {
+var SceneMain = function (game) {
 	this.game = game;
-	var cxt = game.cxt
-	this.cxt = game.cxt;
+	this.context2D = game.context2D;
+	this.canvas = game.canvas;
+
+	var self = this;
+
+	this.registerHandler = function() {
+		var self = this;
+		window.addEventListener("keydown", function (e) {
+			if (Number(e.key)) {
+				self.loadStage(Number(e.key));
+			}
+		})
+
+	}
+
+	this.hoverHandler = function(event)
+	{
+		//console.log(event);
+		return;
+		var x = Math.floor(event.offsetX / 32)
+		var y = Math.floor(event.offsetY / 32)
+		if (x != self.currentHoverX || y != self.currentHoverY) {
+			//log('selected (' + x + "," + y + ")")
+			self.currentHoverX = x;
+			self.currentHoverY = y;
+
+			self.map.mousehoverHandler(x, y);
+
+			self.robots.mousehoverHandler(x, y);
+		}
+	}
+	this.clickHandler = function (event)
+	{
+		if (self.talkDiag)
+		{
+			self.talkDiag.clickHandler();
+			return;
+		}
+
+		var x = Math.floor(event.offsetX / 32)
+		var y = Math.floor(event.offsetY / 32)
+
+
+		if (!self.robots.mousedownHandler(x, y)) {
+			self.map.mousedownHandler(x, y);
+
+		}
+
+		self.game.musicManager.playOnce();
+	}
+
+	this.rightClickHandler = function (e) {
+		var robot = self.robots.selectedRobot;
+		if (robot) {
+			log(robot)
+			if (robot.afterMove) {
+				robot.inCancelMove = true;
+				robot.moveTo(robot.xOriginal, robot.yOriginal);
+				self.setBlackEffect(null);
+			}
+			else {
+				log("right click")
+				self.robots.selectedRobot.selectedWeapon = null;
+				self.robots.selectedRobot = null;
+				self.setBlackEffect(null);
+				g_buttonManager.clear();
+				g_buttonCanvasManager.clear();
+
+			}
+		}
+	}
+
+	this.registerHandler();
 
 	this.update = function () {
 		this.map.update();
 		this.robots.update();
+
+		g_buttonCanvasManager.update(this.context2D);
 	}
 
 	this.draw = function() {
+
 		this.map.draw();
 		this.robots.draw();
 
@@ -21,20 +95,29 @@ var SceneMain = function (game, stage) {
 						var x = i;
 						var y = j;
 
-						var imgdata = this.cxt.getImageData(x * 32, y * 32, 32, 32);
+						var imgdata = this.context2D.getImageData(x * 32, y * 32, 32, 32);
 						//console.log(imgdata);
 						imgdata = toGray(imgdata);//灰白滤镜
-						this.cxt.putImageData(imgdata, x * 32, y * 32);
+						this.context2D.putImageData(imgdata, x * 32, y * 32);
 					}
 				}
 			}
 
 		}
+
 		g_buttonManager.draw();
+
+		g_buttonCanvasManager.draw(this.context2D);
+
+		if (this.talkDiag)
+		{
+			this.talkDiag.draw();
+		}
 	}
 
 	this.loadStage = function(stage)
 	{
+		this.stage = stage;
 		this.map = new Map(this, stage);
 
 
@@ -44,68 +127,6 @@ var SceneMain = function (game, stage) {
 
 	this.currentHoverX = 0;
 	this.currentHoverY = 0;
-
-
-	var self = this;
-	cxt.canvas.addEventListener('mousemove', function(event) {
-		//console.log(event);
-return;
-		var x = Math.floor(event.offsetX / 32)
-		var y = Math.floor(event.offsetY / 32)
-		if (x != self.currentHoverX || y != self.currentHoverY)
-		{
-			//log('selected (' + x + "," + y + ")")
-			self.currentHoverX = x;
-			self.currentHoverY = y;
-
-			self.map.mousehoverHandler(x, y);
-
-			self.robots.mousehoverHandler(x, y);
-		}
-
-	})
-	
-	cxt.canvas.addEventListener('click', function (event) {
-
-		
-
-
-		var x = Math.floor(event.offsetX / 32)
-		var y = Math.floor(event.offsetY / 32)
-
-
-		if (!self.robots.mousedownHandler(x, y))
-		{
-			self.map.mousedownHandler(x, y);
-
-		}
-
-		self.game.musicManager.playOnce();
-
-	})
-
-	var canvasDom = document.getElementById("myCanvas");
-	canvasDom.oncontextmenu = function (e) {
-		var robot = self.robots.selectedRobot;
-		if (robot)
-		{
-			log(robot)
-			if (robot.afterMove)
-			{
-				robot.inCancelMove = true;
-				robot.moveTo(robot.xOriginal, robot.yOriginal);
-				self.setBlackEffect(null);
-			}
-			else{
-				log("right click")
-				self.robots.selectedRobot.selectedWeapon = null;
-				self.robots.selectedRobot = null;
-				self.setBlackEffect(null);
-				g_buttonManager.clear();
-			}
-		}
-			return false;
-		}; 
 
 	this.getMoveConsume = function (robot, x, y, ignore_robot, ignore_maprect) {
 		if (this.map.maprects[x][y].moveConsume[0] == 9999)
@@ -217,4 +238,23 @@ return;
 		return false;
 	}
 
+	this.init = function() {
+		this.game.musicManager.playMap1();
+
+		this.talkDiag = new TalkDiag(game, g_stage_prelude_talk_date[this.stage-1][1]);
+		var self = this;
+		this.talkDiag.setFinishHandler(function() {
+			self.talkDiag.clear();
+			self.talkDiag = null;
+
+			self.game.musicManager.stopMap1();
+			this.game.musicManager.playRobot();
+
+		})
+
+		g_buttonManager.unshowButton1();		
+	}
+	this.clear = function() {
+		this.game.musicManager.stopRobot();
+	}
 }

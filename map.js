@@ -1,7 +1,7 @@
 var Map = function(scene_main, stage){
 	this.scene = scene_main;
 
-	var cxt = scene_main.cxt;
+	var context2D = scene_main.context2D;
 	this.maprects = []
 
 	// 转置
@@ -15,8 +15,8 @@ var Map = function(scene_main, stage){
 	this.width = stage_map.length + 2;
 	this.height = stage_map[0].length + 2;
 	
-	cxt.canvas.setAttribute("width", this.width*32);
-	cxt.canvas.setAttribute("height", this.height*32);
+	context2D.canvas.width = this.width*32;
+	context2D.canvas.height = this.height*32;
 
 
 	var stage_map2 = [];
@@ -38,7 +38,7 @@ var Map = function(scene_main, stage){
 		var arr = [];
 		for (var j = 0; j < stage_map2[i].length; ++j)
 		{
-			var rect = new MapRect(cxt, i, j, stage_map2[i][j]);
+			var rect = new MapRect(context2D, i, j, stage_map2[i][j]);
 			arr.push(rect)
 		}
 		this.maprects.push(arr);
@@ -69,6 +69,8 @@ var Map = function(scene_main, stage){
 		//log(this.maprects[x][y]);
 
 		updateMapRectUI(this.maprects[x][y]);
+
+		//g_buttonCanvasManager.addButtonHandler("Test", null, x*32, y*32, 50, 100);
 	}
 	
 
@@ -86,16 +88,16 @@ var Map = function(scene_main, stage){
 
 }
 
-var MapRect = function(cxt, x, y, type){
+var MapRect = function(context2D, x, y, type){
 	this.x = x;
 	this.y = y;
-	this.cxt = cxt;
+	this.context2D = context2D;
 	this.kind = type;
 
 	this.style = "A"
 	this.img = g_resourceManager.img_maprect[type];
 	this.draw = function() {
-		this.cxt.drawImage(this.img,this.x*32,this.y*32);
+		this.context2D.drawImage(this.img,this.x*32,this.y*32);
 	}
 	this.typeName = g_map_data_typename[type];
 

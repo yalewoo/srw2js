@@ -89,10 +89,33 @@ var load_people_image = function () {
 	return map_images;
 }
 
+
+var load_logos = function() {
+	var map_images = {};
+	var images_path = ["logo", "map1"];
+
+	for (var i = 0; i < images_path.length; ++i) {
+		var img = new Image();
+		img.src = "img/logo/" + images_path[i] + ".png"
+		map_images[images_path[i]] = img;
+
+		img.onerror = function () {
+			this.src = "img/robots/1/undefined.png";
+		}
+		img.onload = function () {
+			this.isloaded = true;
+		}
+	}
+
+	return map_images;
+}
+
 var ResourceManager = function() {
 	this.img_maprect = load_maprect_image();
 	this.img_roboticon = load_robot_icon_image();
 	this.img_enemyicon = load_enemy_icon_image();
 	this.img_robot_image = load_robot_image();
 	this.img_people_image = load_people_image();
+
+	this.img_logos = load_logos();
 }
