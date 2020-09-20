@@ -39,7 +39,7 @@ var TalkDiag = function (game, story) {
     this.draw = function () {
 
         var peopleid = this.talks[this.currentTalk][0]
-        var img = g_resourceManager.img_people_image[peopleid];
+        var img = g_resourceManager.get_img_people_image(peopleid);
 
 
 

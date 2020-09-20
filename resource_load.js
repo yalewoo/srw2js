@@ -112,10 +112,96 @@ var load_logos = function() {
 
 var ResourceManager = function() {
 	this.img_maprect = load_maprect_image();
-	this.img_roboticon = load_robot_icon_image();
-	this.img_enemyicon = load_enemy_icon_image();
-	this.img_robot_image = load_robot_image();
-	this.img_people_image = load_people_image();
+	this.img_roboticon = {};
+	this.img_enemyicon = {};
+	this.img_robot_image = {};
+	this.img_people_image = {};
 
 	this.img_logos = load_logos();
+
+
+	this.get_img_roboticon = function(i)
+	{
+		if (this.img_roboticon[i])
+		{
+			return this.img_roboticon[i];
+		}
+		else{
+			var img = new Image();
+			img.src = "img/robots/1/" + g_robot_data[i][20] + ".png"
+			this.img_roboticon[i] = img;
+
+			img.onerror = function () {
+				this.src = "img/robots/1/undefined.png";
+			}
+			img.onload = function () {
+				this.isloaded = true;
+			}
+
+			return img;
+		}
+	}
+
+	this.get_img_enemyicon = function (i) {
+		if (this.img_enemyicon[i]) {
+			return this.img_enemyicon[i];
+		}
+		else {
+			var img = new Image();
+			img.src = "img/robots/1enemy/" + g_robot_data[i][20] + ".png"
+			this.img_enemyicon[i] = img;
+
+			img.onerror = function () {
+				this.src = "img/robots/1/undefined.png";
+			}
+			img.onload = function () {
+				this.isloaded = true;
+			}
+
+			return img;
+		}
+	}
+
+	this.get_img_robot_image = function (i) {
+		if (this.img_robot_image[i]) {
+			return this.img_robot_image[i];
+		}
+		else {
+			var img = new Image();
+			img.src = "img/robotImg/" + i + ".png"
+			this.img_robot_image[i] = img;
+
+			img.onerror = function () {
+				this.src = "img/robots/1/undefined.png";
+			}
+			img.onload = function () {
+				this.isloaded = true;
+			}
+
+			return img;
+		}
+	}
+
+	this.get_img_people_image = function (i) {
+		if (this.img_people_image[i]) {
+			return this.img_people_image[i];
+		}
+		else {
+			var img = new Image();
+			img.src = "img/people/" + i + ".png"
+			this.img_people_image[i] = img;
+
+			img.onerror = function () {
+				this.src = "img/robots/1/undefined.png";
+			}
+			img.onload = function () {
+				this.isloaded = true;
+			}
+
+			return img;
+		}
+	}
+
+
+
 }

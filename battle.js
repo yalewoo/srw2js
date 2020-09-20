@@ -282,11 +282,11 @@ var Battle = function(scene_main, robot, enemy) {
     }
 
     this.showPeople = function(robot) {
-        this.showPic(g_resourceManager.img_people_image[robot.pilot.id]);
+        this.showPic(g_resourceManager.get_img_people_image(robot.pilot.id));
 
     }
     this.showRobot = function (robot) {
-        this.showPic(g_resourceManager.img_robot_image[robot.robot_id]);
+        this.showPic(g_resourceManager.get_img_robot_image(robot.robot_id));
     }
 
     this.clearBattleText = function () {

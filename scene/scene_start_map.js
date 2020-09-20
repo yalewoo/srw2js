@@ -38,7 +38,7 @@ var SceneStartMap1 = function (game) {
         this.context2D.drawImage(img, 0, 0);
 
         var peopleid = this.talks[this.currentTalk][0]
-        var img = g_resourceManager.img_people_image[peopleid];
+        var img = g_resourceManager.get_img_people_image(peopleid);
         
 
 

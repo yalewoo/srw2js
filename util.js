@@ -55,11 +55,11 @@ var updateRobotUI = function(robot)
 
     var d = document.getElementById("robot_image");
     d.innerHTML = "";
-    d.append(g_resourceManager.img_robot_image[robot.robot_id]);
+    d.append(g_resourceManager.get_img_robot_image(robot.robot_id));
     
     d = document.getElementById("pilot_image");
     d.innerHTML = "";
-    d.append(g_resourceManager.img_people_image[robot.pilot.id]);
+    d.append(g_resourceManager.get_img_people_image(robot.pilot.id));
 
     updateValuebyDomId("weapon1_name", robot.weapon1.name);
     updateValuebyDomId("weapon1_hitrate", robot.weapon1.hitRadio);

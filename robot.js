@@ -255,7 +255,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.robot_id = robot_stage_data[5];
 		this.people = robot_stage_data[4];
 
-		this.img = g_resourceManager.img_enemyicon[this.robot_id];
+		this.img = g_resourceManager.get_img_enemyicon(this.robot_id);
 		
 		
 		this.level = robot_stage_data[6];
@@ -273,7 +273,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.people = robot_stage_data[5];
 
 
-		this.img = g_resourceManager.img_roboticon[this.robot_id];
+		this.img = g_resourceManager.get_img_roboticon(this.robot_id);
 
 
 		this.exp = 0;
