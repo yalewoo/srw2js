@@ -2,6 +2,7 @@ var SceneMain = function (game) {
 	this.game = game;
 	this.context2D = game.context2D;
 	this.canvas = game.canvas;
+	this.round = 0;
 
 	var self = this;
 
@@ -15,20 +16,16 @@ var SceneMain = function (game) {
 
 	}
 
+	this.hoverData = []
+
 	this.hoverHandler = function(event)
 	{
-		//console.log(event);
-		return;
+		
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 		if (x != self.currentHoverX || y != self.currentHoverY) {
-			//log('selected (' + x + "," + y + ")")
-			self.currentHoverX = x;
-			self.currentHoverY = y;
-
-			self.map.mousehoverHandler(x, y);
-
-			self.robots.mousehoverHandler(x, y);
+			this.hoverData = [x, y];
+			
 		}
 	}
 	this.clickHandler = function (event)
@@ -113,6 +110,11 @@ var SceneMain = function (game) {
 		{
 			this.talkDiag.draw();
 		}
+		else
+		{
+			var img = g_resourceManager.img_logos["select"];
+			this.context2D.drawImage(img, this.hoverData[0] * 32, this.hoverData[1] * 32);
+		}
 	}
 
 	this.loadStage = function(stage)
@@ -151,7 +153,14 @@ var SceneMain = function (game) {
 		return this.map.maprects[x][y].moveConsume[robot.property.type];
 	}
 
-	this.calculateMoveRange = function(robot, x_start, y_start, move_value, ignore_robots, ignore_maprect)
+	this.calculateAttackRange = function (robot, weapon)
+	{
+		return this.calculateMoveRangeCore(robot, robot.x, robot.y, weapon.range, true, true);
+	}
+	this.calculateMoveRange = function (robot) {
+		return this.calculateMoveRangeCore(robot, robot.x, robot.y, -1, false, false);
+	}
+	this.calculateMoveRangeCore = function(robot, x_start, y_start, move_value, ignore_robots, ignore_maprect)
 	{
 		//qDebug() << robot->property.robotName << "start searching";
 
@@ -238,6 +247,52 @@ var SceneMain = function (game) {
 		return false;
 	}
 
+	this.AI_move = function (selectedRobot)
+	{
+		var closeEnemy = AI.getEnemy(this, selectedRobot);
+		if (!closeEnemy) {
+			return;
+		}
+
+		var m = this.calculateMoveRange(selectedRobot);
+
+		var m2 = this.calculateMoveRangeCore(selectedRobot, closeEnemy.x, closeEnemy.y, 999, true, true);
+
+		var xTo, yTo;
+		var value;
+		for (var i = 0; i < m.length; ++i)
+		{
+			for (var j = 0; j < m[i].length; ++j)
+			{
+				if (this.robots.getRobotAt(i, j) == null && m[i][j] >= 0) {
+					xTo = i;
+					yTo = j;
+					value = m2[i][j];
+				}
+			}
+		}
+		for (var i = 0; i < m.length; ++i)
+		{
+			for (var j = 0; j < m[i].length; ++j)
+			{
+				if (m[i][j] >= 0) {
+					if (this.robots.getRobotAt(i, j) == null && m2[i][j] > value) {
+						xTo = i;
+						yTo = j;
+						value = m2[i][j];
+					}
+
+				}
+			}
+		}
+
+
+		g_buttonManager.clear();
+
+		selectedRobot.inAIMove = true;
+		selectedRobot.moveTo(xTo, yTo);
+	}
+
 	this.init = function() {
 		this.game.musicManager.playMap1();
 
@@ -257,4 +312,7 @@ var SceneMain = function (game) {
 	this.clear = function() {
 		this.game.musicManager.stopRobot();
 	}
+
+
+
 }

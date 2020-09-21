@@ -62,6 +62,10 @@ function buttonHandler(id) {
 var showMenu1 = function(robots)
 {
     g_buttonManager.clear();
+    g_buttonManager.addButtonHandler("AI行动", function () {
+        robots.selectedRobot.AI_action();
+    })
+
     g_buttonManager.addButtonHandler("待命", function () {
         robots.setSelectedRobotInactive();
     })

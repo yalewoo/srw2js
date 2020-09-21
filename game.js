@@ -21,9 +21,8 @@ var Game = function(canvas, fps)
 
 	this.run = function() {
 
-		var desiredTime = Date.now() + this.FPS;
+		var desiredTime = Date.now() + game.FPS;
 		var interval = Math.max(0, desiredTime - Date.now());
-
 		game.scene.update();
 		game.scene.draw();
 		

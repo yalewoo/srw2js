@@ -298,3 +298,17 @@ var Battle = function(scene_main, robot, enemy) {
 
 
 
+Battle.getDamage = function (robot2, enemy2, weapon2) {
+    var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
+    if (robot2.spirit[10]) {
+        damage *= 2;
+    }
+    if (robot2.spirit[4]) {
+        damage *= 2;
+    }
+
+    if (enemy2.spirit[3]) {
+        damage /= 2;
+    }
+    return damage;
+}

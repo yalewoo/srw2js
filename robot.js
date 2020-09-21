@@ -103,7 +103,7 @@ var Robots = function(scene_main) {
 			robot.updateLevel();
 			robot.InitValue();
 
-			this.robots.push(robot);
+			this.enemy.push(robot);
 		}
 	}
 
@@ -114,6 +114,9 @@ var Robots = function(scene_main) {
 		for (var i = 0; i < this.robots.length; ++i) {
 			this.robots[i].update();
 		}
+		for (var i = 0; i < this.enemy.length; ++i) {
+			this.enemy[i].update();
+		}
 	}
 	this.draw = function() {
 		updateRobotUI(this.selectedRobot);
@@ -121,6 +124,9 @@ var Robots = function(scene_main) {
 		for (var i = 0; i < this.robots.length; ++i)
 		{
 			this.robots[i].draw();
+		}
+		for (var i = 0; i < this.enemy.length; ++i) {
+			this.enemy[i].draw();
 		}
 	}
 
@@ -134,6 +140,14 @@ var Robots = function(scene_main) {
 				log(this.robots[i]);
 
 				updateRobotUI(this.robots[i]);
+			}
+		}
+
+		for (var i = 0; i < this.enemy.length; ++i) {
+			if (this.enemy[i].x == x && this.enemy[i].y == y) {
+				log(this.enemy[i]);
+
+				updateRobotUI(this.enemy[i]);
 			}
 		}
 	}
@@ -169,7 +183,7 @@ var Robots = function(scene_main) {
 
 				this.selectedRobot = robot;
 
-				var m = this.scene.calculateMoveRange(robot, x, y, -1, false);
+				var m = this.scene.calculateMoveRangeCore(robot, x, y, -1, false);
 
 				this.scene.setBlackEffect(m);
 				
@@ -255,10 +269,12 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.robot_id = robot_stage_data[5];
 		this.people = robot_stage_data[4];
 
+
 		this.img = g_resourceManager.get_img_enemyicon(this.robot_id);
 		
 		
 		this.level = robot_stage_data[6];
+		this.robotBehavior = robot_stage_data[7];
 
 	}
 	else
@@ -296,8 +312,8 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	// 实际五维，精神加成之后
 
 	this.t_move = function () {   //机动
-		//if (m_spirit[7]) return m_move + 5;
-		//if (m_spirit[1]) return m_move + 3;
+		//if (spirit[7]) return move + 5;
+		//if (spirit[1]) return move + 3;
 		return this.move;
 	}
 	this.t_hp_total = function () { //总hp
@@ -382,15 +398,20 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		{
 			this.afterMove = false;
 			this.inCancelMove = false;
-			var m = this.scene.calculateMoveRange(this, x, y, -1, false, false);
+			var m = this.scene.calculateMoveRangeCore(this, x, y, -1, false, false);
 
 			this.scene.setBlackEffect(m);
 
 			showMenu1(this.scene.robots);
 		}
+		else if (this.inAIMove)
+		{
+			this.afterMove = false;
+			this.inAIMove = false;
+		}
 		else{
 			this.afterMove = true;
-			var m = this.scene.calculateMoveRange(this, x, y, 1, true, true);
+			var m = this.scene.calculateMoveRangeCore(this, x, y, 1, true, true);
 
 			this.scene.setBlackEffect(m);
 			showMenu1(this.scene.robots);
@@ -399,7 +420,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	}
 	
 	this.canAttack = function(weapon) {
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, weapon.range, true, true);
 
 		for (var i = 0; i < m.length; ++i) {
 			for (var j = 0; j < m[i].length; ++j) {
@@ -420,7 +441,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 						}
 
 					//修理装置
-					if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.m_hp < enemy.m_hp_total) {
+					if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.hp < enemy.hp_total) {
 						return enemy;
 					}
 				}
@@ -430,7 +451,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	}
 
 	this.canAttackRobotUsingWeapon = function(robot, weapon) 	{
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, weapon.range, true, true);
+		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, weapon.range, true, true);
 
 		var i = robot.x;
 		var j = robot.y;
@@ -449,7 +470,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 			}
 
 			//修理装置
-			if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.m_hp < enemy.m_hp_total) {
+			if (weapon.id == 164 && enemy && enemy.isPlayer == this.isPlayer && enemy.hp < enemy.hp_total) {
 				return true;
 			}
 		}
@@ -468,14 +489,14 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.attack1 = function() {
 		log("attack1")
 		this.selectedWeapon = this.weapon1;
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
+		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
 		g_buttonManager.clear();
 	}
 
 	this.attack2 = function () {
 		this.selectedWeapon = this.weapon1;
-		var m = this.scene.calculateMoveRange(this, this.x, this.y, this.selectedWeapon.range, true, true);
+		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
 		this.scene.setBlackEffect(m);
 		g_buttonManager.clear();
 	}
@@ -491,7 +512,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 		this.scene.robots.setSelectedRobotInactive();
 
-		if (enemy.hp < 0)
+		if (enemy.hp <= 0)
 		{
 			this.scene.robots.deleteRobot(enemy);
 		}
@@ -567,5 +588,124 @@ Robot.prototype.InitValue = function () {
 	}
 	this.hp = this.hp_total;
 
+
+}
+
+
+Robot.prototype.AI_action = function () {
+	var selectedRobot = this;
+	var scene = selectedRobot.scene;
+	//if (selectedRobot.robotBehavior && scene.round < selectedRobot.robotBehavior) {
+	if (false)
+		{
+		var enemy = null;
+		if (enemy = selectedRobot.canAttack1()) {
+			selectedRobot.selectedWeapon = selectedRobot.weapon1;
+			selectedRobot.attackDo(enemy);
+			return;
+		}
+		else if (enemy = selectedRobot.canAttack2()) {
+			selectedRobot.selectedWeapon = selectedRobot.weapon2;
+			selectedRobot.attackDo(enemy);
+			return;
+		}
+		else {
+			scene.robots.setSelectedRobotInactive();
+		}
+		return;
+	}
+
+
+	// get All robots that can attack
+	var enemys = AI.getAllAttackTargetRobots(selectedRobot, scene);
+	// Select one target
+	// 1. 可以一击击落的机体
+	// 2. 造成伤害最高的机体
+	var target = null;
+	var maxDamage = 0;
+	for (var i = 0; i < enemys.length; ++i)
+	{
+		var enemy = enemys[i];
+
+		var damage1 = 0;
+		var damage2 = 0;
+		if (enemy.tmp_ai_weapon1) {
+			damage1 = Battle.getDamage(selectedRobot, enemy, selectedRobot.weapon1);
+		}
+		if (enemy.tmp_ai_weapon2) {
+			damage2 = Battle.getDamage(selectedRobot, enemy, selectedRobot.weapon2);
+		}
+
+		if (damage1 > enemy.hp) {
+			target = enemy;
+			selectedRobot.selectedWeapon = selectedRobot.weapon1;
+			break;
+		}
+		if (damage2 > enemy.hp) {
+			target = enemy;
+			selectedRobot.selectedWeapon = selectedRobot.weapon2;
+			break;
+		}
+
+		var damage = Math.max(damage1, damage2);
+		if (damage > maxDamage) {
+			maxDamage = damage;
+			selectedRobot.selectedWeapon = damage1 > damage2 ? selectedRobot.weapon1 : selectedRobot.weapon2;
+			target = enemy;
+		}
+	}
+
+
+	if (target) {
+		// 攻击目标
+		// 无须移动的情况
+		
+		if (selectedRobot.canAttackRobotUsingWeapon(target, selectedRobot.selectedWeapon)) {
+			selectedRobot.attackDo(target);
+		}
+		else {
+			// 先移动在攻击
+			var m = scene.calculateMoveRange(selectedRobot);
+			var x = target.x;
+			var y = target.y;
+			var target_x = x;
+			var target_y = y;
+			var canAttack = true;
+		
+			if (m[x][y - 1] >= 0 && !scene.robots.getRobotAt(x,y - 1)) target_y = y - 1;
+			else if (m[x][y + 1] >= 0 && !scene.robots.getRobotAt(x,y + 1)) target_y = y + 1;
+			else if (m[x - 1][y] >= 0 && !scene.robots.getRobotAt(x - 1,y)) target_x = x - 1;
+			else if (m[x + 1][y] >= 0 && !scene.robots.getRobotAt(x + 1,y)) target_x = x + 1;
+			else {
+				//不能攻击了
+				canAttack = false;
+			}
+
+			g_buttonManager.clear();
+
+			if (canAttack) {
+				selectedRobot.inAIMove = true;
+
+				selectedRobot.moveTo(target_x, target_y);
+
+				selectedRobot.attackDo(target);
+			}
+			else {
+				scene.AI_move(selectedRobot);
+
+				scene.robots.setSelectedRobotInactive();
+				selectedRobot.selectedWeapon = null;
+
+			}
+
+		}
+	}
+	else {
+		// 移动后无法攻击
+		scene.AI_move(selectedRobot);
+
+		scene.robots.setSelectedRobotInactive();
+		selectedRobot.selectedWeapon = null;
+	}
 
 }
