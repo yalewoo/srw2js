@@ -67,8 +67,42 @@ var SceneMain = function (game) {
 
 			}
 		}
+		else{
+			var AI = function() {
+				self.AI(0);
+			}
+			g_buttonCanvasManager.addButtonHandler("回合结束", AI, e.offsetX, e.offsetY, 200, 60);
+
+		}
 	}
 
+	this.AI = function(i) {
+		if (i == 0)
+		{
+			this.game.musicManager.stopRobot();
+			this.game.musicManager.playEnemy();
+		}
+
+		var enemys = this.robots.enemy;
+		if (enemys.length > i)
+		{
+			var enemy = enemys[i];
+			
+			enemy.setNotActiveCallbackOnce = function()
+			{
+				self.AI(i+1);
+	
+			}
+			enemy.AI_action();
+
+		}
+		else{
+			this.game.musicManager.stopEnemy();
+			this.game.musicManager.playRobot();
+			this.robots.setAllActive();
+		}
+		
+	}
 	this.registerHandler();
 
 	this.update = function () {
@@ -247,10 +281,11 @@ var SceneMain = function (game) {
 		return false;
 	}
 
-	this.AI_move = function (selectedRobot)
+	this.AI_move = function (selectedRobot, callback)
 	{
 		var closeEnemy = AI.getEnemy(this, selectedRobot);
 		if (!closeEnemy) {
+			callback();
 			return;
 		}
 
@@ -290,7 +325,7 @@ var SceneMain = function (game) {
 		g_buttonManager.clear();
 
 		selectedRobot.inAIMove = true;
-		selectedRobot.moveTo(xTo, yTo);
+		selectedRobot.moveTo(xTo, yTo, callback);
 	}
 
 	this.init = function() {

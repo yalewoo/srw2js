@@ -19,12 +19,15 @@ var Game = function(canvas, fps)
 
 	var game = this;
 
-	this.run = function() {
 
+	this.run = function() {
+		
 		var desiredTime = Date.now() + game.FPS;
 		var interval = Math.max(0, desiredTime - Date.now());
 		game.scene.update();
 		game.scene.draw();
+
+		
 		
 		setTimeout(game.run, interval);
 	}

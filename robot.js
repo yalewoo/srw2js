@@ -173,7 +173,7 @@ var Robots = function(scene_main) {
 			}
 			else if (robot == this.selectedRobot)
 			{
-				this.setSelectedRobotInactive();
+				robot.setNotActive();
 
 			}
 			
@@ -217,7 +217,7 @@ var Robots = function(scene_main) {
 				}
 				else if (this.selectedRobot)
 				{
-					this.setSelectedRobotInactive();
+					this.selectedRobot.setNotActive();
 				}
 			}
 
@@ -241,14 +241,26 @@ var Robots = function(scene_main) {
 	}
 
 	this.setSelectedRobotInactive = function () {
+		if (this.selectedRobot)
+		{
+			this.selectedRobot.afterMove = false;
+			this.selectedRobot.selectedWeapon = false;
+			this.selectedRobot = null;
+		}
 		
-		this.selectedRobot.afterMove = false;
-		this.selectedRobot.selectedWeapon = false;
-		this.selectedRobot = null;
 		this.scene.setBlackEffect(null);
 		g_buttonManager.clear();
 		g_buttonCanvasManager.clear();
 
+	}
+
+	this.setAllActive = function() {
+		for (var i = 0; i < this.robots.length; ++i) {
+			this.robots[i].setActive();
+		}
+		for (var i = 0; i < this.enemy.length; ++i) {
+			this.enemy[i].setActive();
+		}
 	}
 	
 }
@@ -330,24 +342,27 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	} 
 
 
-	this.moveSpeedUI = 0.618;
+	this.moveSpeedUI = 4;
 	this.update = function () {
 		var inMoveOld = this.inMove;
-		var d = 0;
-		if (this.x < this.TargetX) {
+		if (this.xFloat < 0) {
 			this.xFloat += this.moveSpeedUI;
-			this.x = Math.floor(this.xFloat);
+			this.xFloat = Math.min(this.xFloat, 0)
 		}
-		else if (this.x > this.TargetX) {
+		else if (this.xFloat > 0) {
 			this.xFloat -= this.moveSpeedUI;
-			this.x = Math.floor(this.xFloat);
+			this.xFloat = Math.max(this.xFloat, 0)
+
 		}
-		else if (this.y < this.TargetY) {
+		else if (this.yFloat < 0) {
 			this.yFloat += this.moveSpeedUI;
-			this.y = Math.floor(this.yFloat);
-		} else if (this.y > this.TargetY) {
+			this.yFloat = Math.min(this.yFloat, 0)
+
+		}
+		else if (this.yFloat > 0) {
 			this.yFloat -= this.moveSpeedUI;
-			this.y = Math.floor(this.yFloat);
+			this.yFloat = Math.max(this.yFloat, 0)
+
 		}
 		else
 		{
@@ -361,9 +376,17 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.draw = function() {
 		if (this.img.isloaded)
 		{
-			
+			if (this.inMove)
+			{
+				this.context2D.drawImage(this.img, this.x*32 - this.xFloat, this.y*32 - this.yFloat, this.img.width, this.img.height);
 
-			this.context2D.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
+			}
+			else
+			{
+				this.context2D.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
+
+			}
+
 
 			if (!this.active)
 			{
@@ -382,15 +405,15 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 	}
 
-	this.moveTo = function (x, y) {
+	this.moveTo = function (x, y, callback) {
 		this.xOriginal = this.x;
 		this.yOriginal = this.y;
-
-		this.xFloat = this.x;
-		this.yFloat = this.y;
-		this.TargetX = x;
-		this.TargetY = y;
+		this.xFloat = (x - this.x) * 32;
+		this.yFloat = (y - this.y) * 32;
+		this.x = x;
+		this.y = y;
 		this.inMove = true;
+		this.moveToCallback = callback;
 	}
 
 	this.moveFinished = function(x, y) {
@@ -408,6 +431,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		{
 			this.afterMove = false;
 			this.inAIMove = false;
+
 		}
 		else{
 			this.afterMove = true;
@@ -415,6 +439,11 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 			this.scene.setBlackEffect(m);
 			showMenu1(this.scene.robots);
+		}
+
+		if (this.moveToCallback)
+		{
+			this.moveToCallback();
 		}
 		
 	}
@@ -510,12 +539,34 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		var battle = new Battle(this.scene, this, enemy);
 		battle.DoAttack();
 
-		this.scene.robots.setSelectedRobotInactive();
+		this.setNotActive();
 
 		if (enemy.hp <= 0)
 		{
 			this.scene.robots.deleteRobot(enemy);
 		}
+		if (this.hp <= 0) {
+			this.scene.robots.deleteRobot(this);
+		}
+	}
+
+	this.setNotActive = function()
+	{
+		this.active = false;
+		if (this.scene.robots.selectedRobot == this)
+		{
+			this.scene.robots.setSelectedRobotInactive();
+		}
+
+		if (this.setNotActiveCallbackOnce)
+		{
+			this.setNotActiveCallbackOnce();
+			this.setNotActiveCallbackOnce = null;
+		}
+	}
+	this.setActive = function()
+	{
+		this.active = true;
 	}
 }
 
@@ -686,15 +737,19 @@ Robot.prototype.AI_action = function () {
 			if (canAttack) {
 				selectedRobot.inAIMove = true;
 
-				selectedRobot.moveTo(target_x, target_y);
+				selectedRobot.moveTo(target_x, target_y, function() {
+					selectedRobot.attackDo(target);
+					selectedRobot.setNotActive();
+				});
 
-				selectedRobot.attackDo(target);
 			}
 			else {
-				scene.AI_move(selectedRobot);
+				scene.AI_move(selectedRobot, function() {
+					selectedRobot.setNotActive();
+					selectedRobot.selectedWeapon = null;
+				});
 
-				scene.robots.setSelectedRobotInactive();
-				selectedRobot.selectedWeapon = null;
+				
 
 			}
 
@@ -702,10 +757,12 @@ Robot.prototype.AI_action = function () {
 	}
 	else {
 		// 移动后无法攻击
-		scene.AI_move(selectedRobot);
+		scene.AI_move(selectedRobot, function() {
+			selectedRobot.setNotActive();
+			selectedRobot.selectedWeapon = null;
+		});
 
-		scene.robots.setSelectedRobotInactive();
-		selectedRobot.selectedWeapon = null;
+		
 	}
 
 }

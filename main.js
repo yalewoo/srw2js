@@ -9,7 +9,7 @@
 
 	window.g_resourceManager = new ResourceManager();
 
-	var game = new Game(canvas, 60);
+	var game = new Game(canvas, 240);
 
 	var scene_main = new SceneMain(game);
 	scene_main.loadStage(1);

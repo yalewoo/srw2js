@@ -4,7 +4,6 @@ var MusicManager = function() {
     this.audio2 = document.getElementById('music2');
     this.audio3 = document.getElementById('music3');
 
-    this.backgroundDiv = document.getElementById('music_background');
 
     this.playOnce = function() {
         this.audio2.play();
@@ -29,12 +28,26 @@ var MusicManager = function() {
     this.music_main_robot = new Audio("audio/music/87.wav")
     this.music_main_robot.loop = true;
     this.playRobot = function () {
+        this.music_main_robot.currentTime = 0;
 
         this.music_main_robot.play();
     }
 
     this.stopRobot = function () {
         this.music_main_robot.pause();
+    }
+
+
+    this.music_main_Enemy = new Audio("audio/music/88.wav")
+    this.music_main_Enemy.loop = true;
+    this.playEnemy = function () {
+        this.music_main_Enemy.currentTime = 0;
+
+        this.music_main_Enemy.play();
+    }
+
+    this.stopEnemy = function () {
+        this.music_main_Enemy.pause();
     }
 
 

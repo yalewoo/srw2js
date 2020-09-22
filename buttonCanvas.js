@@ -32,7 +32,7 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
     }
     this.clickHandler = function (event) {
         if (this.intersects(event.offsetX, event.offsetY)) {
-            
+            g_buttonCanvasManager.clear();
 
             if (this.handler) {
                 this.handler();
