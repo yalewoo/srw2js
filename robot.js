@@ -87,19 +87,25 @@ var Robots = function(scene_main) {
 
 	this.context2D = context2D;
 	this.loadStage = function(stage) {
-		var stage_robot = stage_robot_date[stage-1];
-		for (var i = 0; i < stage_robot.length; ++i)
-		{
-			var robot = new Robot(stage_robot[i], scene_main, isEnemy=false);
+
+		
+		var stage_robot = g_stages[stage].robot_init;
+		this.addRobot(stage_robot);
+
+		stage_robot = g_stages[stage].enemy_init;
+		this.addEnemy(stage_robot);
+	}
+	this.addRobot = function (stage_robot) {
+		for (var i = 0; i < stage_robot.length; ++i) {
+			var robot = new Robot(stage_robot[i], scene_main, isEnemy = false);
 			robot.updateLevel();
 			robot.InitValue();
 			this.robots.push(robot);
 		}
-
-		stage_robot = stage_enemy_data[stage-1];
-		for (var i = 0; i < stage_robot.length; ++i)
-		{
-			var robot = new Robot(stage_robot[i], scene_main, isEnemy=true);
+	}
+	this.addEnemy = function (stage_robot) {
+		for (var i = 0; i < stage_robot.length; ++i) {
+			var robot = new Robot(stage_robot[i], scene_main, isEnemy = true);
 			robot.updateLevel();
 			robot.InitValue();
 
@@ -286,7 +292,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		
 		
 		this.level = robot_stage_data[6];
-		this.robotBehavior = robot_stage_data[7];
+		this.robotBehavior = Number(robot_stage_data[10]);
 
 	}
 	else
@@ -534,7 +540,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	{
 		log("attack")
 
-		this.scene.game.musicManager.PlayAttackOnce();
+		this.scene.game.musicManager.PlayOnceFromStart("attack");
 
 		var battle = new Battle(this.scene, this, enemy);
 		battle.DoAttack();

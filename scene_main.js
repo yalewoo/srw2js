@@ -30,6 +30,8 @@ var SceneMain = function (game) {
 	}
 	this.clickHandler = function (event)
 	{
+		g_buttonCanvasManager.clear();
+
 		if (self.talkDiag)
 		{
 			self.talkDiag.clickHandler();
@@ -45,7 +47,7 @@ var SceneMain = function (game) {
 
 		}
 
-		self.game.musicManager.playOnce();
+		self.game.musicManager.PlayOnceFromStart("click");
 	}
 
 	this.rightClickHandler = function (e) {
@@ -68,41 +70,13 @@ var SceneMain = function (game) {
 			}
 		}
 		else{
-			var AI = function() {
-				self.AI(0);
-			}
-			g_buttonCanvasManager.addButtonHandler("回合结束", AI, e.offsetX, e.offsetY, 200, 60);
-
-		}
-	}
-
-	this.AI = function(i) {
-		if (i == 0)
-		{
-			this.game.musicManager.stopRobot();
-			this.game.musicManager.playEnemy();
-		}
-
-		var enemys = this.robots.enemy;
-		if (enemys.length > i)
-		{
-			var enemy = enemys[i];
 			
-			enemy.setNotActiveCallbackOnce = function()
-			{
-				self.AI(i+1);
-	
-			}
-			enemy.AI_action();
+			g_buttonCanvasManager.addButtonHandler("回合"+ this.round +"结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
 
 		}
-		else{
-			this.game.musicManager.stopEnemy();
-			this.game.musicManager.playRobot();
-			this.robots.setAllActive();
-		}
-		
 	}
+
+	
 	this.registerHandler();
 
 	this.update = function () {
@@ -154,11 +128,14 @@ var SceneMain = function (game) {
 	this.loadStage = function(stage)
 	{
 		this.stage = stage;
+
 		this.map = new Map(this, stage);
 
 
 		this.robots = new Robots(this);
 		this.robots.loadStage(stage);
+
+		this.round = 1;
 	}
 
 	this.currentHoverX = 0;
@@ -329,25 +306,106 @@ var SceneMain = function (game) {
 	}
 
 	this.init = function() {
-		this.game.musicManager.playMap1();
-
-		this.talkDiag = new TalkDiag(game, g_stage_prelude_talk_date[this.stage-1][1]);
-		var self = this;
-		this.talkDiag.setFinishHandler(function() {
-			self.talkDiag.clear();
-			self.talkDiag = null;
-
-			self.game.musicManager.stopMap1();
-			this.game.musicManager.playRobot();
-
-		})
-
-		g_buttonManager.unshowButton1();		
+		this.executeStageEvent(function(){});
+		
 	}
 	this.clear = function() {
-		this.game.musicManager.stopRobot();
+		this.game.musicManager.stopAll();
 	}
 
+	this.executeStageEvent = function (callback) {
+		if (g_stages[this.stage] && g_stages[this.stage].round_event
+			&& g_stages[this.stage].round_event[this.round])
+		{
+			var add_enemy = g_stages[this.stage].round_event[this.round].addEnemys;
+			if (add_enemy) {
+				
+				this.game.musicManager.stopAll();
+				this.game.musicManager.PlayOnceFromStart("main_add_enemy");
 
+				this.robots.addEnemy(add_enemy);
+				
+				g_buttonManager.unshowButton1();
+			}
+
+
+			var talk_data = g_stages[this.stage].round_event[this.round].talks;
+			if (talk_data) {
+				if (this.round == 1)
+				{
+					this.game.musicManager.PlayLoopFromStart("start_map");
+				}
+				
+
+				this.talkDiag = new TalkDiag(game, talk_data);
+				var self = this;
+				this.talkDiag.setFinishHandler(function () {
+					self.talkDiag.clear();
+					self.talkDiag = null;
+
+					
+						
+						self.game.musicManager.stopAll();
+						self.game.musicManager.PlayLoopFromStart("main_robot");
+						callback();
+					
+					
+
+				})
+
+				g_buttonManager.unshowButton1();
+			}
+			else{
+				callback();
+			}
+
+		}
+		else
+		{
+			callback();
+		}
+	}
+
+	this.nextRound = function () {
+		++self.round;
+		self.game.musicManager.stopAll();
+		self.game.musicManager.PlayLoopFromStart("main_enemy");
+
+var callback = function() {
+	self.AI(0);
+}
+		self.executeStageEvent(callback);
+
+		
+	}
+
+	this.AI = function (i) {
+		var enemys = this.robots.enemy;
+		if (enemys.length > i) {
+			var enemy = enemys[i];
+
+			enemy.setNotActiveCallbackOnce = function () {
+				self.AI(i + 1);
+
+			}
+
+			if (enemy.robotBehavior < this.round) {
+				enemy.AI_action();
+
+			}
+			else {
+				self.AI(i + 1);
+			}
+
+		}
+		else {
+			this.game.musicManager.stopAll();
+			this.game.musicManager.PlayLoopFromStart("main_robot");
+			this.robots.setAllActive();
+		}
+
+
+
+	}
 
 }

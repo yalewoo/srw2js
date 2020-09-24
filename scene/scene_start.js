@@ -12,7 +12,7 @@ var SceneStart = function (game) {
     }
     this.clickHandler = function (event) {
         if (!self.musicStarted) {
-            this.game.musicManager.playStart();
+            this.game.musicManager.PlayLoopFromStart("start");
             self.musicStarted = true;
         }
     }
@@ -50,11 +50,11 @@ var SceneStart = function (game) {
     }
 
     this.init = function() {
-        this.game.musicManager.playStart();
+        this.game.musicManager.PlayLoopFromStart("start");
     }
     this.clear = function() {
         g_buttonCanvasManager.clear();
-        this.game.musicManager.stopStart();
+        this.game.musicManager.stopAll();
         this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     }

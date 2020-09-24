@@ -60,6 +60,7 @@ var Game = function(canvas, fps)
 		if (g_buttonCanvasManager.clickHandler(e)) {
 			return;
 		}
+		
 		self.scene.clickHandler(e);
 	});
 

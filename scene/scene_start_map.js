@@ -55,15 +55,15 @@ var SceneStartMap1 = function (game) {
 
     this.init = function () {
 
-        this.game.musicManager.playMap1();
+        this.game.musicManager.PlayLoopFromStart("start_map");
 
-        this.game.musicManager.playDididi();
+        this.game.musicManager.PlayOnceFromStart("start_map_dididi");
 
 
     }
     this.clear = function () {
         g_buttonCanvasManager.clear();
-        this.game.musicManager.stopMap1();
+        this.game.musicManager.stopAll();
         this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     }

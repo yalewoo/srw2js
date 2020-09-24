@@ -4,8 +4,9 @@ var Map = function(scene_main, stage){
 	var context2D = scene_main.context2D;
 	this.maprects = []
 
+	var map_data = g_stages[stage].map;
 	// 转置
-	var stage_map_old = map_data[stage-1];
+	var stage_map_old = map_data;
 	var stage_map = stage_map_old[0].map(function(col, i) {
         return stage_map_old.map(function(row) {
         	return row[i];

@@ -66,11 +66,11 @@ var SceneTitle = function (game) {
 
 
     this.init = function () {
-        this.game.musicManager.playTitle();
+        this.game.musicManager.PlayOnceFromStart("start_title");
     }
     this.clear = function () {
         g_buttonCanvasManager.clear();
-        this.game.musicManager.stopTitle();
+        this.game.musicManager.stopAll();
         this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     }

@@ -1,92 +1,62 @@
 var MusicManager = function() {
-    this.audioContainer = document.getElementById('musicdiv');
     this.audio1 = document.getElementById('music1');
     this.audio2 = document.getElementById('music2');
     this.audio3 = document.getElementById('music3');
 
 
-    this.playOnce = function() {
-        this.audio2.play();
+    this.audios = {};
+    this.audios_name = {
+        start: "audio/music/85.wav",
+        main_robot: "audio/music/87.wav",
+        main_enemy: "audio/music/88.wav",
+        main_add_enemy: "audio/music/8D.wav",
+        start_map: "audio/music/89.wav",
+        start_map_dididi: "audio/wav/dididi.mp3",
+        start_title: "audio/music/92.wav",
+        click: "audio/wav/pushbutton.mp3",
+        attack: "audio/wav/huoqiu.mp3",
+
     }
 
-    this.PlayAttackOnce = function() {
-        this.audio3.currentTime = 0;
-        this.audio3.play();
+    this.PlayOnceFromStart = function(name) {
+        if (!this.audios[name])
+        {
+            this.audios[name] = new Audio(this.audios_name[name]);
+        }
+
+        var audio = this.audios[name];
+        audio.loop = false;
+        audio.currentTime = 0;
+        audio.play();
+    }
+    this.PlayLoopFromStart = function (name) {
+        if (!this.audios[name]) {
+            this.audios[name] = new Audio(this.audios_name[name]);
+        }
+
+        var audio = this.audios[name];
+        audio.loop = true;
+        audio.currentTime = 0;
+        audio.play();
+    }
+    this.PlayLoopFrom = function (name, time) {
+        if (!this.audios[name]) {
+            this.audios[name] = new Audio(this.audios_name[name]);
+        }
+
+        var audio = this.audios[name];
+        audio.loop = true;
+        audio.currentTime = time;
+        audio.play();
     }
 
-    this.music_start = new Audio("audio/music/85.wav")
-    this.music_start.loop = true;
-    this.playStart = function() {
-       
-        this.music_start.play();
-    }
-
-    this.stopStart = function() {
-        this.music_start.pause();
-    }
-
-    this.music_main_robot = new Audio("audio/music/87.wav")
-    this.music_main_robot.loop = true;
-    this.playRobot = function () {
-        this.music_main_robot.currentTime = 0;
-
-        this.music_main_robot.play();
-    }
-
-    this.stopRobot = function () {
-        this.music_main_robot.pause();
-    }
-
-
-    this.music_main_Enemy = new Audio("audio/music/88.wav")
-    this.music_main_Enemy.loop = true;
-    this.playEnemy = function () {
-        this.music_main_Enemy.currentTime = 0;
-
-        this.music_main_Enemy.play();
-    }
-
-    this.stopEnemy = function () {
-        this.music_main_Enemy.pause();
-    }
-
-
-    this.music_start_map = new Audio("audio/music/89.wav")
-    this.music_start_map.loop = true;
-    this.playMap1 = function () {
-        this.music_start_map.currentTime = 0.5;
-        this.music_start_map.play();
-    }
-
-    this.stopMap1 = function () {
-        this.music_start_map.pause();
+    this.stopAll = function() {
+        for (var key in this.audios)
+        {
+            this.audios[key].pause();
+        }
     }
 
 
-    this.music_start_title = new Audio("audio/music/92.wav")
-    this.music_start_title.loop = false;
-    this.playTitle = function () {
-
-        this.music_start_title.play();
-    }
-
-    this.stopTitle = function () {
-        this.music_start_title.pause();
-    }
-
-
-    this.music_dididi = new Audio("audio/wav/dididi.mp3")
-    this.music_dididi.loop = false;
-    this.playDididi = function () {
-
-        this.music_dididi.play();
-    }
-
-    this.stopDididi = function () {
-        this.music_dididi.pause();
-    }
-
-
-    
-           
+   
 }
