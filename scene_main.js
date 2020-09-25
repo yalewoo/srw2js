@@ -38,6 +38,7 @@ var SceneMain = function (game) {
 			return;
 		}
 
+
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 

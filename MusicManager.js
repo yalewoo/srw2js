@@ -15,6 +15,20 @@ var MusicManager = function() {
         start_title: "audio/music/92.wav",
         click: "audio/wav/pushbutton.mp3",
         attack: "audio/wav/huoqiu.mp3",
+        80: "audio/music/80.wav",
+        81: "audio/music/81.wav",
+        82: "audio/music/82.wav",
+        83: "audio/music/83.wav",
+        84: "audio/music/84.wav",
+        85: "audio/music/85.wav",
+        86: "audio/music/86.wav",
+        87: "audio/music/87.wav",
+        88: "audio/music/88.wav",
+        89: "audio/music/89.wav",
+        90: "audio/music/90.wav",
+        91: "audio/music/91.wav",
+        92: "audio/music/92.wav",
+        93: "audio/music/93.wav",
 
     }
 

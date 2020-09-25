@@ -3,6 +3,8 @@ var Battle = function(scene_main, robot, enemy) {
     this.robot = robot;
     this.enemy = enemy;
 
+    
+
     this.DoAttack = function() {
         var robot = this.robot;
         var enemy = this.enemy;

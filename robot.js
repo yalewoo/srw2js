@@ -540,20 +540,41 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	{
 		log("attack")
 
-		this.scene.game.musicManager.PlayOnceFromStart("attack");
+		
+		var self = this;
 
-		var battle = new Battle(this.scene, this, enemy);
-		battle.DoAttack();
+		// var battle = new Battle(this.scene, this, enemy);
 
-		this.setNotActive();
+		var scene_main = this.scene;
 
-		if (enemy.hp <= 0)
-		{
-			this.scene.robots.deleteRobot(enemy);
-		}
-		if (this.hp <= 0) {
-			this.scene.robots.deleteRobot(this);
-		}
+		var scene_battle = new SceneBattle(this.scene, this, enemy);
+
+		scene_battle.setFinishHandler( function() {
+			self.scene.game.scene = scene_main;
+			self.setNotActive();
+			if (enemy.hp <= 0) {
+				self.scene.robots.deleteRobot(enemy);
+			}
+			if (self.hp <= 0) {
+				self.scene.robots.deleteRobot(self);
+			}
+		});
+		this.scene.game.scene = scene_battle;
+
+		// battle.callback = function() {
+		// 	self.setNotActive();
+
+		// 	if (enemy.hp <= 0) {
+		// 		this.scene.robots.deleteRobot(enemy);
+		// 	}
+		// 	if (this.hp <= 0) {
+		// 		this.scene.robots.deleteRobot(this);
+		// 	}
+		// }
+
+		// battle.DoAttack();
+
+		
 	}
 
 	this.setNotActive = function()
