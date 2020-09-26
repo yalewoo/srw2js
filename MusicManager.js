@@ -47,7 +47,8 @@ var MusicManager = function() {
         audio.currentTime = 0;
         audio.play();
     }
-    this.PlayLoopFromStart = function (name, recordCurrent = true) {
+    this.PlayLoopFromStart = function (name, recordCurrent) {
+        recordCurrent = recordCurrent == false ? false : true;
         if (!this.audios[name]) {
             this.audios[name] = new Audio(this.audios_name[name]);
         }
@@ -62,7 +63,8 @@ var MusicManager = function() {
             this.currentLoop = audio;
         }
     }
-    this.PlayLoopFrom = function (name, time, recordCurrent = true) {
+    this.PlayLoopFrom = function (name, time, recordCurrent) {
+        recordCurrent = recordCurrent == false ? false : true;
         if (!this.audios[name]) {
             this.audios[name] = new Audio(this.audios_name[name]);
         }

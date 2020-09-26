@@ -83,7 +83,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                     var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
                     enemy.hp = Math.max(enemy.hp - damage, 0);
 
-                    self.textRobot = enemy.property.name + "损坏90";
+                    self.textRobot = enemy.property.name + "损坏" + damage;
                     self.textPeople = enemy.pilot.name + "：哐！";
                 }
                 else
@@ -160,7 +160,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                         var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
                         enemy.hp = Math.max(enemy.hp - damage, 0);
 
-                        self.textRobot = enemy.property.name + "损坏90";
+                        self.textRobot = enemy.property.name + "损坏" + damage;
                         self.textPeople = enemy.pilot.name + "：哐！";
                     }
                     else {
@@ -352,10 +352,10 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
 
 
-    this.showText = function (ctx, x, y, text, size=26) {
+    this.showText = function (ctx, x, y, text) {
         ctx.beginPath();
         ctx.fillStyle = "#fff";
-        ctx.font = size + "px 黑体";
+        ctx.font = 26 + "px 黑体";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillText(text, x, y);
