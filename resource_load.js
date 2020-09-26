@@ -92,7 +92,7 @@ var load_people_image = function () {
 
 var load_logos = function() {
 	var map_images = {};
-	var images_path = ["logo", "map1", "select", "fire"];
+	var images_path = ["logo", "map1", "select", "fire", "arrow2"];
 
 	for (var i = 0; i < images_path.length; ++i) {
 		var img = new Image();

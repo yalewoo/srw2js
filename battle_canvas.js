@@ -6,67 +6,213 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     var self = this;
     this.stage = 0;
+    this.robot = robot;
+    this.enemy = enemy;
     
 
-    var battle = new Battle(scene_main, robot, enemy);
-
-    this.showAttackAnimationLeftToRight = function() {
-        this.inMove = true;
-        this.fire_x = 50;
-        this.fire_x2 = 250;
+    this.showAttackAnimationRobot = function(callback) {
+        if (!this.robot.isPlayer)
+        {
+            this.showAttackAnimationLeftToRight(callback);
+        }
+        else
+        {
+            this.showAttackAnimationRightToLeft(callback);
+        }
     }
-    this.showAttackAnimationRightToLeft = function () {
+    this.showAttackAnimationEnemy = function (callback) {
+        if (!this.enemy.isPlayer) {
+            this.showAttackAnimationLeftToRight(callback);
+        }
+        else {
+            this.showAttackAnimationRightToLeft(callback);
+        }
+    }
+    this.showAttackAnimationLeftToRight = function(callback) {
+        this.callback = callback;
         this.inMove = true;
-        this.fire_x = 250;
-        this.fire_x2 = 50;
+        this.fire_x = 150;
+        this.fire_x2 = 350;
+    }
+    this.showAttackAnimationRightToLeft = function (callback) {
+        this.callback = callback;
+
+        this.inMove = true;
+        this.fire_x = 350;
+        this.fire_x2 = 150;
     }
 
     this.executeStage = function()
     {
+        var self = this;
         if (this.stage == 0) {
             if (robot.isPlayer)
             {
                 var music_id = robot.pilot.music_id;
                 this.game.musicManager.stopAll();
-                this.game.musicManager.PlayLoopFromStart(music_id);
+                this.game.musicManager.PlayLoopFromStart(music_id, false);
+            }
+            else{
+                var music_id = enemy.pilot.music_id;
+                this.game.musicManager.stopAll();
+                this.game.musicManager.PlayLoopFromStart(music_id, false);
             }
 
 
             this.people = robot.pilot;
-            this.text = robot.property.name + "攻击！";
+            this.textRobot = robot.property.name + "攻击！";
+            this.textPeople = "";
             ++this.stage;
 
+            this.weapon = robot.selectedWeapon;
+            this.enemy_weapon = this.getEnemyBackWeapon();
 
+            this.enemy_rate = Math.floor( this.calcRadio(enemy, this.enemy_weapon, robot));
+            this.player_rate = Math.floor( this.calcRadio(robot, this.weapon, enemy));
 
         }
         else if (this.stage == 1)
         {
             this.people = robot.pilot;
-            this.text = robot.pilot.name + "：发射！";
+            this.textPeople = robot.pilot.name + "：发射！";
             this.game.musicManager.PlayOnceFromStart("attack");
-            this.showAttackAnimationRightToLeft();
-            ++this.stage;
+            this.showAttackAnimationRobot(function() {
+                self.people = enemy.pilot;
+
+                if (self.prob(self.player_rate)) {
+                    var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
+                    enemy.hp = Math.max(enemy.hp - damage, 0);
+
+                    self.textRobot = enemy.property.name + "损坏90";
+                    self.textPeople = enemy.pilot.name + "：哐！";
+                }
+                else
+                {
+                    self.textRobot = enemy.property.name + "防御成功！";
+                    self.textPeople = enemy.pilot.name + "：没什么了不起！";
+                }
+                
+                if (enemy.hp > 0)
+                {
+                    ++self.stage;
+                }
+                else
+                {
+                    self.stage = 999;
+                }
+                
+            });
         }
         else if (this.stage == 2)
         {
             this.people = enemy.pilot;
-            this.text = enemy.pilot.name + "：哐！";
-            ++this.stage;
+
+            if (!this.enemy_weapon) {
+                this.textRobot = enemy.pilot.name + "无力反击";
+                this.textPeople = enemy.pilot.name + "：便宜你了!";
+                this.stage++;
+            }
+            else
+            {
+                this.textRobot = enemy.property.name + "反击！";
+                this.textPeople = enemy.pilot.name + "：准备反击！";
+                this.game.musicManager.PlayOnceFromStart("attack");
+
+                this.showAttackAnimationEnemy(function () {
+
+                    self.people = robot.pilot;
+
+                    if (self.prob(self.enemy_rate)) {
+                        var damage = self.getDamage(self.enemy, self.robot, self.enemy_weapon);
+                        robot.hp = Math.max(robot.hp - damage, 0);
+
+                        self.textRobot = robot.property.robotName + "损坏 " + damage;
+
+                        self.textPeople = robot.pilot.name + ": 被打中了!";
+
+                    }
+                    else {
+                        self.textRobot = enemy.property.name + "防御成功！";
+                        self.textPeople = enemy.pilot.name + "：没什么了不起！";
+                    }
+
+                    if (robot.hp > 0) {
+                        ++self.stage;
+                    }
+                    else {
+                        self.stage = 999;
+                    }
+                });
+            }
+           
         }
         else if (this.stage == 3)
         {
-            this.people = enemy.pilot;
-            this.text = enemy.property.name + "反击！";
-            this.game.musicManager.PlayOnceFromStart("attack");
+            if (robot.speed - enemy.speed >= 50) {
+                this.people = robot.pilot;
+                self.textRobot = enemy.property.name + "再次攻击";
+                this.textPeople = robot.pilot.name + "：发射！";
+                this.game.musicManager.PlayOnceFromStart("attack");
+                this.showAttackAnimationRobot(function () {
+                    self.people = enemy.pilot;
 
-            this.showAttackAnimationLeftToRight();
+                    if (self.prob(self.player_rate)) {
+                        var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
+                        enemy.hp = Math.max(enemy.hp - damage, 0);
 
-            ++this.stage;
-        }
-        else if (this.stage == 4) {
-            this.people = robot.pilot;
-            this.text = robot.property.name + "损坏" + 65 + robot.pilot.name + ": 混蛋，打的不错呀";
-            ++this.stage;
+                        self.textRobot = enemy.property.name + "损坏90";
+                        self.textPeople = enemy.pilot.name + "：哐！";
+                    }
+                    else {
+                        self.textRobot = enemy.property.name + "防御成功！";
+                        self.textPeople = enemy.pilot.name + "：没什么了不起！";
+                    }
+
+                    if (enemy.hp > 0) {
+                        ++self.stage;
+                    }
+                    else {
+                        self.stage = 999;
+                    }
+
+                });
+            }
+            else if (enemy.speed - robot.speed >= 50 && this.enemy_weapon != 0) {
+                this.textRobot = enemy.property.name + "再次反击！";
+                this.textPeople = enemy.pilot.name + "：再来！";
+                this.game.musicManager.PlayOnceFromStart("attack");
+
+                this.showAttackAnimationEnemy(function () {
+
+                    self.people = robot.pilot;
+
+                    if (self.prob(self.enemy_rate)) {
+                        var damage = self.getDamage(self.enemy, self.robot, self.enemy_weapon);
+                        robot.hp = Math.max(robot.hp - damage, 0);
+
+                        self.textRobot = robot.property.robotName + "损坏 " + damage;
+
+                        self.textPeople = robot.pilot.name + ": 被打中了!";
+
+                    }
+                    else {
+                        self.textRobot = enemy.property.name + "防御成功！";
+                        self.textPeople = enemy.pilot.name + "：没什么了不起！";
+                    }
+
+                    if (robot.hp > 0) {
+                        ++self.stage;
+                    }
+                    else {
+                        self.stage = 999;
+                    }
+                });
+            }
+            else
+            {
+                this.stage++;
+                this.executeStage();
+            }
         }
         else
         {
@@ -74,12 +220,93 @@ var BattleCanvas = function (scene_main, robot, enemy) {
             this.finishHandler();
 
             this.game.musicManager.stopAll();
-            this.game.musicManager.PlayLoopFromStart("main_robot");
+            this.game.musicManager.PlayLoopContinue();
             
         }
         log(this.people);
         log(this.text);
 
+    }
+
+    this.getDamage = function (robot2, enemy2, weapon2) {
+        var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
+        if (robot2.spirit[10]) {
+            damage *= 2;
+        }
+        if (robot2.spirit[4]) {
+            damage *= 2;
+        }
+
+        if (enemy2.spirit[3]) {
+            damage /= 2;
+        }
+        return damage;
+    }
+
+    this.prob = function (p) {
+        var newp = Math.random() * 100;
+        log(newp)
+        log(p)
+        if (newp < p)
+            return true;
+        else
+            return false;
+    }
+
+    this.getEnemyBackWeapon = function () {
+        if (this.enemy.canAttackRobotUsingWeapon(this.robot, this.enemy.weapon1)) {
+            if (this.enemy.canAttackRobotUsingWeapon(this.robot, this.enemy.weapon2)) {
+                if (this.enemy.weapon1.firepower[this.robot.property.type] > this.enemy.weapon2.firepower[this.robot.property.type])
+                    return this.enemy.weapon1;
+                else
+                    return this.enemy.weapon2;
+            }
+            else
+                return this.enemy.weapon1;
+        }
+        if (this.enemy.canAttackRobotUsingWeapon(this.robot, this.enemy.weapon2)) {
+            return this.enemy.weapon2;
+        }
+        return null;
+    }
+
+    this.calcRadio = function (robot2, weapon2, enemy2) {
+        if (!weapon2)
+            return 0;
+
+        if (enemy2.spirit[8])  //使用回避精神
+            return 0;
+
+        var base = robot2.speed + weapon2.hitRadio - enemy2.speed;
+
+
+        var typeRadio;
+        if (enemy2.property.type == 2) {
+            typeRadio = 1;
+        }
+        else {
+            typeRadio = g_typeRadioTable[scene_main.map.maprects[enemy2.x][enemy2.y].kind];
+        }
+
+
+        var distanceRadio;
+        var d = scene_main.map.calcDistance(robot2, enemy2);
+        if (d <= 1) {
+            distanceRadio = 1;
+        }
+        else {
+            distanceRadio = 1 - 0.05 * (d - 2);
+        }
+
+        var res = base * typeRadio * distanceRadio;
+
+        if (robot2.spirit[2])
+            res += 10;
+
+        if (res > 100)
+            res = 100;
+
+        return res;
     }
 
     this.executeStage();
@@ -115,30 +342,28 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         }
         else{
             this.inMove = false;
+            if (this.callback) {
+                this.callback();
+                this.callback = null;
+            }
+
         }
     }
 
-    this.draw = function () {
-
-        
-        var peopleid = this.people.id;
-        var text = this.text;
-
-        var img = g_resourceManager.get_img_people_image(peopleid);
 
 
-
-        var ctx = this.context2D;
-
-        var x = 0;
-        var y = 350;
-        var width = 600;
-        var height = 200;
-
-        var fillStyleOld = ctx.fillStyle;
-
+    this.showText = function (ctx, x, y, text, size=26) {
         ctx.beginPath();
-        ctx.fillStyle = "#7f7f7f";
+        ctx.fillStyle = "#fff";
+        ctx.font = size + "px 黑体";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x, y);
+        ctx.closePath();
+    }
+    this.showRect = function (ctx, x, y, width, height, color) {
+        ctx.beginPath();
+        ctx.fillStyle = color;
         ctx.moveTo(x, y);
         ctx.lineTo(x + width, y);
         ctx.lineTo(x + width, y + height);
@@ -147,19 +372,73 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
         ctx.closePath();
         ctx.fill();
+    }
+
+    this.draw = function () {
+
+        var peopleid = this.people.id;
+        var text = this.text;
+        var text2 = this.text2;
 
 
-        ctx.beginPath();
-        ctx.fillStyle = "#fff";
-        ctx.font = 26 + "px 黑体";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, 100, 400);
-        ctx.closePath();
+
+
+        var ctx = this.context2D;
+
+        var x = 0;
+        var y = 350;
+        var width = 600;
+        var height = 250;
+
+        var fillStyleOld = ctx.fillStyle;
+
+        this.showRect(ctx, 0, 0, ctx.canvas.width, 500, "#101010");
+
+        this.showRect(ctx, x, y, width, height, "#7f7f7f");
+
+        this.showText(ctx, 100, 460, this.textPeople);
+        this.showText(ctx, 10, 430, this.textRobot);
+
+
+        if (!this.robot.isPlayer)
+        {
+            // robot应该在右边
+            // 左边
+            this.showText(ctx, 10, 370, "命中");
+            this.showText(ctx, 150, 370, this.player_rate + " %");
+            this.showText(ctx, 10, 390, "HP");
+            this.showText(ctx, 100, 390, this.robot.hp + " / " + this.robot.hp_total);
+
+            // 右边
+            this.showText(ctx, 300, 370, "命中");
+            this.showText(ctx, 450, 370, this.enemy_rate + " %");
+
+            this.showText(ctx, 300, 390, "HP");
+            this.showText(ctx, 400, 390, this.enemy.hp + " / " + this.enemy.hp_total);
+        }
+        else
+        {
+            // robot应该在左边
+            
+            this.showText(ctx, 10, 370, "命中");
+            this.showText(ctx, 150, 370, this.enemy_rate + " %");
+            this.showText(ctx, 10, 390, "HP");
+            this.showText(ctx, 100, 390, this.enemy.hp + " / " + this.enemy.hp_total);
+
+            this.showText(ctx, 300, 370, "命中");
+            this.showText(ctx, 450, 370, this.player_rate + " %");
+
+            this.showText(ctx, 300, 390, "HP");
+            this.showText(ctx, 400, 390, this.robot.hp + " / " + this.robot.hp_total);
+        }
+        
+
 
         ctx.fillStyle = fillStyleOld;
 
-        this.context2D.drawImage(img, 10, 380);
+        var img = g_resourceManager.get_img_people_image(peopleid);
+
+        this.context2D.drawImage(img, 10, 470);
 
         if (this.inMove) {
             img = g_resourceManager.img_logos["fire"];

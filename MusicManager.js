@@ -15,6 +15,8 @@ var MusicManager = function() {
         start_title: "audio/music/92.wav",
         click: "audio/wav/pushbutton.mp3",
         attack: "audio/wav/huoqiu.mp3",
+        boom: "audio/wav/boom.mp3",
+        recover: "audio/wav/recover.mp3",
         80: "audio/music/80.wav",
         81: "audio/music/81.wav",
         82: "audio/music/82.wav",
@@ -32,6 +34,8 @@ var MusicManager = function() {
 
     }
 
+    this.currentLoop = null;
+
     this.PlayOnceFromStart = function(name) {
         if (!this.audios[name])
         {
@@ -43,17 +47,22 @@ var MusicManager = function() {
         audio.currentTime = 0;
         audio.play();
     }
-    this.PlayLoopFromStart = function (name) {
+    this.PlayLoopFromStart = function (name, recordCurrent = true) {
         if (!this.audios[name]) {
             this.audios[name] = new Audio(this.audios_name[name]);
         }
 
+        
         var audio = this.audios[name];
         audio.loop = true;
         audio.currentTime = 0;
         audio.play();
+        if (recordCurrent)
+        {
+            this.currentLoop = audio;
+        }
     }
-    this.PlayLoopFrom = function (name, time) {
+    this.PlayLoopFrom = function (name, time, recordCurrent = true) {
         if (!this.audios[name]) {
             this.audios[name] = new Audio(this.audios_name[name]);
         }
@@ -62,6 +71,13 @@ var MusicManager = function() {
         audio.loop = true;
         audio.currentTime = time;
         audio.play();
+        if (recordCurrent) {
+            this.currentLoop = audio;
+        }
+    }
+
+    this.PlayLoopContinue = function() {
+        this.currentLoop.play();
     }
 
     this.stopAll = function() {

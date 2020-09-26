@@ -71,8 +71,16 @@ var SceneMain = function (game) {
 			}
 		}
 		else{
-			
-			g_buttonCanvasManager.addButtonHandler("回合"+ this.round +"结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
+			if (g_buttonCanvasManager.hasAnyButton())
+			{
+				g_buttonCanvasManager.clear();
+
+			}
+			else
+			{
+				g_buttonCanvasManager.addButtonHandler("回合" + this.round + "结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
+
+			}
 
 		}
 	}
@@ -80,12 +88,74 @@ var SceneMain = function (game) {
 	
 	this.registerHandler();
 
+
+	this.startAttackArrow = function(x, y, x2, y2, callback) {
+		log(x, y, x2, y2)
+		this.arrowImg = g_resourceManager.img_logos["arrow2"];
+		this.arrowX = x;
+		this.arrowY = y;
+		this.arrowXTarget = x2;
+		this.arrowYTarget = y2;
+		this.arrowXFloat = (x2-x) * 32;
+		this.arrowYFloat = (y2 -y) * 32;
+		this.arrowMoveFinished = callback;
+	}
 	this.update = function () {
 		this.map.update();
 		this.robots.update();
 
 		g_buttonCanvasManager.update(this.context2D);
+
+		if (this.arrowImg) {
+			this.arrowMoveSpeedUI = 4;
+				if (this.arrowXFloat < 0) {
+					this.arrowXFloat += this.arrowMoveSpeedUI;
+					this.arrowXFloat = Math.min(this.arrowXFloat, 0)
+				}
+				else if (this.arrowXFloat > 0) {
+					this.arrowXFloat -= this.arrowMoveSpeedUI;
+					this.arrowXFloat = Math.max(this.arrowXFloat, 0)
+
+				}
+				else if (this.arrowYFloat < 0) {
+					this.arrowYFloat += this.arrowMoveSpeedUI;
+					this.arrowYFloat = Math.min(this.arrowYFloat, 0)
+
+				}
+				else if (this.arrowYFloat > 0) {
+					this.arrowYFloat -= this.arrowMoveSpeedUI;
+					this.arrowYFloat = Math.max(this.arrowYFloat, 0)
+
+				}
+				else {
+					this.arrowImg = null;
+					this.arrowMoveFinished();
+
+				}
+			
+
+		}
+
+		if (this.waitDoTimer > 0)
+		{
+			--this.waitDoTimer;
+			if (this.waitDoTimer == 0)
+			{
+				this.waitDoCallback();
+			}
+		}
 	}
+
+	this.waitAndDo = function(time, callback)
+	{
+		this.waitDoCallback = callback;
+
+		var fps = this.game.fps;
+
+		this.waitDoTimer = Math.floor(time * fps);
+	}
+
+
 
 	this.draw = function() {
 
@@ -121,8 +191,20 @@ var SceneMain = function (game) {
 		}
 		else
 		{
-			var img = g_resourceManager.img_logos["select"];
-			this.context2D.drawImage(img, this.hoverData[0] * 32, this.hoverData[1] * 32);
+			if (this.arrowImg)
+			{
+				this.context2D.drawImage(this.arrowImg, this.arrowXTarget * 32 - this.arrowXFloat, this.arrowYTarget * 32 - this.arrowYFloat);
+			}
+			else
+			{
+				if (this.hoverData)
+				{
+					var img = g_resourceManager.img_logos["select"];
+					this.context2D.drawImage(img, this.hoverData[0] * 32, this.hoverData[1] * 32);
+				}
+				
+			}
+			
 		}
 	}
 
@@ -380,23 +462,35 @@ var callback = function() {
 		
 	}
 
+	
+
 	this.AI = function (i) {
+
+		var self = this;
 		var enemys = this.robots.enemy;
 		if (enemys.length > i) {
 			var enemy = enemys[i];
+			this.hoverData = [enemy.x, enemy.y];
+			log(enemy)
+			
+			this.waitAndDo(0.1, function() {
+				enemy.setNotActiveCallbackOnce = function () {
+					self.AI(i + 1);
 
-			enemy.setNotActiveCallbackOnce = function () {
-				self.AI(i + 1);
+				}
 
-			}
 
-			if (enemy.robotBehavior < this.round) {
-				enemy.AI_action();
+				if (enemy.robotBehavior < self.round) {
+					enemy.AI_action();
 
-			}
-			else {
-				self.AI(i + 1);
-			}
+				}
+				else {
+					enemy.setNotActive();
+					
+				}
+			})
+
+			
 
 		}
 		else {

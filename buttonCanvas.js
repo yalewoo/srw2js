@@ -115,7 +115,9 @@ var ButtonCanvasManager = function (ctx) {
 
     }
 
-
+    this.hasAnyButton = function() {
+        return this.buttons.length != 0;
+    }
 
 
     this.draw = function (context2D) {

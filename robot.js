@@ -412,6 +412,9 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	}
 
 	this.moveTo = function (x, y, callback) {
+
+		this.scene.hoverData = null;
+
 		this.xOriginal = this.x;
 		this.yOriginal = this.y;
 		this.xFloat = (x - this.x) * 32;
@@ -543,37 +546,33 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		
 		var self = this;
 
-		// var battle = new Battle(this.scene, this, enemy);
+		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
+		{
+			this.scene.game.musicManager.PlayOnceFromStart("recover");
+			enemy.hp += Math.floor(this.hp_total / 2);
+			enemy.hp = Math.min(enemy.hp, enemy.hp_total)
+			this.setNotActive();
+		}
+		else
+		{
+			this.scene.startAttackArrow(this.x, this.y, enemy.x, enemy.y, function () {
+				var scene_main = self.scene;
 
-		var scene_main = this.scene;
+				var scene_battle = new SceneBattle(self.scene, self, enemy);
 
-		var scene_battle = new SceneBattle(this.scene, this, enemy);
-
-		scene_battle.setFinishHandler( function() {
-			self.scene.game.scene = scene_main;
-			self.setNotActive();
-			if (enemy.hp <= 0) {
-				self.scene.robots.deleteRobot(enemy);
-			}
-			if (self.hp <= 0) {
-				self.scene.robots.deleteRobot(self);
-			}
-		});
-		this.scene.game.scene = scene_battle;
-
-		// battle.callback = function() {
-		// 	self.setNotActive();
-
-		// 	if (enemy.hp <= 0) {
-		// 		this.scene.robots.deleteRobot(enemy);
-		// 	}
-		// 	if (this.hp <= 0) {
-		// 		this.scene.robots.deleteRobot(this);
-		// 	}
-		// }
-
-		// battle.DoAttack();
-
+				scene_battle.setFinishHandler(function () {
+					self.scene.game.scene = scene_main;
+					self.setNotActive();
+					if (enemy.hp <= 0) {
+						self.scene.robots.deleteRobot(enemy);
+					}
+					if (self.hp <= 0) {
+						self.scene.robots.deleteRobot(self);
+					}
+				});
+				self.scene.game.scene = scene_battle;
+			})
+		}
 		
 	}
 

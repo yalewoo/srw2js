@@ -1,1 +1,1 @@
-var g_debug_mode_enabled = true;
+var g_debug_mode_enabled = false;

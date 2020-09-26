@@ -2,6 +2,7 @@ var Game = function(canvas, fps)
 {
 	this.canvas = canvas;
 	this.context2D = canvas.getContext("2d");
+	this.fps = fps;
 	this.FPS = 1000 / fps;
 
 
