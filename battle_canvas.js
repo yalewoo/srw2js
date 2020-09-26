@@ -80,7 +80,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                 self.people = enemy.pilot;
 
                 if (self.prob(self.player_rate)) {
-                    var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
+                    var damage = BattleCanvas.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
                     enemy.hp = Math.max(enemy.hp - damage, 0);
 
                     self.textRobot = enemy.property.name + "损坏" + damage;
@@ -123,7 +123,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                     self.people = robot.pilot;
 
                     if (self.prob(self.enemy_rate)) {
-                        var damage = self.getDamage(self.enemy, self.robot, self.enemy_weapon);
+                        var damage = BattleCanvas.getDamage(self.enemy, self.robot, self.enemy_weapon);
                         robot.hp = Math.max(robot.hp - damage, 0);
 
                         self.textRobot = robot.property.robotName + "损坏 " + damage;
@@ -157,7 +157,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                     self.people = enemy.pilot;
 
                     if (self.prob(self.player_rate)) {
-                        var damage = self.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
+                        var damage = BattleCanvas.getDamage(self.robot, self.enemy, self.robot.selectedWeapon);
                         enemy.hp = Math.max(enemy.hp - damage, 0);
 
                         self.textRobot = enemy.property.name + "损坏" + damage;
@@ -187,7 +187,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                     self.people = robot.pilot;
 
                     if (self.prob(self.enemy_rate)) {
-                        var damage = self.getDamage(self.enemy, self.robot, self.enemy_weapon);
+                        var damage = BattleCanvas.getDamage(self.enemy, self.robot, self.enemy_weapon);
                         robot.hp = Math.max(robot.hp - damage, 0);
 
                         self.textRobot = robot.property.robotName + "损坏 " + damage;
@@ -228,20 +228,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     }
 
-    this.getDamage = function (robot2, enemy2, weapon2) {
-        var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
-        if (robot2.spirit[10]) {
-            damage *= 2;
-        }
-        if (robot2.spirit[4]) {
-            damage *= 2;
-        }
-
-        if (enemy2.spirit[3]) {
-            damage /= 2;
-        }
-        return damage;
-    }
+    
 
     this.prob = function (p) {
         var newp = Math.random() * 100;
@@ -457,4 +444,19 @@ var BattleCanvas = function (scene_main, robot, enemy) {
     ];
 
     this.currentTalk = 0;
+}
+
+BattleCanvas.getDamage = function (robot2, enemy2, weapon2) {
+    var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
+    if (robot2.spirit[10]) {
+        damage *= 2;
+    }
+    if (robot2.spirit[4]) {
+        damage *= 2;
+    }
+
+    if (enemy2.spirit[3]) {
+        damage /= 2;
+    }
+    return damage;
 }

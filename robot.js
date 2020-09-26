@@ -707,10 +707,10 @@ Robot.prototype.AI_action = function () {
 		var damage1 = 0;
 		var damage2 = 0;
 		if (enemy.tmp_ai_weapon1) {
-			damage1 = Battle.getDamage(selectedRobot, enemy, selectedRobot.weapon1);
+			damage1 = BattleCanvas.getDamage(selectedRobot, enemy, selectedRobot.weapon1);
 		}
 		if (enemy.tmp_ai_weapon2) {
-			damage2 = Battle.getDamage(selectedRobot, enemy, selectedRobot.weapon2);
+			damage2 = BattleCanvas.getDamage(selectedRobot, enemy, selectedRobot.weapon2);
 		}
 
 		if (damage1 > enemy.hp) {
