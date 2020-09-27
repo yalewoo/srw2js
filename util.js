@@ -44,7 +44,7 @@ var updateRobotUI = function(robot)
 
     updateValuebyDomId("robot_spirit_total", robot.pilot.spirit_total0);
 
-    updateValuebyDomId("robot_spirit", robot.spirit);
+    updateValuebyDomId("robot_spirit", robot.pilot.spirit);
     updateValuebyDomId("robot_hp", robot.hp);
     updateValuebyDomId("robot_exp", robot.exp);
 

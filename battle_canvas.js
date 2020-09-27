@@ -51,11 +51,15 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                 var music_id = robot.pilot.music_id;
                 this.game.musicManager.stopAll();
                 this.game.musicManager.PlayLoopFromStart(music_id, false);
+                this.playerRobot = robot;
+                this.enemyRobot = enemy;
             }
             else{
                 var music_id = enemy.pilot.music_id;
                 this.game.musicManager.stopAll();
                 this.game.musicManager.PlayLoopFromStart(music_id, false);
+                this.playerRobot = enemy;
+                this.enemyRobot = robot;
             }
 
 
@@ -98,6 +102,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                 }
                 else
                 {
+                    
                     self.stage = 999;
                 }
                 
@@ -214,14 +219,44 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                 this.executeStage();
             }
         }
+        else if (this.stage == 999)
+        {
+            ++this.stage;
+            if (this.enemyRobot.hp <= 0)
+            {
+                // 获得经验
+                var diffLevel = this.enemyRobot.level - this.playerRobot.level;
+                var exp = this.enemyRobot.property.exp_dievalue * this.enemyRobot.level;
+                if (diffLevel >= 0) {
+                    diffLevel = diffLevel > 8 ? 8 : diffLevel;
+                    exp = exp * (diffLevel + 2) * 0.5;
+                }
+                else {
+                    diffLevel = diffLevel < -5 ? -5 : diffLevel;
+                    exp = exp / (diffLevel * -1 * 2);
+                }
+
+                var oldLevel = this.playerRobot.level;
+                this.playerRobot.getExp(exp);
+
+
+                self.textRobot = this.playerRobot.property.name + "获得经验：" + exp;
+                if (this.playerRobot.level != oldLevel)
+                    self.textPeople = this.playerRobot.property.name + "升级到" + this.playerRobot.level + "级";
+            }
+            else
+            {
+                this.executeStage();
+            }
+            
+            
+        }
         else
         {
-            
             this.finishHandler();
 
             this.game.musicManager.stopAll();
             this.game.musicManager.PlayLoopContinue();
-            
         }
         log(this.people);
         log(this.text);
@@ -264,6 +299,9 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         if (enemy2.spirit[8])  //使用回避精神
             return 0;
 
+        if (robot2.spirit[6]) // 使用必杀
+            return 100;
+
         var base = robot2.speed + weapon2.hitRadio - enemy2.speed;
 
 
@@ -287,6 +325,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
         var res = base * typeRadio * distanceRadio;
 
+        // 使用瞄准
         if (robot2.spirit[2])
             res += 10;
 
@@ -448,14 +487,14 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
 BattleCanvas.getDamage = function (robot2, enemy2, weapon2) {
     var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
-    if (robot2.spirit[10]) {
+    if (robot2.spirit[10]) { // 热血
         damage *= 2;
     }
-    if (robot2.spirit[4]) {
+    if (robot2.spirit[4]) { // 强攻
         damage *= 2;
     }
 
-    if (enemy2.spirit[3]) {
+    if (enemy2.spirit[3]) { // 防守
         damage /= 2;
     }
     return damage;

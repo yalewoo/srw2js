@@ -51,24 +51,27 @@ var SceneMain = function (game) {
 		self.game.musicManager.PlayOnceFromStart("click");
 	}
 
+	this.undoSelectedRobot = function() {
+		var robot = this.robots.selectedRobot;
+		if (robot.afterMove) {
+			robot.inCancelMove = true;
+			robot.moveTo(robot.xOriginal, robot.yOriginal);
+			self.setBlackEffect(null);
+		}
+		else {
+			log("right click")
+			self.robots.selectedRobot.selectedWeapon = null;
+			self.robots.selectedRobot = null;
+			self.setBlackEffect(null);
+			g_buttonManager.clear();
+			g_buttonCanvasManager.clear();
+
+		}
+	}
 	this.rightClickHandler = function (e) {
 		var robot = self.robots.selectedRobot;
 		if (robot) {
-			log(robot)
-			if (robot.afterMove) {
-				robot.inCancelMove = true;
-				robot.moveTo(robot.xOriginal, robot.yOriginal);
-				self.setBlackEffect(null);
-			}
-			else {
-				log("right click")
-				self.robots.selectedRobot.selectedWeapon = null;
-				self.robots.selectedRobot = null;
-				self.setBlackEffect(null);
-				g_buttonManager.clear();
-				g_buttonCanvasManager.clear();
-
-			}
+			self.undoSelectedRobot();
 		}
 		else{
 			if (g_buttonCanvasManager.hasAnyButton())
@@ -496,7 +499,11 @@ var callback = function() {
 		else {
 			this.game.musicManager.stopAll();
 			this.game.musicManager.PlayLoopFromStart("main_robot");
+
+			// 加血
+			this.robots.updateForNewTurn();
 			this.robots.setAllActive();
+
 		}
 
 

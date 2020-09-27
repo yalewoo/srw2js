@@ -1,277 +1,3 @@
-var RobotProperty = function(id)
-{
-	this.id = id;
-
-	var data = g_robot_data[id];
-
-	this.exp_dievalue = data[13];  //本机死亡带来的固定经验
-	this.money = data[10];  //金钱
-
-	//基本属性
-
-	this.robotName = data[1];  //机体名
-	this.name = data[1];  //机体名
-	this.type_original = data[3];//原始类型
-	this.type = data[3] & 3;   //类型 0=空，1=陆，2=海
-
-	this.img_id = data[20]; //图标id
-
-	//等级1时数据
-	this.robot_move0 = data[6];   //机动
-	this.robot_hp0 = data[19]; //Hp
-	this.robot_strength0 = data[8];   //强度
-	this.robot_defense0 = data[9];    //防卫
-	this.robot_speed0 = data[7];  //速度
-	//成长方式
-	this.robot_hp_plus = data[18]; //Hp
-	this.robot_strength_plus = data[16];   //强度
-	this.robot_defense_plus = data[17];    //防卫
-	this.robot_speed_plus = data[15];  //速度
-
-
-	//武器Id
-	this.weapon1id = data[24];
-	this.weapon2id = data[25];
-};
-
-var Pilot = function(id)
-{
-	this.id = id;
-	var t = g_people_data[id];
-	
-	this.name = t[1];
-
-
-	this.spirit_total0 = t[2];
-
-
-	this.spirit_increase = t[3];
-
-	this.spirit_table = [];
-	for (var i = 0; i < 19; ++i)
-	{
-		var f = t[i + 4] == 1 ? true : false;
-		this.spirit_table.push(f);
-	}
-
-	this.move = t[23];
-	this.strength = t[24];
-	this.defense = t[25];
-	this.speed = t[26];
-	this.hp = t[27];
-
-	this.music_id = t[28];
-}
-
-
-
-var Robots = function(scene_main) {
-	this.scene = scene_main;
-	var context2D = scene_main.context2D;
-
-	this.robots = []
-	this.enemy = []
-
-	this.deleteRobot = function(robot)
-	{
-		var index = this.robots.indexOf(robot);
-		if (index > -1) {
-			this.robots.splice(index, 1);
-		}
-
-		index = this.enemy.indexOf(robot);
-		if (index > -1) {
-			this.enemy.splice(index, 1);
-		}
-	}
-
-	this.context2D = context2D;
-	this.loadStage = function(stage) {
-
-		
-		var stage_robot = g_stages[stage].robot_init;
-		this.addRobot(stage_robot);
-
-		stage_robot = g_stages[stage].enemy_init;
-		this.addEnemy(stage_robot);
-	}
-	this.addRobot = function (stage_robot) {
-		for (var i = 0; i < stage_robot.length; ++i) {
-			var robot = new Robot(stage_robot[i], scene_main, isEnemy = false);
-			robot.updateLevel();
-			robot.InitValue();
-			this.robots.push(robot);
-		}
-	}
-	this.addEnemy = function (stage_robot) {
-		for (var i = 0; i < stage_robot.length; ++i) {
-			var robot = new Robot(stage_robot[i], scene_main, isEnemy = true);
-			robot.updateLevel();
-			robot.InitValue();
-
-			this.enemy.push(robot);
-		}
-	}
-
-
-
-
-	this.update = function () {
-		for (var i = 0; i < this.robots.length; ++i) {
-			this.robots[i].update();
-		}
-		for (var i = 0; i < this.enemy.length; ++i) {
-			this.enemy[i].update();
-		}
-	}
-	this.draw = function() {
-		updateRobotUI(this.selectedRobot);
-		
-		for (var i = 0; i < this.robots.length; ++i)
-		{
-			this.robots[i].draw();
-		}
-		for (var i = 0; i < this.enemy.length; ++i) {
-			this.enemy[i].draw();
-		}
-	}
-
-	this.mousehoverHandler = function(x, y)
-	{
-		
-		for (var i = 0; i < this.robots.length; ++i)
-		{
-			if (this.robots[i].x == x && this.robots[i].y == y)
-			{
-				log(this.robots[i]);
-
-				updateRobotUI(this.robots[i]);
-			}
-		}
-
-		for (var i = 0; i < this.enemy.length; ++i) {
-			if (this.enemy[i].x == x && this.enemy[i].y == y) {
-				log(this.enemy[i]);
-
-				updateRobotUI(this.enemy[i]);
-			}
-		}
-	}
-	this.getRobotAt = function(x, y) {
-		for (var i = 0; i < this.robots.length; ++i) {
-			if (this.robots[i].x == x && this.robots[i].y == y) {
-				return this.robots[i];
-			}
-		}
-		for (var i = 0; i < this.enemy.length; ++i) {
-			if (this.enemy[i].x == x && this.enemy[i].y == y) {
-				return this.enemy[i];
-			}
-		}
-		return null;
-	}
-	this.mousedownHandler = function (x, y) {
-		var robot = this.getRobotAt(x, y);
-		if (robot) {
-			if (robot.inMove)
-			{
-
-			}
-			else if (robot == this.selectedRobot)
-			{
-				robot.setNotActive();
-
-			}
-			
-			else if (this.selectedRobot == null)
-			{
-				updateMapRectUI(null);
-
-				this.selectedRobot = robot;
-
-				var m = this.scene.calculateMoveRangeCore(robot, x, y, -1, false);
-
-				this.scene.setBlackEffect(m);
-				
-				showMenu1(this);
-			}
-			else
-			{
-
-				//使用选择的武器攻击
-				if (this.selectedRobot.selectedWeapon && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.selectedWeapon)) 
-				{
-
-					this.selectedRobot.attackDo(robot);
-					
-				}
-				// //两个武器都能攻击时，显示菜单让玩家选择武器
-				// else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)
-				// 	&& this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2))
-				// {
-				// 	log("both weapons can attack")
-				// }
-				// 只有武器1能攻击到时自动使用武器1
-				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)) {
-					this.selectedRobot.selectedWeapon = this.selectedRobot.weapon1;
-					this.selectedRobot.attackDo(robot);
-				}
-				// 只有武器2能攻击到时自动使用武器2
-				else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2)) {
-					this.selectedRobot.selectedWeapon = this.selectedRobot.weapon2;
-					this.selectedRobot.attackDo(robot);
-				}
-				else if (this.selectedRobot)
-				{
-					this.selectedRobot.setNotActive();
-				}
-			}
-
-			return true;
-		}
-		else{
-			if (this.selectedRobot)
-			{
-
-				if (this.scene.canMoveTo(x, y)) {
-					this.selectedRobot.moveTo(x, y);
-					//this.selectedRobot = null;
-					this.scene.setBlackEffect(null);
-				}
-				
-
-			}
-
-			return false;
-		}
-	}
-
-	this.setSelectedRobotInactive = function () {
-		if (this.selectedRobot)
-		{
-			this.selectedRobot.afterMove = false;
-			this.selectedRobot.selectedWeapon = false;
-			this.selectedRobot = null;
-		}
-		
-		this.scene.setBlackEffect(null);
-		g_buttonManager.clear();
-		g_buttonCanvasManager.clear();
-
-	}
-
-	this.setAllActive = function() {
-		for (var i = 0; i < this.robots.length; ++i) {
-			this.robots[i].setActive();
-		}
-		for (var i = 0; i < this.enemy.length; ++i) {
-			this.enemy[i].setActive();
-		}
-	}
-	
-}
-
-
 var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.scene = scene_main;
 	var context2D = scene_main.context2D;
@@ -291,7 +17,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.img = g_resourceManager.get_img_enemyicon(this.robot_id);
 		
 		
-		this.level = robot_stage_data[6];
+		this.level = robot_stage_data[6] + 1;
 		this.robotBehavior = Number(robot_stage_data[10]);
 
 	}
@@ -330,13 +56,12 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	// 实际五维，精神加成之后
 
 	this.t_move = function () {   //机动
-		//if (spirit[7]) return move + 5;
-		//if (spirit[1]) return move + 3;
+		if (this.spirit[7]) return this.move + 5;
+		if (this.spirit[1]) return this.move + 3;
 		return this.move;
 	}
-	this.t_hp_total = function () { //总hp
-		return this.hp;
-	}
+
+	
 	this.t_strength = function () { //强度
 		return this.strength;
 	}
@@ -346,6 +71,14 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.t_speed = function () { //速度
 		return this.speed;
 	} 
+
+	this.addHp = function(hp)
+	{
+		this.scene.game.musicManager.PlayOnceFromStart("recover");
+
+		hp = Math.floor(hp);
+		this.hp = this.hp + hp > this.hp_total ? this.hp_total : this.hp + hp;
+	}
 
 
 	this.moveSpeedUI = 4;
@@ -548,9 +281,8 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
 		{
-			this.scene.game.musicManager.PlayOnceFromStart("recover");
-			enemy.hp += Math.floor(this.hp_total / 2);
-			enemy.hp = Math.min(enemy.hp, enemy.hp_total)
+			enemy.addHp(this.hp_total / 2);
+
 			this.setNotActive();
 		}
 		else
@@ -593,6 +325,11 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.setActive = function()
 	{
 		this.active = true;
+	}
+
+	this.getExp = function(exp) {
+		this.exp += Math.floor(exp);
+		this.updateLevel();
 	}
 }
 
@@ -656,11 +393,9 @@ Robot.prototype.updateLevel = function () {
 Robot.prototype.InitValue = function () {
 	if (this.isPlayer)
 	{
-		this.spirit = this.pilot.spirit_total0;
 	}
 	else
 	{
-		this.spirit = 0;
 		this.exp = 0;
 	}
 	this.hp = this.hp_total;
@@ -791,4 +526,362 @@ Robot.prototype.AI_action = function () {
 		
 	}
 
+}
+
+
+
+Robot.prototype.use_sprit_begin = function (id) {
+	this.pilot.spirit -= g_spirit_consume_table[id];
+
+	this.spirit[id] = true;
+
+}
+Robot.prototype.use_sprit_end = function (id) {
+	this.scene.undoSelectedRobot();
+}
+
+Robot.prototype.use_sprit_0 = function ()	//毅力
+{
+	this.use_sprit_begin(0);
+
+	log("use_sprit_0");
+	this.addHp(50);
+
+	this.use_sprit_end(0);
+}
+Robot.prototype.use_sprit_1 = function ()	//加速
+{
+	this.use_sprit_begin(1);
+
+	log("use_sprit_1");
+
+
+	this.use_sprit_end(1);
+}
+Robot.prototype.use_sprit_2 = function ()	//瞄准
+{
+	this.use_sprit_begin(2);
+
+	log("use_sprit_2");
+
+
+	this.use_sprit_end(2);
+}
+Robot.prototype.use_sprit_3 = function ()	//防守
+{
+	this.use_sprit_begin(3);
+
+	log("use_sprit_3");
+
+
+	this.use_sprit_end(3);
+}
+Robot.prototype.use_sprit_4 = function ()	//强攻
+{
+	this.use_sprit_begin(4);
+
+	log("use_sprit_4");
+
+
+	this.use_sprit_end(4);
+}
+Robot.prototype.use_sprit_5 = function ()	//友情
+{
+	this.use_sprit_begin(5);
+
+	log("use_sprit_5");
+
+
+	this.use_sprit_end(5);
+}
+Robot.prototype.use_sprit_6 = function ()	//必杀
+{
+	this.use_sprit_begin(6);
+
+	log("use_sprit_6");
+
+
+	this.use_sprit_end(6);
+}
+Robot.prototype.use_sprit_7 = function ()	//疾风
+{
+	this.use_sprit_begin(7);
+
+	log("use_sprit_7");
+
+
+	this.use_sprit_end(7);
+}
+Robot.prototype.use_sprit_8 = function ()	//回避
+{
+	this.use_sprit_begin(8);
+
+	log("use_sprit_8");
+
+
+	this.use_sprit_end(8);
+}
+Robot.prototype.use_sprit_9 = function ()	//潜力
+{
+	this.use_sprit_begin(9);
+
+	log("use_sprit_9");
+
+	var hp_plus = this.hp_total - this.hp;
+	this.addHp(hp_plus);
+
+
+	this.use_sprit_end(9);
+}
+Robot.prototype.use_sprit_10 = function ()	//热血
+{
+	this.use_sprit_begin(10);
+
+	log("use_sprit_10");
+
+
+	this.use_sprit_end(10);
+}
+Robot.prototype.use_sprit_11 = function ()	//情义
+{
+	this.use_sprit_begin(11);
+
+	log("use_sprit_11");
+
+
+	this.use_sprit_end(11);
+}
+Robot.prototype.use_sprit_12 = function ()	//传真
+{
+	this.use_sprit_begin(12);
+
+	log("use_sprit_12");
+
+
+	this.use_sprit_end(12);
+}
+Robot.prototype.use_sprit_13 = function ()	//援助
+{
+	this.use_sprit_begin(13);
+
+	log("use_sprit_13");
+
+
+	this.use_sprit_end(13);
+}
+Robot.prototype.use_sprit_14 = function ()	//怒
+{
+	this.use_sprit_begin(14);
+
+	log("use_sprit_14");
+
+
+	this.use_sprit_end(14);
+}
+Robot.prototype.use_sprit_15 = function ()	//祈祷
+{
+	this.use_sprit_begin(15);
+
+	log("use_sprit_15");
+
+
+	this.use_sprit_end(15);
+}
+Robot.prototype.use_sprit_16 = function ()	//干扰
+{
+	this.use_sprit_begin(16);
+
+	log("use_sprit_16");
+
+
+	this.use_sprit_end(16);
+}
+Robot.prototype.use_sprit_17 = function ()	//狂怒
+{
+	this.use_sprit_begin(17);
+
+	log("use_sprit_17");
+
+
+	this.use_sprit_end(17);
+}
+Robot.prototype.use_sprit_18 = function ()	//爱心
+{
+	this.use_sprit_begin(18);
+
+	log("use_sprit_18");
+}
+
+
+Robot.prototype.canUseSpirit = function(id)
+{
+	if (this.inMainShip)
+		return false;
+
+	switch (id) {
+		case 0: return this.hp < this.hp_total;
+		case 1: return true;
+		case 2: return true;
+		case 3: return true;
+		case 4: return true;
+		case 5: return true;
+		case 6: return true;
+		case 7: return true;
+		case 8: return true;
+		case 9: return true;
+		case 10: return true;
+		case 11: return true;
+		case 12: return true;
+		case 13: return true;
+		case 14: return true;
+		case 15: return true;
+		case 16: return true;
+		case 17: return true;
+		case 18: return true;
+		default: break;
+	}
+}
+
+
+Robot.prototype.canTransform = function()
+{
+	var lists = [];
+	var id2 = this.robot_id;
+
+
+	if ((this.property.type_original & 0x0c) == 0) {
+		return lists;
+	}
+	var index = this.property.type_original & 0x30;
+	while (1) {
+		var prev = new RobotProperty(--id2);
+		if ((prev.type_original & 0x0c) == (this.property.type_original & 0x0c)) {
+			var prev_index = prev.type_original & 0x30;
+			if (prev.robot_move0 == 0 || prev_index >= index)
+				break;
+			lists.push(prev);
+		}
+		else {
+			break;
+		}
+	}
+	id2 = this.robot_id;
+	while (1) {
+		var prev = new RobotProperty(++id2);
+		if ((prev.type_original & 0x0c) == (this.property.type_original & 0x0c)) {
+			var prev_index = prev.type_original & 0x30;
+			if (prev.robot_move0 == 0 || prev_index <= index)
+				break;
+			lists.push(prev);
+		}
+		else {
+			break;
+		}
+	}
+	return lists;
+}
+
+Robot.prototype.transform = function(property2)
+{
+	this.robot_id = property2.id;
+	this.property = property2;
+
+	this.img = g_resourceManager.get_img_roboticon(this.robot_id);
+
+	this.weapon1 = new Weapon(this.property.weapon1id);
+	this.weapon2 = new Weapon(this.property.weapon2id);
+
+	// 盖塔变形同时换驾驶员
+	if ((this.property.type_original & 0x0c) == 0x08) {
+		var exp = this.exp;
+		
+		log(this.property.type_original)
+		if (this.property.type_original >> 4 == 3) {
+			this.setPilot(10);
+		}
+		else if (this.property.type_original>> 4 == 2) {
+			this.setPilot(9);
+		}
+		else if (this.property.type_original>> 4 == 1) {
+			this.setPilot(8);
+		}
+		this.exp = exp;
+	}
+
+
+	this.updateLevel();
+
+	showMenu1(this.scene.robots);
+
+}
+
+Robot.prototype.setPilot = function(id)
+{
+	var oldSpirit = this.pilot.spirit;
+	this.people = id
+	this.pilot = new Pilot(this.people);
+	this.pilot.spirit = oldSpirit;
+}
+
+
+var RobotProperty = function (id) {
+	this.id = id;
+
+	var data = g_robot_data[id];
+
+	this.exp_dievalue = data[13];  //本机死亡带来的固定经验
+	this.money = data[10];  //金钱
+
+	//基本属性
+
+	this.robotName = data[1];  //机体名
+	this.name = data[1];  //机体名
+	this.type_original = data[3];//原始类型
+	this.type = data[3] & 3;   //类型 0=空，1=陆，2=海
+
+	this.img_id = data[20]; //图标id
+
+	//等级1时数据
+	this.robot_move0 = data[6];   //机动
+	this.robot_hp0 = data[19]; //Hp
+	this.robot_strength0 = data[8];   //强度
+	this.robot_defense0 = data[9];    //防卫
+	this.robot_speed0 = data[7];  //速度
+	//成长方式
+	this.robot_hp_plus = data[18]; //Hp
+	this.robot_strength_plus = data[16];   //强度
+	this.robot_defense_plus = data[17];    //防卫
+	this.robot_speed_plus = data[15];  //速度
+
+
+	//武器Id
+	this.weapon1id = data[24];
+	this.weapon2id = data[25];
+};
+
+var Pilot = function (id) {
+	this.id = id;
+	var t = g_people_data[id];
+
+	this.name = t[1];
+
+
+	this.spirit_total0 = t[2];
+	this.spirit = this.spirit_total0;
+
+	this.spirit_increase = t[3];
+
+	this.spirit_table = [];
+	for (var i = 0; i < 19; ++i) {
+		var f = t[i + 4] == 1 ? true : false;
+		this.spirit_table.push(f);
+	}
+
+	this.move = t[23];
+	this.strength = t[24];
+	this.defense = t[25];
+	this.speed = t[26];
+	this.hp = t[27];
+
+	this.music_id = t[28];
 }

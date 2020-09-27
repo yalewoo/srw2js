@@ -20,6 +20,7 @@ var Map = function(scene_main, stage){
 	context2D.canvas.height = this.height*32;
 
 
+
 	var stage_map2 = [];
 	for (var i = 0; i < this.width; i++) {
 		var m2 = [];
@@ -57,6 +58,11 @@ var Map = function(scene_main, stage){
 				this.maprects[i][j].draw();
 			}
 		}
+	}
+
+	this.isSupply = function(x, y)
+	{
+		return this.maprects[x][y].kind == 10;
 	}
 
 	this.mousehoverHandler = function(x, y)
