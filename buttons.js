@@ -82,6 +82,10 @@ var showMenu1 = function(robots)
         })
     }
 
+    if (robot.afterMove)
+    {
+        return;
+    }
     if (robot.pilot) {
         for (var i = 0; i < 19; ++i)
         {
@@ -115,6 +119,28 @@ var showMenu1 = function(robots)
                 
                                
 
+            }
+        }
+
+        if (robot.pilot.id == 54)
+        {
+            for (var i = 0; i < robot.passengers.length; ++i)
+            {
+                var r = robot.passengers[i];
+                (function(r) {
+                    g_buttonManager.addButtonHandler(r.property.robotName, function() {
+
+                        robots.selectedRobot = r;
+                        r.drawIgnoreMainShip = true;
+
+                        var m = robots.scene.calculateMoveRangeCore(r, r.x, r.y, -1, false);
+
+                        r.scene.setBlackEffect(m);
+
+                        showMenu1(r.scene.robots);
+                    });     
+                })(r);
+                              
             }
         }
     }

@@ -77,6 +77,10 @@ var Map = function(scene_main, stage){
 
 		updateMapRectUI(this.maprects[x][y]);
 
+		
+
+
+
 		//g_buttonCanvasManager.addButtonHandler("Test", null, x*32, y*32, 50, 100);
 	}
 	

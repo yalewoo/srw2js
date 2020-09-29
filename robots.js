@@ -49,11 +49,13 @@ var Robots = function (scene_main) {
         for (var i = 0; i < this.robots.length; ++i) {
             var robot = this.robots[i];
             robot.spirit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            if (this.scene.map.isSupply(robot.x, robot.y))
+            if (this.scene.map.isSupply(robot.x, robot.y) || robot.inMainShip)
             {
                 
                 var hp = Math.floor(robot.hp_total * 0.3);
-                robot.addHp(hp);            }
+                robot.addHp(hp); 
+            }
+
         }
         for (var i = 0; i < this.enemy.length; ++i) {
             var robot = this.enemy[i];
@@ -107,12 +109,27 @@ var Robots = function (scene_main) {
     this.getRobotAt = function (x, y) {
         for (var i = 0; i < this.robots.length; ++i) {
             if (this.robots[i].x == x && this.robots[i].y == y) {
-                return this.robots[i];
+                if (this.robots[i].inMainShip && !this.robots[i].drawIgnoreMainShip)
+                {
+
+                }
+                else
+                {
+                    return this.robots[i];
+                }
+                
             }
         }
         for (var i = 0; i < this.enemy.length; ++i) {
             if (this.enemy[i].x == x && this.enemy[i].y == y) {
-                return this.enemy[i];
+                if (this.enemy[i].inMainShip)
+                {
+
+                }
+                else
+                {
+                    return this.enemy[i];
+                }
             }
         }
         return null;
@@ -164,7 +181,23 @@ var Robots = function (scene_main) {
                     this.selectedRobot.attackDo(robot);
                 }
                 else if (this.selectedRobot) {
-                    this.selectedRobot.setNotActive();
+                    if (robot.pilot.id == 54)
+                    {
+                        var self = this;
+                        if (this.scene.canMoveTo(x, y))
+                        {
+                            // robot是母舰
+                            this.scene.setBlackEffect(null);
+
+                            this.selectedRobot.moveTo(x, y, function() {
+
+                                robot.passengers.push(self.selectedRobot);
+                                self.selectedRobot.inMainShip = robot;
+                                self.selectedRobot.setNotActive();
+                            });
+                            
+                        }
+                    }
                 }
             }
 
@@ -172,14 +205,19 @@ var Robots = function (scene_main) {
         }
         else {
             if (this.selectedRobot) {
+                if (this.selectedRobot.afterMove)
+                {
 
-                if (this.scene.canMoveTo(x, y)) {
-                    this.selectedRobot.moveTo(x, y);
-                    //this.selectedRobot = null;
-                    this.scene.setBlackEffect(null);
                 }
-
-
+                else
+                {
+                    if (this.scene.canMoveTo(x, y)) {
+                        this.selectedRobot.moveTo(x, y);
+                        //this.selectedRobot = null;
+                        this.scene.setBlackEffect(null);
+                    }
+                }
+                
             }
 
             return false;

@@ -60,6 +60,12 @@ var SceneMain = function (game) {
 		}
 		else {
 			log("right click")
+			
+			if (self.robots.selectedRobot.drawIgnoreMainShip)
+			{
+				self.robots.selectedRobot.drawIgnoreMainShip = false;
+			}
+			
 			self.robots.selectedRobot.selectedWeapon = null;
 			self.robots.selectedRobot = null;
 			self.setBlackEffect(null);
@@ -103,6 +109,11 @@ var SceneMain = function (game) {
 		this.arrowYFloat = (y2 -y) * 32;
 		this.arrowMoveFinished = callback;
 	}
+
+	this.animations = [];
+	this.addAnimation = function(animation) {
+		this.animations.push(animation);
+	}
 	this.update = function () {
 		this.map.update();
 		this.robots.update();
@@ -139,23 +150,15 @@ var SceneMain = function (game) {
 
 		}
 
-		if (this.waitDoTimer > 0)
-		{
-			--this.waitDoTimer;
-			if (this.waitDoTimer == 0)
-			{
-				this.waitDoCallback();
+		if (this.animations.length > 0) {
+			for (var i = this.animations.length - 1; i >= 0; i--) {
+				if (this.animations[i].update() == false){
+					this.animations.splice(i, 1);
+				}
 			}
 		}
-	}
 
-	this.waitAndDo = function(time, callback)
-	{
-		this.waitDoCallback = callback;
-
-		var fps = this.game.fps;
-
-		this.waitDoTimer = Math.floor(time * fps);
+		
 	}
 
 
@@ -208,6 +211,12 @@ var SceneMain = function (game) {
 				
 			}
 			
+		}
+
+		if (this.animations.length > 0) {
+			for (var i = this.animations.length - 1; i >= 0; i--) {
+				this.animations[i].draw();
+			}
 		}
 	}
 
@@ -457,12 +466,10 @@ var SceneMain = function (game) {
 		self.game.musicManager.stopAll();
 		self.game.musicManager.PlayLoopFromStart("main_enemy");
 
-var callback = function() {
-	self.AI(0);
-}
+		var callback = function() {
+			self.AI(0);
+		}
 		self.executeStageEvent(callback);
-
-		
 	}
 
 	
@@ -476,7 +483,7 @@ var callback = function() {
 			this.hoverData = [enemy.x, enemy.y];
 			log(enemy)
 			
-			this.waitAndDo(0.1, function() {
+			this.game.addTimer(0.1, function() {
 				enemy.setNotActiveCallbackOnce = function () {
 					self.AI(i + 1);
 

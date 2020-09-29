@@ -247,3 +247,8 @@ var g_robot_exp_table = [
 9999,
 9999,
 ]
+
+for (var i = 2; i < 51; ++i)
+{
+    g_robot_exp_table[i] = g_robot_exp_table[i-1] + g_robot_exp_table[i];
+}

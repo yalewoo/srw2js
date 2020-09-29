@@ -2,6 +2,17 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.scene = scene_main;
 	var context2D = scene_main.context2D;
 	this.context2D = context2D;
+
+	this.passengers = [];
+	this.inMainShip = null;
+	this.removePassenger = function(r)
+	{
+		for (var i = this.passengers.length - 1; i >= 0; i--) {
+			if (this.passengers[i] == r){
+				this.passengers.splice(i, 1);
+			}
+		}
+	}
 	
 	if (isEnemy)
 	{
@@ -77,7 +88,11 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		this.scene.game.musicManager.PlayOnceFromStart("recover");
 
 		hp = Math.floor(hp);
+		var oldhp = this.hp;
 		this.hp = this.hp + hp > this.hp_total ? this.hp_total : this.hp + hp;
+
+		var ani = new TextAnimation(this.scene, this.x, this.y, "+" + (this.hp - oldhp));
+		this.scene.addAnimation(ani);
 	}
 
 
@@ -113,6 +128,10 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 		}
 	}
 	this.draw = function() {
+		if (this.inMainShip && !this.drawIgnoreMainShip)
+		{
+			return;
+		}
 		if (this.img.isloaded)
 		{
 			if (this.inMove)
@@ -167,7 +186,14 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 			this.scene.setBlackEffect(m);
 
+			if (this.drawIgnoreMainShip)
+			{
+				this.drawIgnoreMainShip = false;
+			}
+
 			showMenu1(this.scene.robots);
+
+
 		}
 		else if (this.inAIMove)
 		{
@@ -183,10 +209,22 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 			showMenu1(this.scene.robots);
 		}
 
+		if (this.passengers.length > 0)
+		{
+			for (var i = 0; i < this.passengers.length; ++i)
+			{
+				this.passengers[i].x = this.x;
+				this.passengers[i].y = this.y;
+				
+			}
+		}
+
 		if (this.moveToCallback)
 		{
 			this.moveToCallback();
 		}
+
+
 		
 	}
 	
@@ -310,7 +348,16 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 	this.setNotActive = function()
 	{
+		
+
 		this.active = false;
+		if (this.drawIgnoreMainShip)
+		{
+			this.inMainShip.removePassenger(this);
+			this.inMainShip = null;
+			this.drawIgnoreMainShip = undefined;
+
+		}
 		if (this.scene.robots.selectedRobot == this)
 		{
 			this.scene.robots.setSelectedRobotInactive();

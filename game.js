@@ -20,15 +20,47 @@ var Game = function(canvas, fps)
 
 	var game = this;
 
+	this.timers = [];
+	this.addTimer = function(time, callback) {
+		var fps = this.fps;
+		var waitDoTimer = Math.floor(time * fps);
 
+		var timer = {time: waitDoTimer, callback: callback};
+		this.timers.push(timer);
+	}
+
+	
+	this.update = function() {
+		game.scene.update();
+
+		// Timer
+		if (this.timers.length > 0)
+		{
+			for (var i = this.timers.length - 1; i >= 0; i--) {
+				this.timers[i].time--;
+				if(this.timers[i].time < 0) {
+					this.timers[i].callback();
+
+					this.timers.splice(i, 1);
+				}
+			}
+		}
+
+	}
+
+	this.draw = function() {
+		game.scene.draw();
+
+	}
+
+	var self = this;
 	this.run = function() {
 		
 		var desiredTime = Date.now() + game.FPS;
 		var interval = Math.max(0, desiredTime - Date.now());
-		game.scene.update();
-		game.scene.draw();
 
-		
+		self.update();
+		self.draw();
 		
 		setTimeout(game.run, interval);
 	}
