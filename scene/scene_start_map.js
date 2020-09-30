@@ -1,12 +1,13 @@
-var SceneStartMap1 = function (game) {
+var SceneStartMap1 = function (game, stage) {
     this.game = game;
     this.context2D = game.context2D;
     this.canvas = game.canvas;
-
+    this.stage = stage;
     var self = this;
 
+    var talk_data = g_stages[self.stage].talk_map;
 
-    var talkDiag = new TalkDiag(game, g_stage_prelude_talk_date[0][0]);
+    var talkDiag = new TalkDiag(game, talk_data);
 
     this.hoverHandler = function (event) {
         talkDiag.hoverHandler();

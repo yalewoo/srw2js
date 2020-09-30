@@ -1,8 +1,9 @@
-var SceneTitle = function (game) {
+var SceneTitle = function (game, stage) {
     this.game = game;
     this.context2D = game.context2D;
     this.canvas = game.canvas;
-
+    this.stage = stage;
+    this.title = g_stages[this.stage].title;
     var self = this;
 
 
@@ -34,7 +35,7 @@ var SceneTitle = function (game) {
         
         var ctx = this.context2D;
 
-        var text = "第一篇"
+        var text = "第" + this.stage + "篇"
 
         ctx.beginPath();
         ctx.fillStyle = "#fff";
@@ -46,7 +47,7 @@ var SceneTitle = function (game) {
 
         ctx.closePath();
 
-        var text = "凶街"
+        var text = this.title;
 
         ctx.beginPath();
         ctx.fillStyle = "#fff";

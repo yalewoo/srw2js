@@ -3,6 +3,7 @@ var SceneMain = function (game) {
 	this.context2D = game.context2D;
 	this.canvas = game.canvas;
 	this.round = 0;
+	this.robots_exps = {};
 
 	this.canvas.width = 18*32;
 	this.canvas.height = 22*32;
@@ -228,6 +229,10 @@ var SceneMain = function (game) {
 
 	this.loadStage = function(stage)
 	{
+		if (stage != 1){
+			this.robots_exps = this.robots.loadStage_getExp();
+		}
+			
 		this.startFromFile = false;
 
 		this.stage = stage;
@@ -237,6 +242,10 @@ var SceneMain = function (game) {
 
 		this.robots = new Robots(this);
 		this.robots.loadStage(stage);
+
+		if (stage != 1) {
+			this.robots.loadStage_setExp(this.robots_exps);
+		}
 
 		this.round = 1;
 	}
@@ -412,21 +421,11 @@ var SceneMain = function (game) {
 
 		var m = this.calculateMoveRange(selectedRobot);
 
-		var m2 = this.calculateMoveRangeCore(selectedRobot, closeEnemy.x, closeEnemy.y, 999, true, true);
+		var m2 = this.calculateMoveRangeCore(selectedRobot, closeEnemy.x, closeEnemy.y, 999, true, false);
 
 		var xTo, yTo;
-		var value;
-		for (var i = 0; i < m.length; ++i)
-		{
-			for (var j = 0; j < m[i].length; ++j)
-			{
-				if (this.robots.getRobotAt(i, j) == null && m[i][j] >= 0) {
-					xTo = i;
-					yTo = j;
-					value = m2[i][j];
-				}
-			}
-		}
+		var value = 0;
+
 		for (var i = 0; i < m.length; ++i)
 		{
 			for (var j = 0; j < m[i].length; ++j)
@@ -449,11 +448,19 @@ var SceneMain = function (game) {
 		selectedRobot.moveTo(xTo, yTo, callback);
 	}
 
+	this.money_total = 0;
+	this.getMoney = function(m)
+	{
+		this.money_total += m;
+	}
+
 	this.init = function() {
 		var self = this;
-g_buttonManager.unshowButton1();
+
+		g_buttonManager.unshowButton1();
 		if (!this.startFromFile)
 		{
+			self.game.musicManager.stopAll();
 			this.game.musicManager.PlayLoopFromStart("start_map");
 			this.executeStageEvent(function(){
 				self.game.musicManager.stopAll();
@@ -528,6 +535,73 @@ g_buttonManager.unshowButton1();
 		else
 		{
 			callback();
+		}
+	}
+
+	this.checkEvent = function() {
+		var self = this;
+		var callback = function() {
+			var game = self.game;
+			var scene_map1 = new SceneStartMap1(game, self.stage+1);
+
+
+			game.setScene(scene_map1);
+			scene_map1.setFinishHandler(function () {
+				var scene_title = new SceneTitle(game, self.stage + 1);
+				game.setScene(scene_title);
+				scene_title.setFinishHandler(function () {
+					self.stage++;
+					self.loadStage(self.stage);
+					self.init();
+
+					game.setScene(self);
+				});
+			});
+		}
+
+		if (this.robots.enemy.length == 0)
+		{
+			var add_robot = g_stages[this.stage].round_event["success"].addRobots;
+			if (add_robot) {
+				var self = this;				
+				
+				this.robots.addRobotAni(add_robot, 0, function() {
+					var talk_data = g_stages[self.stage].round_event["success"].talks;
+					if (talk_data) {
+						self.talkDiag = new TalkDiag(game, talk_data);
+						self.talkDiag.setFinishHandler(function () {
+							self.talkDiag.clear();
+							self.talkDiag = null;
+								callback();
+						})
+		
+						g_buttonManager.unshowButton1();
+					}
+					else{
+						callback();
+					}
+				});
+				
+				g_buttonManager.unshowButton1();
+			}
+			else
+			{
+				var talk_data = g_stages[this.stage].round_event["success"].talks;
+				if (talk_data) {
+					this.talkDiag = new TalkDiag(game, talk_data);
+					var self = this;
+					this.talkDiag.setFinishHandler(function () {
+						self.talkDiag.clear();
+						self.talkDiag = null;
+							callback();
+					})
+	
+					g_buttonManager.unshowButton1();
+				}
+				else{
+					callback();
+				}
+			}
 		}
 	}
 

@@ -3,12 +3,14 @@ var Robots = function (scene_main) {
     var context2D = scene_main.context2D;
 
     this.robots = []
+    this.robots_dead = []
     this.enemy = []
 
     this.deleteRobot = function (robot) {
         var index = this.robots.indexOf(robot);
         if (index > -1) {
             this.robots.splice(index, 1);
+            this.robots_dead.push(robot);
         }
 
         index = this.enemy.indexOf(robot);
@@ -27,6 +29,51 @@ var Robots = function (scene_main) {
         stage_robot = g_stages[stage].enemy_init;
         this.addEnemy(stage_robot);
     }
+
+    this.loadStage_setExp = function(exps) {
+        for (var i = 0; i < this.robots.length; ++i) {
+            var robot = this.robots[i];
+            var people = robot.people;
+            if (exps[people] != undefined) {
+                robot.getExp(exps[people]);
+            }
+        }
+    }
+    this.loadStage_getExp = function() {
+        var s = {};
+        for (var i = 0; i < this.robots.length; ++i) {
+            var robot = this.robots[i];
+            var exp = robot.exp;
+            var people = robot.people;
+            if (people == 8 || people == 9 || people == 10)
+            {
+                s[8] = exp;
+                s[9] = exp;
+                s[10] = exp;
+            }
+            else
+            {
+                s[people] = exp;
+            }
+        }
+
+        for (var i = 0; i < this.robots_dead.length; ++i) {
+            var robot = this.robots_dead[i];
+            var exp = robot.exp;
+            var people = robot.people;
+            if (people == 8 || people == 9 || people == 10) {
+                s[8] = exp;
+                s[9] = exp;
+                s[10] = exp;
+            }
+            else {
+                s[people] = exp;
+            }
+        }
+
+        return s;
+    }
+
     this.addRobot = function (stage_robot) {
         for (var i = 0; i < stage_robot.length; ++i) {
             var robot_stage_data = stage_robot[i];
@@ -79,6 +126,14 @@ var Robots = function (scene_main) {
             var robotData = robot.getRunTimeRobotData();
             arr.push(robotData);
         }
+
+        for (var i = 0; i < this.robots_dead.length; ++i) {
+            var robot = this.robots_dead[i];
+            var robotData = robot.getRunTimeRobotData();
+            robotData.isDead = true;
+            arr.push(robotData);
+        }
+
         for (var i = 0; i < this.enemy.length; ++i) {
             var robot = this.enemy[i];
             var robotData = robot.getRunTimeRobotData();
@@ -100,7 +155,13 @@ var Robots = function (scene_main) {
     }
     this.addRobotRuntime = function(runtimeData) {
         var robot;
-        if (runtimeData.isPlayer)
+        if (runtimeData.isDead)
+        {
+            robot = new Robot(runtimeData, scene_main, isEnemy = false);
+            robot.updateLevel();
+            this.robots_dead.push(robot);
+        }
+        else if (runtimeData.isPlayer)
         {
             robot = new Robot(runtimeData, scene_main, isEnemy = false);
             robot.updateLevel();
@@ -170,6 +231,48 @@ var Robots = function (scene_main) {
             this.scene.game.addTimer(0.3, function() {
                 self.enemy.push(robot);
                 self.addEnemyAni(stage_robot, i+1, callback);
+            })
+
+        }
+        else
+        {
+            callback();
+        }
+        
+    }
+
+    this.addRobotAni = function(stage_robot, i, callback)
+    {
+        if (i < stage_robot.length)
+        {
+            var robot_stage_data = stage_robot[i];
+            var o = {}
+            o.isPlayer = 1;
+            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
+            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+            o.x = robot_stage_data[0]+1;
+            o.y = robot_stage_data[1]+1;
+            o.people = robot_stage_data[2];   
+            o.robot_id = robot_stage_data[4];
+
+            o.exp = robot_stage_data[6];
+            o.robotBehavior = 0;
+
+
+            
+            o.active = true;
+            o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            
+            var robot = new Robot(o, scene_main);
+            robot.updateLevel();
+            robot.InitValue();
+
+            this.scene.hoverData = [robot.x, robot.y];
+
+            var self = this;
+            this.scene.game.addTimer(0.3, function() {
+                self.robots.push(robot);
+                self.addRobotAni(stage_robot, i+1, callback);
             })
 
         }

@@ -239,8 +239,11 @@ var BattleCanvas = function (scene_main, robot, enemy) {
                 var oldLevel = this.playerRobot.level;
                 this.playerRobot.getExp(exp);
 
+                var money = this.enemyRobot.property.money * 10;
+                scene_main.getMoney(money);
 
-                self.textRobot = this.playerRobot.property.name + "获得经验：" + exp;
+
+                self.textRobot = this.playerRobot.property.name + "获得经验 " + exp + "和金钱 " + money;
                 if (this.playerRobot.level != oldLevel)
                     self.textPeople = this.playerRobot.property.name + "升级到" + this.playerRobot.level + "级";
             }

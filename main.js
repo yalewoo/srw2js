@@ -23,8 +23,8 @@
 
 	var scene_start = new SceneStart(game);
 
-	var scene_map1 = new SceneStartMap1(game);
-	var scene_title = new SceneTitle(game);
+	var scene_map1 = new SceneStartMap1(game, 1);
+	var scene_title = new SceneTitle(game, 1);
 	
 
 	if (g_debug_mode_enabled)

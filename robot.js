@@ -1,4 +1,4 @@
-var Robot = function (robotData, scene_main, isEnemy) {
+var Robot = function (robotData, scene_main) {
 	this.scene = scene_main;
 	var context2D = scene_main.context2D;
 	this.context2D = context2D;
@@ -13,7 +13,7 @@ var Robot = function (robotData, scene_main, isEnemy) {
 			}
 		}
 	}
-	this.exp = 0;
+	
 	
 
 	this.isPlayer = robotData.isPlayer;
@@ -29,6 +29,7 @@ var Robot = function (robotData, scene_main, isEnemy) {
 	this.active = robotData.active;
 
 	this.spirit = robotData.spirit;
+
 
 	if (this.isPlayer)
 	{
@@ -52,6 +53,8 @@ var Robot = function (robotData, scene_main, isEnemy) {
 	this.weapon1 = new Weapon(this.property.weapon1id);
 	this.weapon2 = new Weapon(this.property.weapon2id);
 
+	this.exp = 0;
+	
 
 	// 实际五维，精神加成之后
 
@@ -74,6 +77,11 @@ var Robot = function (robotData, scene_main, isEnemy) {
 
 	this.addHp = function(hp)
 	{
+		if (this.hp == this.hp_total)
+		{
+			return;
+
+		}
 		this.scene.game.musicManager.PlayOnceFromStart("recover");
 
 		hp = Math.floor(hp);
@@ -117,6 +125,7 @@ var Robot = function (robotData, scene_main, isEnemy) {
 		}
 	}
 	this.draw = function() {
+
 		if (this.inMainShip && !this.drawIgnoreMainShip)
 		{
 			return;
@@ -324,6 +333,7 @@ var Robot = function (robotData, scene_main, isEnemy) {
 
 						var ani = new AnimationBoom(scene_main, enemy.x, enemy.y, 1, 24, function() {
 							scene_main.robots.deleteRobot(enemy);
+							scene_main.checkEvent();
 						});
 						scene_main.addAnimation(ani);
 						
@@ -333,9 +343,12 @@ var Robot = function (robotData, scene_main, isEnemy) {
 
 						var ani = new AnimationBoom(scene_main, self.x, self.y,1, 24, function() {
 							scene_main.robots.deleteRobot(self);
+							scene_main.checkEvent();
+
 						});
 						scene_main.addAnimation(ani);
 					}
+
 				});
 				self.scene.game.scene = scene_battle;
 			})
@@ -372,9 +385,16 @@ var Robot = function (robotData, scene_main, isEnemy) {
 	}
 
 	this.getExp = function(exp) {
-		this.exp += Math.floor(exp);
-		this.updateLevel();
+		if (exp)
+		{
+			this.exp += Math.floor(exp);
+			this.updateLevel();
+		}
+		
 	}
+
+	this.getExp(robotData.exp);
+	
 }
 
 
@@ -392,7 +412,7 @@ Robot.prototype.getLevelPropertyPlus = function(plusType, level)
 	level = level - 1;
 	switch (plusType) {
 		case 0:
-			return Math.ceil(level * 1.5) + 1;
+			return Math.ceil(level * 1.5);
 		case 1:
 			return (level * 2);
 		case 2:
@@ -942,7 +962,8 @@ Robot.prototype.getRunTimeRobotData = function() {
     o.level = this.level;
 	o.exp = this.exp;
 	o.robotBehavior = this.robotBehavior;
-	
+	o.isDead = false;
+
     o.hp = this.hp;
 	o.people_spirit = this.pilot.spirit
 	if (this.inMainShip)

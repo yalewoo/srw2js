@@ -68,7 +68,7 @@ var AI = function() {
     {
         var robots = scene.robots;
         var max = -1;
-        var m = scene.calculateMoveRangeCore(robot, robot.x, robot.y, 999, true, true);
+        var m = scene.calculateMoveRangeCore(robot, robot.x, robot.y, 999, true, false);
         var enemys = robot.isPlayer ? robots.enemy : robots.robots;
         var result = null;
         for (var i = 0; i < enemys.length; ++i) {
