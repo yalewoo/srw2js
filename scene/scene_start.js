@@ -48,6 +48,10 @@ var SceneStart = function (game) {
     {
         this.setButton("Start", handler, 150, 300, 200, 80);
     }
+    this.setContinueButton = function(handler)
+    {
+        this.setButton("Continue", handler, 150, 400, 200, 80);
+    }
 
     this.init = function() {
         this.game.musicManager.PlayLoopFromStart("start");

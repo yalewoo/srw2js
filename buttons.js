@@ -12,7 +12,6 @@ var ButtonManager = function() {
     this.addButtonHandler = function(name, callback)
     {
         var id = "button" + (this.used+1);
-        log(id)
         var d = document.getElementById(id);
         d.innerText = name;
 
@@ -26,7 +25,7 @@ var ButtonManager = function() {
     }
 
     this.draw = function() {
-        for (var i = 1; i <= 9; ++i)
+        for (var i = 1; i <= 13; ++i)
         {
             var id = "button" + i;
             var d = document.getElementById(id);

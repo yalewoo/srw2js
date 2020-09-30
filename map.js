@@ -77,8 +77,8 @@ var Map = function(scene_main, stage){
 
 		updateMapRectUI(this.maprects[x][y]);
 
-		
-
+		//var ani = new AnimationBoom(this.scene, x, y, 1, 30);
+		//this.scene.addAnimation(ani);
 
 
 		//g_buttonCanvasManager.addButtonHandler("Test", null, x*32, y*32, 50, 100);

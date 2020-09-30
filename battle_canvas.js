@@ -248,18 +248,16 @@ var BattleCanvas = function (scene_main, robot, enemy) {
             {
                 this.executeStage();
             }
-            
-            
         }
         else
         {
+            this.game.musicManager.stopAll();
+
             this.finishHandler();
 
-            this.game.musicManager.stopAll();
+            
             this.game.musicManager.PlayLoopContinue();
         }
-        log(this.people);
-        log(this.text);
 
     }
 
@@ -267,8 +265,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     this.prob = function (p) {
         var newp = Math.random() * 100;
-        log(newp)
-        log(p)
+
         if (newp < p)
             return true;
         else

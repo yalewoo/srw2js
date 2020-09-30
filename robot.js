@@ -1,4 +1,4 @@
-var Robot = function (robot_stage_data, scene_main, isEnemy) {
+var Robot = function (robotData, scene_main, isEnemy) {
 	this.scene = scene_main;
 	var context2D = scene_main.context2D;
 	this.context2D = context2D;
@@ -13,42 +13,33 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 			}
 		}
 	}
+	this.exp = 0;
 	
-	if (isEnemy)
+
+	this.isPlayer = robotData.isPlayer;
+	//关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
+	//[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+	this.x = robotData.x;
+	this.y = robotData.y;
+	this.robot_id = robotData.robot_id;
+	this.people = robotData.people;
+	
+	this.level = robotData.level;
+	this.robotBehavior = robotData.robotBehavior;
+	this.active = robotData.active;
+
+	this.spirit = robotData.spirit;
+
+	if (this.isPlayer)
 	{
-		this.isPlayer = 0;
-		//关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
-		//[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
-		this.x = robot_stage_data[2]+1;
-		this.y = robot_stage_data[3]+1;
-		this.robot_id = robot_stage_data[5];
-		this.people = robot_stage_data[4];
-
-
-		this.img = g_resourceManager.get_img_enemyicon(this.robot_id);
-		
-		
-		this.level = robot_stage_data[6] + 1;
-		this.robotBehavior = Number(robot_stage_data[10]);
+		this.img = g_resourceManager.get_img_roboticon(this.robot_id);
 
 	}
 	else
 	{
-		this.isPlayer = 1;
-
-		//关数,回合,x,y,编号,机师,机师名,机体,机体名
-		// [1,1,12,16,1,6,"大卫" ,126,"刚达"]
-		this.x = robot_stage_data[2]+1;
-		this.y = robot_stage_data[3]+1;
-		this.robot_id = robot_stage_data[7];
-		this.people = robot_stage_data[5];
-
-
-		this.img = g_resourceManager.get_img_roboticon(this.robot_id);
-
-
-		this.exp = 0;
+		this.img = g_resourceManager.get_img_enemyicon(this.robot_id);
 	}
+	
 
 	this.TargetX = this.x;
 	this.TargetY = this.y;
@@ -61,9 +52,7 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 	this.weapon1 = new Weapon(this.property.weapon1id);
 	this.weapon2 = new Weapon(this.property.weapon2id);
 
-	this.active = true;
 
-	this.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 	// 实际五维，精神加成之后
 
 	this.t_move = function () {   //机动
@@ -312,9 +301,6 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 
 	this.attackDo = function(enemy)
 	{
-		log("attack")
-
-		
 		var self = this;
 
 		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
@@ -334,10 +320,21 @@ var Robot = function (robot_stage_data, scene_main, isEnemy) {
 					self.scene.game.scene = scene_main;
 					self.setNotActive();
 					if (enemy.hp <= 0) {
-						self.scene.robots.deleteRobot(enemy);
+						scene_main.game.musicManager.PlayOnceFromStart("boom");
+
+						var ani = new AnimationBoom(scene_main, enemy.x, enemy.y, 1, 24, function() {
+							scene_main.robots.deleteRobot(enemy);
+						});
+						scene_main.addAnimation(ani);
+						
 					}
 					if (self.hp <= 0) {
-						self.scene.robots.deleteRobot(self);
+						scene_main.game.musicManager.PlayOnceFromStart("boom");
+
+						var ani = new AnimationBoom(scene_main, self.x, self.y,1, 24, function() {
+							scene_main.robots.deleteRobot(self);
+						});
+						scene_main.addAnimation(ani);
 					}
 				});
 				self.scene.game.scene = scene_battle;
@@ -842,7 +839,6 @@ Robot.prototype.transform = function(property2)
 	if ((this.property.type_original & 0x0c) == 0x08) {
 		var exp = this.exp;
 		
-		log(this.property.type_original)
 		if (this.property.type_original >> 4 == 3) {
 			this.setPilot(10);
 		}
@@ -931,4 +927,35 @@ var Pilot = function (id) {
 	this.hp = t[27];
 
 	this.music_id = t[28];
+}
+
+
+Robot.prototype.getRunTimeRobotData = function() {
+	var o = {}
+    o.x = this.x;
+    o.y = this.y;
+
+    o.robot_id = this.property.id;
+    o.people = this.people;
+
+    o.isPlayer = this.isPlayer;
+    o.level = this.level;
+	o.exp = this.exp;
+	o.robotBehavior = this.robotBehavior;
+	
+    o.hp = this.hp;
+	o.people_spirit = this.pilot.spirit
+	if (this.inMainShip)
+	{
+		o.inMainShip = this.inMainShip.pilot.id; //是否在母舰中
+	}
+	else
+	{
+		o.inMainShip = null; //是否在母舰中
+	}
+	o.active = this.active;
+	o.spirit = this.spirit; // 数组
+
+
+	return o;
 }

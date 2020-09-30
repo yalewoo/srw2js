@@ -92,7 +92,7 @@ var updateMapRectUI = function (maprect) {
     }
     d.style.display = "block";
 
-    updateValuebyDomId("map_rect_name", maprect.typeName);
+    updateValuebyDomId("map_rect_name", maprect.typeName + "(" + maprect.x + ", " + maprect.y + ")");
     updateValuebyDomId("move_consume_sky", maprect.moveConsume[0]);
     updateValuebyDomId("move_consume_land", maprect.moveConsume[1]);
     updateValuebyDomId("move_consume_sea", maprect.moveConsume[2]);

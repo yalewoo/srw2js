@@ -29,7 +29,20 @@ var Robots = function (scene_main) {
     }
     this.addRobot = function (stage_robot) {
         for (var i = 0; i < stage_robot.length; ++i) {
-            var robot = new Robot(stage_robot[i], scene_main, isEnemy = false);
+            var robot_stage_data = stage_robot[i];
+            var o = {}
+            o.isPlayer = 1;
+            //关数,回合,x,y,编号,机师,机师名,机体,机体名
+            // [1,1,12,16,1,6,"大卫" ,126,"刚达"]
+            o.x = robot_stage_data[2]+1;
+            o.y = robot_stage_data[3]+1;
+            o.robot_id = robot_stage_data[7];
+            o.people = robot_stage_data[5];
+
+            o.active = true;
+	        o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        
+            var robot = new Robot(o, scene_main, isEnemy = false);
             robot.updateLevel();
             robot.InitValue();
             this.robots.push(robot);
@@ -37,12 +50,134 @@ var Robots = function (scene_main) {
     }
     this.addEnemy = function (stage_robot) {
         for (var i = 0; i < stage_robot.length; ++i) {
-            var robot = new Robot(stage_robot[i], scene_main, isEnemy = true);
+            var robot_stage_data = stage_robot[i];
+            var o = {}
+            o.isPlayer = 0;
+            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
+            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+            o.x = robot_stage_data[2]+1;
+            o.y = robot_stage_data[3]+1;
+            o.robot_id = robot_stage_data[5];
+            o.people = robot_stage_data[4];       
+            o.level = robot_stage_data[6] + 1;
+            o.robotBehavior = Number(robot_stage_data[10]);
+            o.active = true;
+	        o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        
+            var robot = new Robot(o, scene_main, isEnemy = true);
             robot.updateLevel();
             robot.InitValue();
 
             this.enemy.push(robot);
         }
+    }
+
+    this.getRobotRuntimeArr = function() {
+        var arr = [];
+        for (var i = 0; i < this.robots.length; ++i) {
+            var robot = this.robots[i];
+            var robotData = robot.getRunTimeRobotData();
+            arr.push(robotData);
+        }
+        for (var i = 0; i < this.enemy.length; ++i) {
+            var robot = this.enemy[i];
+            var robotData = robot.getRunTimeRobotData();
+            arr.push(robotData);
+        }
+        return arr;
+    }
+    this.addRobotsRuntime = function(arr) {
+        for (var i = 0; i < arr.length; ++i)
+        {
+            if (arr[i].people == 54)
+                this.addRobotRuntime(arr[i]);
+        }
+        for (var i = 0; i < arr.length; ++i)
+        {
+            if (arr[i].people != 54)
+                this.addRobotRuntime(arr[i]);
+        }
+    }
+    this.addRobotRuntime = function(runtimeData) {
+        var robot;
+        if (runtimeData.isPlayer)
+        {
+            robot = new Robot(runtimeData, scene_main, isEnemy = false);
+            robot.updateLevel();
+            this.robots.push(robot);
+        }
+        else
+        {
+            robot = new Robot(runtimeData, scene_main, isEnemy = true);
+            robot.updateLevel();
+            this.enemy.push(robot);
+        }
+        
+        robot.hp = runtimeData.hp;
+        robot.pilot.spirit = runtimeData.people_spirit;
+        if (runtimeData.inMainShip)
+        {
+            var captain = this.getRobotByPeopleId(runtimeData.inMainShip);
+            robot.inMainShip = captain;
+            captain.passengers.push(robot);
+
+        }
+    }
+
+    this.getRobotByPeopleId = function(id) {
+        for (var i = 0; i < this.robots.length; ++i) {
+                if (this.robots[i].pilot.id == id)
+                {
+                    return this.robots[i];
+                }                
+            
+        }
+        for (var i = 0; i < this.enemy.length; ++i) {
+                if (this.enemy[i].pilot.id == id)
+                {
+                    return this.enemy[i];
+                } 
+            
+        }
+        return null;
+    }
+
+    this.addEnemyAni = function(stage_robot, i, callback)
+    {
+        if (i < stage_robot.length)
+        {
+            var robot_stage_data = stage_robot[i];
+            var o = {}
+            o.isPlayer = 0;
+            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
+            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+            o.x = robot_stage_data[2]+1;
+            o.y = robot_stage_data[3]+1;
+            o.robot_id = robot_stage_data[5];
+            o.people = robot_stage_data[4];       
+            o.level = robot_stage_data[6] + 1;
+            o.robotBehavior = Number(robot_stage_data[10]);
+            o.active = true;
+            o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            
+            var robot = new Robot(o, scene_main, isEnemy = true);
+            robot.updateLevel();
+            robot.InitValue();
+
+            this.scene.hoverData = [robot.x, robot.y];
+
+            var self = this;
+            this.scene.game.addTimer(0.3, function() {
+                self.enemy.push(robot);
+                self.addEnemyAni(stage_robot, i+1, callback);
+            })
+
+        }
+        else
+        {
+            callback();
+        }
+        
     }
 
     this.updateForNewTurn = function() {

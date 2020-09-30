@@ -36,7 +36,7 @@ var MusicManager = function() {
 
     this.currentLoop = null;
 
-    this.PlayOnceFromStart = function(name) {
+    this.PlayOnceFromStart = function(name, callback) {
         if (!this.audios[name])
         {
             this.audios[name] = new Audio(this.audios_name[name]);
@@ -46,6 +46,11 @@ var MusicManager = function() {
         audio.loop = false;
         audio.currentTime = 0;
         audio.play();
+
+        if (callback)
+        {
+            audio.onended  = callback;
+        }
     }
     this.PlayLoopFromStart = function (name, recordCurrent) {
         recordCurrent = recordCurrent == false ? false : true;

@@ -4,6 +4,9 @@ var SceneMain = function (game) {
 	this.canvas = game.canvas;
 	this.round = 0;
 
+	this.canvas.width = 18*32;
+	this.canvas.height = 22*32;
+
 	var self = this;
 
 	this.registerHandler = function() {
@@ -20,12 +23,14 @@ var SceneMain = function (game) {
 
 	this.hoverHandler = function(event)
 	{
-		
+		if (this.inAIActions)
+		{
+			return;
+		}
 		var x = Math.floor(event.offsetX / 32)
 		var y = Math.floor(event.offsetY / 32)
 		if (x != self.currentHoverX || y != self.currentHoverY) {
 			this.hoverData = [x, y];
-			
 		}
 	}
 	this.clickHandler = function (event)
@@ -59,7 +64,6 @@ var SceneMain = function (game) {
 			self.setBlackEffect(null);
 		}
 		else {
-			log("right click")
 			
 			if (self.robots.selectedRobot.drawIgnoreMainShip)
 			{
@@ -89,6 +93,9 @@ var SceneMain = function (game) {
 			{
 				g_buttonCanvasManager.addButtonHandler("回合" + this.round + "结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
 
+				g_buttonCanvasManager.addButtonHandler("Save", self.saveToFile, e.offsetX, e.offsetY+100, 200, 60);
+				g_buttonCanvasManager.addButtonHandler("Load", self.loadFromFile, e.offsetX, e.offsetY+200, 200, 60);
+
 			}
 
 		}
@@ -99,7 +106,6 @@ var SceneMain = function (game) {
 
 
 	this.startAttackArrow = function(x, y, x2, y2, callback) {
-		log(x, y, x2, y2)
 		this.arrowImg = g_resourceManager.img_logos["arrow2"];
 		this.arrowX = x;
 		this.arrowY = y;
@@ -222,6 +228,8 @@ var SceneMain = function (game) {
 
 	this.loadStage = function(stage)
 	{
+		this.startFromFile = false;
+
 		this.stage = stage;
 
 		this.map = new Map(this, stage);
@@ -231,6 +239,47 @@ var SceneMain = function (game) {
 		this.robots.loadStage(stage);
 
 		this.round = 1;
+	}
+
+	var self = this;
+
+	this.loadFromFile = function() {
+
+		this.startFromFile = true;
+		var json=window.localStorage.getItem("srw2js_save");
+		if (json)
+		{
+			var jsonObj=JSON.parse(json);
+			var o = jsonObj;
+	
+			self.stage = o.stage;
+	
+			self.map = new Map(self, o.stage);
+	
+	
+			self.robots = new Robots(self);
+	
+			self.robots.addRobotsRuntime(o.arr);
+	
+			self.round = o.round;
+
+			return true;
+		}
+		else
+		{
+			alert("找不到存档，请刷新后重新开始")
+		}
+		
+
+		return false;
+	}
+	this.saveToFile = function() {
+		var o = {stage: self.stage, round: self.round};
+		o.arr = self.robots.getRobotRuntimeArr();
+		
+		var str = JSON.stringify(o);
+
+		window.localStorage.setItem("srw2js_save", str);
 	}
 
 	this.currentHoverX = 0;
@@ -401,7 +450,20 @@ var SceneMain = function (game) {
 	}
 
 	this.init = function() {
-		this.executeStageEvent(function(){});
+		var self = this;
+g_buttonManager.unshowButton1();
+		if (!this.startFromFile)
+		{
+			this.game.musicManager.PlayLoopFromStart("start_map");
+			this.executeStageEvent(function(){
+				self.game.musicManager.stopAll();
+				self.game.musicManager.PlayLoopFromStart("main_robot");
+			});
+		}
+		else
+		{
+			this.game.musicManager.PlayLoopFromStart("main_robot");
+		}
 		
 	}
 	this.clear = function() {
@@ -414,45 +476,53 @@ var SceneMain = function (game) {
 		{
 			var add_enemy = g_stages[this.stage].round_event[this.round].addEnemys;
 			if (add_enemy) {
-				
-				this.game.musicManager.stopAll();
-				this.game.musicManager.PlayOnceFromStart("main_add_enemy");
-
-				this.robots.addEnemy(add_enemy);
-				
-				g_buttonManager.unshowButton1();
-			}
-
-
-			var talk_data = g_stages[this.stage].round_event[this.round].talks;
-			if (talk_data) {
-				if (this.round == 1)
-				{
-					this.game.musicManager.PlayLoopFromStart("start_map");
-				}
-				
-
-				this.talkDiag = new TalkDiag(game, talk_data);
 				var self = this;
-				this.talkDiag.setFinishHandler(function () {
-					self.talkDiag.clear();
-					self.talkDiag = null;
-
-					
-						
-						self.game.musicManager.stopAll();
-						self.game.musicManager.PlayLoopFromStart("main_robot");
+				this.game.musicManager.stopAll();
+				this.game.musicManager.PlayOnceFromStart("main_add_enemy", function() {
+					self.game.musicManager.PlayLoopContinue();
+				});
+				
+				
+				this.robots.addEnemyAni(add_enemy, 0, function() {
+					var talk_data = g_stages[self.stage].round_event[self.round].talks;
+					if (talk_data) {
+						self.talkDiag = new TalkDiag(game, talk_data);
+						self.talkDiag.setFinishHandler(function () {
+							self.talkDiag.clear();
+							self.talkDiag = null;
+								callback();
+						})
+		
+						g_buttonManager.unshowButton1();
+					}
+					else{
 						callback();
-					
-					
-
-				})
-
+					}
+				});
+				
 				g_buttonManager.unshowButton1();
 			}
-			else{
-				callback();
+			else
+			{
+				var talk_data = g_stages[this.stage].round_event[this.round].talks;
+				if (talk_data) {
+					this.talkDiag = new TalkDiag(game, talk_data);
+					var self = this;
+					this.talkDiag.setFinishHandler(function () {
+						self.talkDiag.clear();
+						self.talkDiag = null;
+							callback();
+					})
+	
+					g_buttonManager.unshowButton1();
+				}
+				else{
+					callback();
+				}
 			}
+
+
+			
 
 		}
 		else
@@ -462,6 +532,8 @@ var SceneMain = function (game) {
 	}
 
 	this.nextRound = function () {
+		self.inAIActions = true;
+
 		++self.round;
 		self.game.musicManager.stopAll();
 		self.game.musicManager.PlayLoopFromStart("main_enemy");
@@ -475,13 +547,12 @@ var SceneMain = function (game) {
 	
 
 	this.AI = function (i) {
-
+		
 		var self = this;
 		var enemys = this.robots.enemy;
 		if (enemys.length > i) {
 			var enemy = enemys[i];
 			this.hoverData = [enemy.x, enemy.y];
-			log(enemy)
 			
 			this.game.addTimer(0.1, function() {
 				enemy.setNotActiveCallbackOnce = function () {
@@ -510,6 +581,8 @@ var SceneMain = function (game) {
 			// 加血
 			this.robots.updateForNewTurn();
 			this.robots.setAllActive();
+
+			this.inAIActions = false;
 
 		}
 

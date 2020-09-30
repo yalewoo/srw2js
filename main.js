@@ -11,6 +11,12 @@
 
 	var game = new Game(canvas, 240);
 
+	if (g_debug_mode_enabled)
+	{
+		window.game = game;
+	}
+	
+
 	var scene_main = new SceneMain(game);
 	scene_main.loadStage(1);
 
@@ -33,10 +39,22 @@
 			scene_map1.setFinishHandler(function () {
 				game.setScene(scene_title);
 				scene_title.setFinishHandler(function () {
+					
+					
 					game.setScene(scene_main);
 				});
 			});
 		})
+
+		scene_start.setContinueButton(function () {
+			if (scene_main.loadFromFile())
+			{
+				game.setScene(scene_main);
+			}
+			
+		})
+
+		
 		
 		game.setScene(scene_start);
 
