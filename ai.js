@@ -9,6 +9,10 @@ var AI = function() {
             for (var i = 0; i < enemys.length; ++i)
             {
                var enemy = enemys[i];
+                if (enemy.inMainShip) {
+                    continue;
+                }
+
                     if (robot.canAttackRobotUsingWeapon(enemy, robot.weapon1)) {
                         enemy.tmp_ai_weapon1 = true;
                         enemysCanAttack.push(enemy);
@@ -21,6 +25,9 @@ var AI = function() {
         if (robot.weapon2) {
             for (var i = 0; i < enemys.length; ++i) {
                 var enemy = enemys[i];
+                if (enemy.inMainShip) {
+                    continue;
+                }
                     if (robot.canAttackRobotUsingWeapon(enemy, robot.weapon2)) {
                         enemy.tmp_ai_weapon2 = true;
                         enemysCanAttack.push(enemy);
@@ -36,6 +43,10 @@ var AI = function() {
 
         for (var k = 0; k < enemys.length; ++k) {
             var enemy = enemys[k];
+            if (enemy.inMainShip) {
+                continue;
+            }
+            
             var i = enemy.x;
             var j = enemy.y;
 
@@ -72,7 +83,13 @@ var AI = function() {
         var enemys = robot.isPlayer ? robots.enemy : robots.robots;
         var result = null;
         for (var i = 0; i < enemys.length; ++i) {
+           
             var enemy = enemys[i];
+            if (enemy.inMainShip)
+            {
+                continue;
+            }
+
             if (m[enemy.x][enemy.y] > max)
             {
                 max = m[enemy.x][enemy.y];

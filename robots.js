@@ -36,6 +36,7 @@ var Robots = function (scene_main) {
             var people = robot.people;
             if (exps[people] != undefined) {
                 robot.getExp(exps[people]);
+                robot.InitValue();
             }
         }
     }
@@ -79,12 +80,13 @@ var Robots = function (scene_main) {
             var robot_stage_data = stage_robot[i];
             var o = {}
             o.isPlayer = 1;
-            //关数,回合,x,y,编号,机师,机师名,机体,机体名
-            // [1,1,12,16,1,6,"大卫" ,126,"刚达"]
-            o.x = robot_stage_data[2]+1;
-            o.y = robot_stage_data[3]+1;
-            o.robot_id = robot_stage_data[7];
-            o.people = robot_stage_data[5];
+            //x,y,编号,机师,机师名,机体,机体名
+            // [12,16,1,6,"大卫" ,126,"刚达"]
+            o.x = robot_stage_data[0]+1;
+            o.y = robot_stage_data[1]+1;
+            o.people = robot_stage_data[2];
+            o.robot_id = robot_stage_data[3];
+            o.exp = robot_stage_data[4];
 
             o.active = true;
 	        o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -100,14 +102,13 @@ var Robots = function (scene_main) {
             var robot_stage_data = stage_robot[i];
             var o = {}
             o.isPlayer = 0;
-            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
-            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
-            o.x = robot_stage_data[2]+1;
-            o.y = robot_stage_data[3]+1;
-            o.robot_id = robot_stage_data[5];
-            o.people = robot_stage_data[4];       
-            o.level = robot_stage_data[6] + 1;
-            o.robotBehavior = Number(robot_stage_data[10]);
+            //x,y,机师,机体,等级,智商
+            o.x = robot_stage_data[0]+1;
+            o.y = robot_stage_data[1]+1;
+            o.people = robot_stage_data[2];    
+            o.robot_id = robot_stage_data[3];
+            o.level = robot_stage_data[4] + 1;
+            o.robotBehavior = Number(robot_stage_data[5]);
             o.active = true;
 	        o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         
@@ -210,14 +211,14 @@ var Robots = function (scene_main) {
             var robot_stage_data = stage_robot[i];
             var o = {}
             o.isPlayer = 0;
-            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
-            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
-            o.x = robot_stage_data[2]+1;
-            o.y = robot_stage_data[3]+1;
-            o.robot_id = robot_stage_data[5];
-            o.people = robot_stage_data[4];       
-            o.level = robot_stage_data[6] + 1;
-            o.robotBehavior = Number(robot_stage_data[10]);
+            //x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
+            //[8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+            o.x = robot_stage_data[0]+1;
+            o.y = robot_stage_data[1]+1;
+            o.people = robot_stage_data[2];   
+            o.robot_id = robot_stage_data[3];
+            o.level = robot_stage_data[4] + 1;
+            o.robotBehavior = Number(robot_stage_data[5]);
             o.active = true;
             o.spirit = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             
@@ -248,14 +249,14 @@ var Robots = function (scene_main) {
             var robot_stage_data = stage_robot[i];
             var o = {}
             o.isPlayer = 1;
-            //关数,回合,x,y,机师,机体,等级,智商,机师名,机体名,智商,图标
-            //[1,1,8,3,3,54,1,5,"士兵" ,"乍克" ,"8",32],
+            //x,y,机师,机体,exp
             o.x = robot_stage_data[0]+1;
             o.y = robot_stage_data[1]+1;
             o.people = robot_stage_data[2];   
-            o.robot_id = robot_stage_data[4];
+            o.robot_id = robot_stage_data[3];
 
-            o.exp = robot_stage_data[6];
+            o.exp = robot_stage_data[4];
+
             o.robotBehavior = 0;
 
 

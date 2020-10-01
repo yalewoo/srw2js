@@ -49,7 +49,7 @@ var TalkDiag = function (game, story) {
         var y = 350;
         var width = 600;
         var height = 200;
-        var text = this.talks[this.currentTalk][2];
+        var text = this.talks[this.currentTalk][1];
 
         var fillStyleOld = ctx.fillStyle;
 

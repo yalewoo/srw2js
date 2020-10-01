@@ -52,6 +52,29 @@ var SceneStart = function (game) {
     {
         this.setButton("Continue", handler, 150, 400, 200, 80);
     }
+    this.setDataLoadButton = function (handler) {
+        var self = this;
+        this.setButton("Data Load", function () {
+            self.clear();
+
+            var datas = {};
+            var json = window.localStorage.getItem("srw2js_save_data");
+            if (json) {
+                datas = JSON.parse(json);
+            }
+            for (var i = 0; i < 30; ++i) {
+                (function (i) {
+                    if (datas[i]) {
+                        self.setButton(i+1, function() {
+                            handler(i+1);
+                        }, Math.floor(i%4)*100, 300 + Math.floor(i/4) * 100, 80, 80);
+                    }
+                })(i);
+            }
+
+        }, 150, 500, 200, 80);
+
+    }
 
     this.init = function() {
         this.game.musicManager.PlayLoopFromStart("start");

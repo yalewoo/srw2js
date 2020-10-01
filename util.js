@@ -24,7 +24,11 @@ var updateRobotUI = function(robot)
 
     d.style.display = "block";
 
-    updateValuebyDomId("robot_name", robot.property.robotName);
+    var robotName = robot.property.robotName;
+    if (g_debug_mode_enabled){
+        robotName += "(" + robot.property.id + ")";
+    }
+    updateValuebyDomId("robot_name", robotName);
 
     updateValuebyDomId("robot_level", robot.level);
 
@@ -39,7 +43,12 @@ var updateRobotUI = function(robot)
     updateValuebyDomId("robot_defense", robot.defense);
     updateValuebyDomId("robot_speed", robot.speed);
     updateValuebyDomId("robot_hp_total", robot.hp_total);
-    updateValuebyDomId("robot_pilot_name", robot.pilot.name);
+
+    var pilotName = robot.pilot.name;
+    if (g_debug_mode_enabled) {
+        pilotName += "(" + robot.pilot.id + ")";
+    }
+    updateValuebyDomId("robot_pilot_name", pilotName);
 
 
     updateValuebyDomId("robot_spirit_total", robot.pilot.spirit_total0);
@@ -61,19 +70,19 @@ var updateRobotUI = function(robot)
     d.innerHTML = "";
     d.append(g_resourceManager.get_img_people_image(robot.pilot.id));
 
-    updateValuebyDomId("weapon1_name", robot.weapon1.name);
+    updateValuebyDomId("weapon1_name", robot.weapon1.name );
     updateValuebyDomId("weapon1_hitrate", robot.weapon1.hitRadio);
     updateValuebyDomId("weapon1_range", robot.weapon1.range);
-    updateValuebyDomId("weapon1_power_sky", robot.weapon1.firepower[0]);
-    updateValuebyDomId("weapon1_power_land", robot.weapon1.firepower[1]);
-    updateValuebyDomId("weapon1_power_sea", robot.weapon1.firepower[2]);
+    updateValuebyDomId("weapon1_power_sky", robot.weapon1.firepower[0] == 0 ? 0 : robot.weapon1.firepower[0] + robot.strength );
+    updateValuebyDomId("weapon1_power_land", robot.weapon1.firepower[1] == 0 ? 0 : robot.weapon1.firepower[1] + robot.strength );
+    updateValuebyDomId("weapon1_power_sea", robot.weapon1.firepower[2] == 0 ? 0 : robot.weapon1.firepower[2] + robot.strength );
 
-    updateValuebyDomId("weapon2_name", robot.weapon2.name);
+    updateValuebyDomId("weapon2_name", robot.weapon2.name );
     updateValuebyDomId("weapon2_hitrate", robot.weapon2.hitRadio);
     updateValuebyDomId("weapon2_range", robot.weapon2.range);
-    updateValuebyDomId("weapon2_power_sky", robot.weapon2.firepower[0]);
-    updateValuebyDomId("weapon2_power_land", robot.weapon2.firepower[1]);
-    updateValuebyDomId("weapon2_power_sea", robot.weapon2.firepower[2]);
+    updateValuebyDomId("weapon2_power_sky", robot.weapon2.firepower[0] == 0 ? 0 : robot.weapon2.firepower[0] + robot.strength );
+    updateValuebyDomId("weapon2_power_land", robot.weapon2.firepower[1] == 0 ? 0 : robot.weapon2.firepower[1] + robot.strength );
+    updateValuebyDomId("weapon2_power_sea", robot.weapon2.firepower[2] == 0 ? 0 : robot.weapon2.firepower[2] + robot.strength );
 
     // robot.move;
     // robot.speed;

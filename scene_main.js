@@ -3,7 +3,6 @@ var SceneMain = function (game) {
 	this.context2D = game.context2D;
 	this.canvas = game.canvas;
 	this.round = 0;
-	this.robots_exps = {};
 
 	this.canvas.width = 18*32;
 	this.canvas.height = 22*32;
@@ -229,8 +228,17 @@ var SceneMain = function (game) {
 
 	this.loadStage = function(stage)
 	{
+		var robots_exps = {};
 		if (stage != 1){
-			this.robots_exps = this.robots.loadStage_getExp();
+			var json = window.localStorage.getItem("srw2js_save_data");
+			if (json) {
+				datas = JSON.parse(json);
+			}
+			if (datas && datas[stage-1])
+			{
+				robots_exps = datas[stage-1];
+				this.money_total = datas["this.money_total"];
+			}
 		}
 			
 		this.startFromFile = false;
@@ -244,7 +252,7 @@ var SceneMain = function (game) {
 		this.robots.loadStage(stage);
 
 		if (stage != 1) {
-			this.robots.loadStage_setExp(this.robots_exps);
+			this.robots.loadStage_setExp(robots_exps);
 		}
 
 		this.round = 1;
@@ -477,60 +485,98 @@ var SceneMain = function (game) {
 		this.game.musicManager.stopAll();
 	}
 
+	this.executeStageEventCore = function (i, arr, callback) {
+		if (i < arr.length)
+		{
+			if (arr[i].type == "addEnemys") {
+				var add_enemy = arr[i].data;
+				
+				var self = this;
+				this.game.musicManager.stopAll();
+				this.game.musicManager.PlayOnceFromStart("main_add_enemy", function () {
+					self.game.musicManager.PlayLoopContinue();
+				});
+
+				this.robots.addEnemyAni(add_enemy, 0, function () {
+					self.executeStageEventCore(i+1, arr, callback);
+				});
+
+				g_buttonManager.unshowButton1();
+				
+			}
+			else if (arr[i].type == "talks") {
+				var talk_data = arr[i].data;
+				this.talkDiag = new TalkDiag(game, talk_data);
+				var self = this;
+				this.talkDiag.setFinishHandler(function () {
+					self.talkDiag.clear();
+					self.talkDiag = null;
+					self.executeStageEventCore(i + 1, arr, callback);
+				})
+
+				g_buttonManager.unshowButton1();
+				
+			}
+			else if (arr[i].type == "addRobots") {
+				var add_robot = arr[i].data;
+				var self = this;
+
+				this.robots.addRobotAni(add_robot, 0, function () {
+					self.executeStageEventCore(i + 1, arr, callback);
+				});
+
+				g_buttonManager.unshowButton1();
+				
+			}
+			else if (arr[i].type == "checkAndTalk") {
+				var data = arr[i].data;
+				if (data.type == "HasPeople") {
+					var peopleid = data.people;
+					if (this.robots.getRobotByPeopleId(peopleid)) {
+						var talk_data = data.talks1;
+						this.talkDiag = new TalkDiag(game, talk_data);
+						var self = this;
+						this.talkDiag.setFinishHandler(function () {
+							self.talkDiag.clear();
+							self.talkDiag = null;
+							self.executeStageEventCore(i + 1, arr, callback);
+						})
+
+						g_buttonManager.unshowButton1();
+					}
+					else
+					{
+						var talk_data = data.talks2;
+						this.talkDiag = new TalkDiag(game, talk_data);
+						var self = this;
+						this.talkDiag.setFinishHandler(function () {
+							self.talkDiag.clear();
+							self.talkDiag = null;
+							self.executeStageEventCore(i + 1, arr, callback);
+						})
+
+						g_buttonManager.unshowButton1();
+
+					}
+				}
+			}
+			else {
+				callback();
+			}
+		}
+		else
+		{
+			callback();
+		}
+	}
+
+
 	this.executeStageEvent = function (callback) {
 		if (g_stages[this.stage] && g_stages[this.stage].round_event
 			&& g_stages[this.stage].round_event[this.round])
 		{
-			var add_enemy = g_stages[this.stage].round_event[this.round].addEnemys;
-			if (add_enemy) {
-				var self = this;
-				this.game.musicManager.stopAll();
-				this.game.musicManager.PlayOnceFromStart("main_add_enemy", function() {
-					self.game.musicManager.PlayLoopContinue();
-				});
-				
-				
-				this.robots.addEnemyAni(add_enemy, 0, function() {
-					var talk_data = g_stages[self.stage].round_event[self.round].talks;
-					if (talk_data) {
-						self.talkDiag = new TalkDiag(game, talk_data);
-						self.talkDiag.setFinishHandler(function () {
-							self.talkDiag.clear();
-							self.talkDiag = null;
-								callback();
-						})
-		
-						g_buttonManager.unshowButton1();
-					}
-					else{
-						callback();
-					}
-				});
-				
-				g_buttonManager.unshowButton1();
-			}
-			else
-			{
-				var talk_data = g_stages[this.stage].round_event[this.round].talks;
-				if (talk_data) {
-					this.talkDiag = new TalkDiag(game, talk_data);
-					var self = this;
-					this.talkDiag.setFinishHandler(function () {
-						self.talkDiag.clear();
-						self.talkDiag = null;
-							callback();
-					})
-	
-					g_buttonManager.unshowButton1();
-				}
-				else{
-					callback();
-				}
-			}
-
-
-			
-
+			var data = g_stages[this.stage].round_event[this.round];
+			this.executeStageEventCore(0, data, callback);
 		}
 		else
 		{
@@ -539,70 +585,48 @@ var SceneMain = function (game) {
 	}
 
 	this.checkEvent = function() {
-		var self = this;
-		var callback = function() {
-			var game = self.game;
-			var scene_map1 = new SceneStartMap1(game, self.stage+1);
-
-
-			game.setScene(scene_map1);
-			scene_map1.setFinishHandler(function () {
-				var scene_title = new SceneTitle(game, self.stage + 1);
-				game.setScene(scene_title);
-				scene_title.setFinishHandler(function () {
-					self.stage++;
-					self.loadStage(self.stage);
-					self.init();
-
-					game.setScene(self);
-				});
-			});
-		}
-
 		if (this.robots.enemy.length == 0)
 		{
-			var add_robot = g_stages[this.stage].round_event["success"].addRobots;
-			if (add_robot) {
-				var self = this;				
-				
-				this.robots.addRobotAni(add_robot, 0, function() {
-					var talk_data = g_stages[self.stage].round_event["success"].talks;
-					if (talk_data) {
-						self.talkDiag = new TalkDiag(game, talk_data);
-						self.talkDiag.setFinishHandler(function () {
-							self.talkDiag.clear();
-							self.talkDiag = null;
-								callback();
-						})
-		
-						g_buttonManager.unshowButton1();
-					}
-					else{
-						callback();
-					}
-				});
-				
-				g_buttonManager.unshowButton1();
+			// Save data
+			var datas = {};
+			var json = window.localStorage.getItem("srw2js_save_data");
+			if (json) {
+				datas = JSON.parse(json);
 			}
-			else
-			{
-				var talk_data = g_stages[this.stage].round_event["success"].talks;
-				if (talk_data) {
-					this.talkDiag = new TalkDiag(game, talk_data);
-					var self = this;
-					this.talkDiag.setFinishHandler(function () {
-						self.talkDiag.clear();
-						self.talkDiag = null;
-							callback();
-					})
-	
-					g_buttonManager.unshowButton1();
-				}
-				else{
-					callback();
-				}
-			}
+
+			var exps = this.robots.loadStage_getExp();
+			datas[this.stage] = exps;
+			datas["money_total"] = this.money_total
+
+			var str = JSON.stringify(datas);
+			window.localStorage.setItem("srw2js_save_data", str);
+
+			// 执行过关剧情
+			var data = g_stages[this.stage].round_event["success"];
+			var self = this;
+			this.executeStageEventCore(0, data, function () {
+				self.beginStage(self.stage+1);
+			});
 		}
+	}
+
+	this.beginStage = function(stage) {
+		this.stage = stage;
+		var self = this;
+		var game = this.game;
+		var scene_map1 = new SceneStartMap1(game, stage);
+
+		game.setScene(scene_map1);
+		scene_map1.setFinishHandler(function () {
+			var scene_title = new SceneTitle(game, stage);
+			game.setScene(scene_title);
+			scene_title.setFinishHandler(function () {
+				self.loadStage(stage);
+				self.init();
+
+				game.setScene(self);
+			});
+		});
 	}
 
 	this.nextRound = function () {

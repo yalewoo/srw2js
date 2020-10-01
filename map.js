@@ -5,6 +5,7 @@ var Map = function(scene_main, stage){
 	this.maprects = []
 
 	var map_data = g_stages[stage].map;
+	this.style = g_stages[stage].mapStyle ? g_stages[stage].mapStyle : "A";
 	// 转置
 	var stage_map_old = map_data;
 	var stage_map = stage_map_old[0].map(function(col, i) {
@@ -40,7 +41,7 @@ var Map = function(scene_main, stage){
 		var arr = [];
 		for (var j = 0; j < stage_map2[i].length; ++j)
 		{
-			var rect = new MapRect(context2D, i, j, stage_map2[i][j]);
+			var rect = new MapRect(context2D, i, j, stage_map2[i][j], this.style);
 			arr.push(rect)
 		}
 		this.maprects.push(arr);
@@ -99,14 +100,14 @@ var Map = function(scene_main, stage){
 
 }
 
-var MapRect = function(context2D, x, y, type){
+var MapRect = function(context2D, x, y, type, style){
 	this.x = x;
 	this.y = y;
 	this.context2D = context2D;
 	this.kind = type;
 
-	this.style = "A"
-	this.img = g_resourceManager.img_maprect[type];
+	this.style = style;
+	this.img = g_resourceManager.get_img_maprect(style, type);
 	this.draw = function() {
 		this.context2D.drawImage(this.img,this.x*32,this.y*32);
 	}

@@ -27,38 +27,39 @@
 	var scene_title = new SceneTitle(game, 1);
 	
 
-	if (g_debug_mode_enabled)
-	{
-		game.setScene(scene_main);
 
-	}
-	else
-	{
-		scene_start.setStartButton(function () {
-			game.setScene(scene_map1);
-			scene_map1.setFinishHandler(function () {
-				game.setScene(scene_title);
-				scene_title.setFinishHandler(function () {
-					
-					
-					game.setScene(scene_main);
-				});
-			});
-		})
-
-		scene_start.setContinueButton(function () {
-			if (scene_main.loadFromFile())
-			{
+	scene_start.setStartButton(function () {
+		game.setScene(scene_map1);
+		scene_map1.setFinishHandler(function () {
+			game.setScene(scene_title);
+			scene_title.setFinishHandler(function () {
+				
+				
 				game.setScene(scene_main);
-			}
-			
-		})
+			});
+		});
+	})
 
+	scene_start.setContinueButton(function () {
+		if (scene_main.loadFromFile())
+		{
+			game.setScene(scene_main);
+		}
 		
-		
-		game.setScene(scene_start);
+	});
 
-	}
+	scene_start.setDataLoadButton(function (stage) {
+
+		scene_main.beginStage(stage);		
+
+	})
+
+
+	
+	
+	game.setScene(scene_start);
+
+	
 
 	game.run();
 
