@@ -61,6 +61,31 @@ function buttonHandler(id) {
 var showMenu1 = function(robots)
 {
     g_buttonManager.clear();
+
+    var robot = robots.selectedRobot;
+    if (!robot) {
+        return;
+    }
+
+    var stage = robots.scene.stage;
+    if (g_stages[stage].quanxiang) {
+        
+        var enemyPeople = g_stages[stage].quanxiang[robot.pilot.id];
+        if (enemyPeople) {
+            var enemy = robots.getRobotByPeopleId(enemyPeople);
+            if (enemy) {
+                if ((enemy.x == robot.x && (enemy.y == robot.y-1 || enemy.y == robot.y + 1)) || 
+                    (enemy.y == robot.y && (enemy.x == robot.x - 1 || enemy.x == robot.x + 1)) ) {
+                        g_buttonManager.addButtonHandler("劝降", function () {
+                            robots.quanxiang(robot, enemy);
+                        })
+                    }
+            }
+        }
+        
+    }
+
+    
     g_buttonManager.addButtonHandler("AI行动", function () {
         robots.selectedRobot.AI_action();
     })
@@ -69,7 +94,8 @@ var showMenu1 = function(robots)
         robots.setSelectedRobotInactive();
     })
 
-    var robot = robots.selectedRobot;
+    
+
     if (robot.canAttack1()) {
         g_buttonManager.addButtonHandler(robot.weapon1.name, function () {
             robot.attack1();

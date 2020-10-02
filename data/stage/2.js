@@ -75,7 +75,7 @@ var g_stages_data_stage2 = {
                 type: "addRobots",
                 data: [
                     //x,y,机师,机体,exp
-                    [8, 0, 9, 35], // 
+                    [8, 0, 17, 35], // 
                 ],
             },
             {

@@ -67,7 +67,7 @@ var SceneStart = function (game) {
                     if (datas[i]) {
                         self.setButton(i+1, function() {
                             handler(i+1);
-                        }, Math.floor(i%4)*100, 300 + Math.floor(i/4) * 100, 80, 80);
+                        }, Math.floor(i%5)*100, 300 + Math.floor(i/5) * 100, 80, 80);
                     }
                 })(i);
             }

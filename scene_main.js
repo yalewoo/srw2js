@@ -585,6 +585,8 @@ var SceneMain = function (game) {
 	}
 
 	this.checkEvent = function() {
+		
+
 		if (this.robots.enemy.length == 0)
 		{
 			// Save data

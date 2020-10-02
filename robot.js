@@ -334,6 +334,22 @@ var Robot = function (robotData, scene_main) {
 						var ani = new AnimationBoom(scene_main, enemy.x, enemy.y, 1, 24, function() {
 							scene_main.robots.deleteRobot(enemy);
 							scene_main.checkEvent();
+							var stage = self.scene.stage;
+							if (g_stages[stage] && g_stages[stage].afterboom_event) {
+								if (g_stages[stage].afterboom_event)
+								{
+									if (g_stages[stage].afterboom_event[enemy.people]) {
+										var arr = [];
+										arr.push(g_stages[stage].afterboom_event[enemy.people])
+										self.scene.executeStageEventCore(0, arr, function() {
+
+										});
+									}
+								}
+							}
+						
+					
+
 						});
 						scene_main.addAnimation(ani);
 						
@@ -345,6 +361,19 @@ var Robot = function (robotData, scene_main) {
 							scene_main.robots.deleteRobot(self);
 							scene_main.checkEvent();
 
+							var stage = self.scene.stage;
+							if (g_stages[stage] && g_stages[stage].afterboom_event) {
+								if (g_stages[stage].afterboom_event) {
+									if (g_stages[stage].afterboom_event[self.people]) {
+										var arr = [];
+										arr.push(g_stages[stage].afterboom_event[self.people])
+										self.scene.executeStageEventCore(0, arr, function() {
+											
+										});
+									}
+								}
+							}
+
 						});
 						scene_main.addAnimation(ani);
 					}
@@ -355,6 +384,8 @@ var Robot = function (robotData, scene_main) {
 		}
 		
 	}
+
+	
 
 	this.setNotActive = function()
 	{

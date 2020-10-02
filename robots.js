@@ -376,6 +376,11 @@ var Robots = function (scene_main) {
     this.mousedownHandler = function (x, y) {
         var robot = this.getRobotAt(x, y);
         if (robot) {
+            if (g_debug_mode_enabled){
+                log(robot)
+            
+            }
+                
             if (robot.inMove) {
 
             }
@@ -483,6 +488,49 @@ var Robots = function (scene_main) {
         for (var i = 0; i < this.enemy.length; ++i) {
             this.enemy[i].setActive();
         }
+    }
+
+    this.quanxiang = function (robot, enemy) {
+        this.scene.setBlackEffect(null);
+        
+        robot.setNotActive();
+        robot.setActive();
+
+        g_buttonManager.unshowButton1();
+        var stage = this.scene.stage;
+        var talk_data = g_stages[stage].quanxiang.talks;
+        var newrobot = g_stages[stage].quanxiang.robot;
+        this.scene.talkDiag = new TalkDiag(game, talk_data);
+        var self = this;
+        this.scene.talkDiag.setFinishHandler(function () {
+            self.scene.talkDiag.clear();
+            self.scene.talkDiag = null;
+
+            self.deleteRobot(enemy);
+
+            var o = {}
+            o.isPlayer = 1;
+            //x,y,编号,机师,机师名,机体,机体名
+            // [12,16,1,6,"大卫" ,126,"刚达"]
+            o.x = enemy.x;
+            o.y = enemy.y;
+            o.people = enemy.people;
+            o.robot_id = newrobot["id"];
+            o.exp = newrobot["exp"];
+
+            o.active = true;
+            o.spirit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+            var robot = new Robot(o, scene_main, isEnemy = false);
+            robot.updateLevel();
+            robot.InitValue();
+            self.robots.push(robot);
+            
+
+            
+        })
+
+        
     }
 
 }
