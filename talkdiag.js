@@ -41,7 +41,7 @@ var TalkDiag = function (game, story) {
         var peopleid = this.talks[this.currentTalk][0]
         var img = g_resourceManager.get_img_people_image(peopleid);
 
-
+        var name = g_people_data[peopleid][1];
 
         var ctx = this.context2D;
 
@@ -70,12 +70,20 @@ var TalkDiag = function (game, story) {
         ctx.font = 26 + "px 黑体";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        ctx.fillText(text, 100, 400);
+        ctx.fillText(name+":", 100, 400);
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#fff";
+        ctx.font = 26 + "px 黑体";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, 100, 450);
         ctx.closePath();
 
         ctx.fillStyle = fillStyleOld;
 
-        this.context2D.drawImage(img, 10, 380);
+        this.context2D.drawImage(img, 10, 420);
 
 
     }

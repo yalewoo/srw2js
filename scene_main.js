@@ -486,12 +486,12 @@ var SceneMain = function (game) {
 	}
 
 	this.executeStageEventCore = function (i, arr, callback) {
+		var self = this;
 		if (i < arr.length)
 		{
 			if (arr[i].type == "addEnemys") {
 				var add_enemy = arr[i].data;
 				
-				var self = this;
 				this.game.musicManager.stopAll();
 				this.game.musicManager.PlayOnceFromStart("main_add_enemy", function () {
 					self.game.musicManager.PlayLoopContinue();
@@ -559,6 +559,31 @@ var SceneMain = function (game) {
 
 					}
 				}
+			}
+			else if (arr[i].type == "moveRobot") {
+				var data = arr[i].data;
+				peopleid = data.people;
+				var robot = this.robots.getRobotByPeopleId(peopleid)
+				if (robot) {
+					robot.moveTo(data.x, data.y, function() {
+						self.setBlackEffect(null);
+						robot.setNotActive();
+						robot.setActive();
+						self.executeStageEventCore(i + 1, arr, callback);
+					})
+				}
+				g_buttonManager.unshowButton1();
+			}
+			else if (arr[i].type == "removeRobot") {
+				var data = arr[i].data;
+				peopleid = data.people;
+				var robot = this.robots.getRobotByPeopleId(peopleid)
+				if (robot) {
+					this.robots.deleteRobot(robot);
+					self.executeStageEventCore(i + 1, arr, callback);
+					
+				}
+				g_buttonManager.unshowButton1();
 			}
 			else {
 				callback();

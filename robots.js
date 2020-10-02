@@ -237,7 +237,10 @@ var Robots = function (scene_main) {
         }
         else
         {
-            callback();
+            this.scene.game.addTimer(0.3, function () {
+                callback();
+            })
+            
         }
         
     }

@@ -9,7 +9,7 @@ var load_maprect_image = function() {
 		map_images[i].src = image_path_parent + images_path[i] + ".png";
 
 		map_images[i].onerror = function () {
-			map_images[i].src = "img/robots/1enemy/undefined.png";
+			map_images[i].src = "img/undefined.png";
 		}
 	}
 	return map_images;
@@ -25,7 +25,7 @@ var load_robot_icon_image = function()
 		map_images[i] = img;
 
 		img.onerror = function () {
-			this.src = "img/robots/1/undefined.png";
+			this.src = "img/undefined.png";
 		}
 		img.onload = function () {
 			this.isloaded = true;
@@ -43,7 +43,7 @@ var load_enemy_icon_image = function () {
 		map_images[i] = img;
 
 		img.onerror = function () {
-			this.src = "img/robots/1enemy/undefined.png";
+			this.src = "img/undefined.png";
 		}
 		img.onload = function () {
 			this.isloaded = true;
@@ -61,7 +61,7 @@ var load_robot_image = function() {
 		map_images[i] = img;
 
 		img.onerror = function () {
-			this.src = "img/robots/1/undefined.png";
+			this.src = "img/undefined.png";
 		}
 		img.onload = function () {
 			this.isloaded = true;
@@ -79,7 +79,7 @@ var load_people_image = function () {
 		map_images[i] = img;
 
 		img.onerror = function () {
-			this.src = "img/robots/1/undefined.png";
+			this.src = "img/undefined.png";
 		}
 		img.onload = function () {
 			this.isloaded = true;
@@ -100,7 +100,7 @@ var load_logos = function() {
 		map_images[images_path[i]] = img;
 
 		img.onerror = function () {
-			this.src = "img/robots/1/undefined.png";
+			this.src = "img/undefined.png";
 		}
 		img.onload = function () {
 			this.isloaded = true;
@@ -136,7 +136,7 @@ var ResourceManager = function() {
 			this.img_maprect[key] = img;
 
 			img.onerror = function () {
-				this.src = "img/robots/1/undefined.png";
+				this.src = "img/undefined.png";
 			}
 			img.onload = function () {
 				this.isloaded = true;
@@ -158,7 +158,7 @@ var ResourceManager = function() {
 			this.img_roboticon[i] = img;
 
 			img.onerror = function () {
-				this.src = "img/robots/1/undefined.png";
+				this.src = "img/undefined.png";
 			}
 			img.onload = function () {
 				this.isloaded = true;
@@ -178,7 +178,7 @@ var ResourceManager = function() {
 			this.img_enemyicon[i] = img;
 
 			img.onerror = function () {
-				this.src = "img/robots/1/undefined.png";
+				this.src = "img/undefined.png";
 			}
 			img.onload = function () {
 				this.isloaded = true;
@@ -198,7 +198,7 @@ var ResourceManager = function() {
 			this.img_robot_image[i] = img;
 
 			img.onerror = function () {
-				this.src = "img/robots/1/undefined.png";
+				this.src = "img/undefined.png";
 			}
 			img.onload = function () {
 				this.isloaded = true;
@@ -218,7 +218,7 @@ var ResourceManager = function() {
 			this.img_people_image[i] = img;
 
 			img.onerror = function () {
-				this.src = "img/robots/1/undefined.png";
+				this.src = "img/undefined.png";
 			}
 			img.onload = function () {
 				this.isloaded = true;
