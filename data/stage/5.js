@@ -118,6 +118,24 @@ var g_stages_data_stage5 = {
 
                 ],
             },
+
+            {
+                type: "moveRobot",
+                data: {
+                    people: 35,
+                    x: 18,
+                    y: 11,
+                },
+            },
+            {
+                type: "attackRobot",
+                data: {
+                    people: 35,
+                    weapon: 1,
+                    targetPeople: 40,
+                },
+            },
+
             {
                 type: "removeRobot",
                 data: 

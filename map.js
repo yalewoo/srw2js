@@ -78,8 +78,8 @@ var Map = function(scene_main, stage){
 
 		updateMapRectUI(this.maprects[x][y]);
 
-		//var ani = new AnimationBoom(this.scene, x, y, 1, 30);
-		//this.scene.addAnimation(ani);
+		// var ani = new Weapon66(this.scene, x, y, 1, 30);
+		// this.scene.addAnimation(ani);
 
 
 		//g_buttonCanvasManager.addButtonHandler("Test", null, x*32, y*32, 50, 100);
@@ -111,17 +111,17 @@ var MapRect = function(context2D, x, y, type, style){
 	this.draw = function() {
 		this.context2D.drawImage(this.img,this.x*32,this.y*32);
 	}
-	this.typeName = g_map_data_typename[type];
+	this.typeName = g_map_data_typename[this.style][type];
 
 	   
 	this.moveConsume = [1,1,1];
-	this.moveConsume[0] = g_map_data_moveConsumeTable[0][this.kind];
-	this.moveConsume[1] = g_map_data_moveConsumeTable[1][this.kind];
-	this.moveConsume[2] = g_map_data_moveConsumeTable[2][this.kind];
+	this.moveConsume[0] = g_map_data_moveConsumeTable[this.style][0][this.kind];
+	this.moveConsume[1] = g_map_data_moveConsumeTable[this.style][1][this.kind];
+	this.moveConsume[2] = g_map_data_moveConsumeTable[this.style][2][this.kind];
 
-	if (this.style == "C" && m_kind == 1)
+	if (this.style == "C" && this.kind == 1)
 	{
-		m_moveConsume[2] = 1;
+		this.moveConsume[2] = 1;
 	}
 
 }

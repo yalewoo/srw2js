@@ -452,8 +452,16 @@ var SceneMain = function (game) {
 
 		g_buttonManager.clear();
 
-		selectedRobot.inAIMove = true;
-		selectedRobot.moveTo(xTo, yTo, callback);
+		if (xTo && yTo) {
+			selectedRobot.inAIMove = true;
+			selectedRobot.moveTo(xTo, yTo, callback);
+		}
+		else
+		{
+			callback();
+		}
+
+		
 	}
 
 	this.money_total = 0;
@@ -585,6 +593,33 @@ var SceneMain = function (game) {
 				}
 				g_buttonManager.unshowButton1();
 			}
+			else if (arr[i].type == "attackRobot") {
+				var data = arr[i].data;
+				peopleid = data.people;
+				var robot = this.robots.getRobotByPeopleId(peopleid);
+				var weapon;
+				if (data.weapon == 1) weapon = robot.weapon1;
+				if (data.weapon == 2) weapon = robot.weapon2;
+				if (weapon.id == 66) {
+					robot.selectedWeapon = weapon;
+					robot.attackCore(function() {
+						self.executeStageEventCore(i + 1, arr, callback);
+					});
+				}
+				else
+				{
+					var enemyPeopleId = data.targetPeople;
+					var enemy = this.robots.getRobotByPeopleId(enemyPeopleId);
+					robot.selectedWeapon = weapon;
+					robot.attackDo(enemy, function() {
+						self.executeStageEventCore(i + 1, arr, callback);
+					});
+					
+				}
+				
+				g_buttonManager.unshowButton1();
+			}
+			
 			else {
 				callback();
 			}

@@ -51,7 +51,7 @@ var updateRobotUI = function(robot)
     updateValuebyDomId("robot_pilot_name", pilotName);
 
 
-    updateValuebyDomId("robot_spirit_total", robot.pilot.spirit_total0);
+    updateValuebyDomId("robot_spirit_total", robot.pilot.spirit_total);
 
     updateValuebyDomId("robot_spirit", robot.pilot.spirit);
     updateValuebyDomId("robot_hp", robot.hp);
@@ -70,14 +70,22 @@ var updateRobotUI = function(robot)
     d.innerHTML = "";
     d.append(g_resourceManager.get_img_people_image(robot.pilot.id));
 
-    updateValuebyDomId("weapon1_name", robot.weapon1.name );
+    var weapon1_name = robot.weapon1.name;
+    if (g_debug_mode_enabled) {
+        weapon1_name += "(" + robot.weapon1.id + ")";
+    }
+    updateValuebyDomId("weapon1_name", weapon1_name );
     updateValuebyDomId("weapon1_hitrate", robot.weapon1.hitRadio);
     updateValuebyDomId("weapon1_range", robot.weapon1.range);
     updateValuebyDomId("weapon1_power_sky", robot.weapon1.firepower[0] == 0 ? 0 : robot.weapon1.firepower[0] + robot.strength );
     updateValuebyDomId("weapon1_power_land", robot.weapon1.firepower[1] == 0 ? 0 : robot.weapon1.firepower[1] + robot.strength );
     updateValuebyDomId("weapon1_power_sea", robot.weapon1.firepower[2] == 0 ? 0 : robot.weapon1.firepower[2] + robot.strength );
 
-    updateValuebyDomId("weapon2_name", robot.weapon2.name );
+    var weapon2_name = robot.weapon2.name;
+    if (g_debug_mode_enabled) {
+        weapon2_name += "(" + robot.weapon2.id + ")";
+    }
+    updateValuebyDomId("weapon2_name", weapon2_name );
     updateValuebyDomId("weapon2_hitrate", robot.weapon2.hitRadio);
     updateValuebyDomId("weapon2_range", robot.weapon2.range);
     updateValuebyDomId("weapon2_power_sky", robot.weapon2.firepower[0] == 0 ? 0 : robot.weapon2.firepower[0] + robot.strength );

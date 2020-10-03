@@ -388,6 +388,9 @@ var Robots = function (scene_main) {
 
             }
             else if (robot == this.selectedRobot) {
+                if (robot.selectedWeapon && robot.selectedWeapon.id == 164) {
+                    robot.addHp(robot.hp_total/2);
+                }
                 robot.setNotActive();
 
             }
@@ -501,6 +504,26 @@ var Robots = function (scene_main) {
 
         g_buttonManager.unshowButton1();
         var stage = this.scene.stage;
+
+        if (g_stages[stage].quanxiang.check) {
+            if (g_stages[stage].quanxiang.check.type == "hpLessThan") {
+                var pid = g_stages[stage].quanxiang.check.peopleId;
+                var hpTarget = g_stages[stage].quanxiang.check.hpTarget;
+                var r = this.getRobotByPeopleId(pid);
+                if (r.hp >= hpTarget) {
+                    var talk_data = g_stages[stage].quanxiang.talks2;
+                    this.scene.talkDiag = new TalkDiag(game, talk_data);
+                    var self = this;
+                    this.scene.talkDiag.setFinishHandler(function () {
+                        self.scene.talkDiag.clear();
+                        self.scene.talkDiag = null;
+                        robot.setNotActive();               
+                    })
+                    return;
+                }
+            }
+        }
+
         var talk_data = g_stages[stage].quanxiang.talks;
         var newrobot = g_stages[stage].quanxiang.robot;
         this.scene.talkDiag = new TalkDiag(game, talk_data);
@@ -528,9 +551,6 @@ var Robots = function (scene_main) {
             robot.updateLevel();
             robot.InitValue();
             self.robots.push(robot);
-            
-
-            
         })
 
         

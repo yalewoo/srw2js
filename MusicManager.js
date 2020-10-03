@@ -17,6 +17,7 @@ var MusicManager = function() {
         attack: "audio/wav/huoqiu.mp3",
         boom: "audio/wav/boom.mp3",
         recover: "audio/wav/recover.mp3",
+        weapon66: "audio/wav/weapon66.mp3",
         80: "audio/music/80.wav",
         81: "audio/music/81.wav",
         82: "audio/music/82.wav",

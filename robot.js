@@ -294,21 +294,56 @@ var Robot = function (robotData, scene_main) {
 	}
 
 	this.attack1 = function() {
-		log("attack1")
 		this.selectedWeapon = this.weapon1;
-		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
-		this.scene.setBlackEffect(m);
-		g_buttonManager.clear();
+		this.attackCore();
 	}
 
 	this.attack2 = function () {
-		this.selectedWeapon = this.weapon1;
-		var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
-		this.scene.setBlackEffect(m);
+		this.selectedWeapon = this.weapon2;
+		this.attackCore();
+	}
+	this.attackCore = function(callback) {
+		if (this.selectedWeapon.id == 66) {
+			this.scene.setBlackEffect(null);
+			this.scene.game.musicManager.PlayOnceFromStart("weapon66");
+
+			var robot = this;
+			var scene = robot.scene;
+			var ani = new Weapon66(this.scene, this.x, this.y, function() {
+				var robots = robot.scene.robots;
+				var enemys = robots.enemy;
+
+				for (var i = 0; i < enemys.length; ++i) {
+					var enemy = enemys[i];
+					if (robot.canAttackRobotUsingWeapon(enemy, robot.selectedWeapon)) {
+						var damage = BattleCanvas.getDamage(robot, enemy, robot.selectedWeapon);
+						var ani = new TextAnimation(scene, enemy.x, enemy.y, "-" + damage, function() {
+							if (callback) {
+								callback();
+							}
+						});
+						scene.addAnimation(ani);
+						enemy.hp = Math.max(enemy.hp - damage, 0);
+						enemy.checkRobotHp();
+					}
+				}
+
+
+				robot.setNotActive();
+			});
+			this.scene.addAnimation(ani);
+		}
+		else
+		{
+			var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
+			this.scene.setBlackEffect(m);
+			
+		}
 		g_buttonManager.clear();
+
 	}
 
-	this.attackDo = function(enemy)
+	this.attackDo = function(enemy, callback)
 	{
 		var self = this;
 
@@ -328,61 +363,47 @@ var Robot = function (robotData, scene_main) {
 				scene_battle.setFinishHandler(function () {
 					self.scene.game.scene = scene_main;
 					self.setNotActive();
-					if (enemy.hp <= 0) {
-						scene_main.game.musicManager.PlayOnceFromStart("boom");
-
-						var ani = new AnimationBoom(scene_main, enemy.x, enemy.y, 1, 24, function() {
-							scene_main.robots.deleteRobot(enemy);
-							scene_main.checkEvent();
-							var stage = self.scene.stage;
-							if (g_stages[stage] && g_stages[stage].afterboom_event) {
-								if (g_stages[stage].afterboom_event)
-								{
-									if (g_stages[stage].afterboom_event[enemy.people]) {
-										var arr = [];
-										arr.push(g_stages[stage].afterboom_event[enemy.people])
-										self.scene.executeStageEventCore(0, arr, function() {
-
-										});
-									}
-								}
-							}
-						
+					enemy.checkRobotHp();
+					self.checkRobotHp();
 					
-
-						});
-						scene_main.addAnimation(ani);
-						
-					}
-					if (self.hp <= 0) {
-						scene_main.game.musicManager.PlayOnceFromStart("boom");
-
-						var ani = new AnimationBoom(scene_main, self.x, self.y,1, 24, function() {
-							scene_main.robots.deleteRobot(self);
-							scene_main.checkEvent();
-
-							var stage = self.scene.stage;
-							if (g_stages[stage] && g_stages[stage].afterboom_event) {
-								if (g_stages[stage].afterboom_event) {
-									if (g_stages[stage].afterboom_event[self.people]) {
-										var arr = [];
-										arr.push(g_stages[stage].afterboom_event[self.people])
-										self.scene.executeStageEventCore(0, arr, function() {
-											
-										});
-									}
-								}
-							}
-
-						});
-						scene_main.addAnimation(ani);
-					}
+					if (callback)
+						callback();
 
 				});
 				self.scene.game.scene = scene_battle;
 			})
 		}
 		
+	}
+
+	this.checkRobotHp = function() {
+		var robot = this;
+		var self = this;
+		if (robot.hp <= 0) {
+			scene_main.game.musicManager.PlayOnceFromStart("boom");
+
+			var ani = new AnimationBoom(scene_main, robot.x, robot.y, 1, 24, function () {
+				scene_main.robots.deleteRobot(robot);
+				scene_main.checkEvent();
+				var stage = self.scene.stage;
+				if (g_stages[stage] && g_stages[stage].afterboom_event) {
+					if (g_stages[stage].afterboom_event) {
+						if (g_stages[stage].afterboom_event[robot.people]) {
+							var arr = [];
+							arr.push(g_stages[stage].afterboom_event[robot.people])
+							self.scene.executeStageEventCore(0, arr, function () {
+
+							});
+						}
+					}
+				}
+
+
+
+			});
+			scene_main.addAnimation(ani);
+
+		}
 	}
 
 	
@@ -483,6 +504,8 @@ Robot.prototype.updateLevel = function () {
 	this.speed = this.property.robot_speed0 + this.pilot.speed + this.getLevelPropertyPlus(this.property.robot_speed_plus, this.level);
 	this.strength = this.property.robot_strength0 + this.pilot.strength + this.getLevelPropertyPlus(this.property.robot_strength_plus, this.level);
 	this.defense = this.property.robot_defense0 + this.pilot.defense + this.getLevelPropertyPlus(this.property.robot_defense_plus, this.level);
+
+	this.pilot.spirit_total = this.pilot.spirit_total0 + 5 * (this.level-1);
 }
 
 Robot.prototype.InitValue = function () {
@@ -494,7 +517,7 @@ Robot.prototype.InitValue = function () {
 		this.exp = 0;
 	}
 	this.hp = this.hp_total;
-
+	this.pilot.spirit = this.pilot.spirit_total;
 
 }
 
