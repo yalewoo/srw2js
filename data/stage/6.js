@@ -1,4 +1,4 @@
-var g_stages_data_stage6 = {
+g_stages[6] = {
     title: "破坏敌要塞",
     mapStyle: "A",
     map: [

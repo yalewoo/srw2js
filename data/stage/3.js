@@ -1,4 +1,4 @@
-var g_stages_data_stage3 = {
+g_stages[3] = {
     title: "达尔卡之血",
     mapStyle: "B",
     map: [

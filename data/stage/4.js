@@ -1,4 +1,4 @@
-var g_stages_data_stage4 = {
+g_stages[4] = {
     title: "S 巴库",
     mapStyle: "A",
     map: [

@@ -1,4 +1,5 @@
-var g_stages_data_stage1 = {
+var g_stages = {};
+g_stages[1] = {
     title: "救出刚达z",
     map: [
         [4, 1, 1, 4, 4, 7, 7, 7, 2, 4, 4, 4, 4, 4, 4, 4,],

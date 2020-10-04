@@ -226,9 +226,25 @@ var SceneMain = function (game) {
 		}
 	}
 
+	this.getSavedExp = function(peopleId) {
+		var json = window.localStorage.getItem("srw2js_save_data");
+		if (json) {
+			datas = JSON.parse(json);
+		}
+		if (datas) {
+			for (var i = this.stage - 1; i > 0; --i) {
+				if (datas[i][peopleId]) {
+					return datas[i][peopleId];
+				}
+			}
+		}
+		
+		return 0;
+	}
+
 	this.loadStage = function(stage)
 	{
-		var robots_exps = {};
+		this.immediateEventDone = {};
 		if (stage != 1){
 			var json = window.localStorage.getItem("srw2js_save_data");
 			if (json) {
@@ -236,8 +252,7 @@ var SceneMain = function (game) {
 			}
 			if (datas && datas[stage-1])
 			{
-				robots_exps = datas[stage-1];
-				this.money_total = datas["this.money_total"];
+				this.money_total = datas["money_total"];
 			}
 		}
 			
@@ -251,15 +266,11 @@ var SceneMain = function (game) {
 		this.robots = new Robots(this);
 		this.robots.loadStage(stage);
 
-		if (stage != 1) {
-			this.robots.loadStage_setExp(robots_exps);
-		}
 
 		this.round = 1;
 	}
 
 	var self = this;
-
 	this.loadFromFile = function() {
 
 		this.startFromFile = true;
@@ -279,6 +290,18 @@ var SceneMain = function (game) {
 			self.robots.addRobotsRuntime(o.arr);
 	
 			self.round = o.round;
+
+			var stage = self.stage;
+			if (stage != 1) {
+				var json = window.localStorage.getItem("srw2js_save_data");
+				if (json) {
+					datas = JSON.parse(json);
+				}
+				if (datas && datas[stage - 1]) {
+					this.money_total = datas["money_total"];
+				}
+			}
+
 
 			return true;
 		}
@@ -573,12 +596,40 @@ var SceneMain = function (game) {
 				peopleid = data.people;
 				var robot = this.robots.getRobotByPeopleId(peopleid)
 				if (robot) {
-					robot.moveTo(data.x, data.y, function() {
-						self.setBlackEffect(null);
-						robot.setNotActive();
-						robot.setActive();
-						self.executeStageEventCore(i + 1, arr, callback);
-					})
+					if (data.x && data.y) {
+						robot.moveTo(data.x, data.y, function () {
+							self.setBlackEffect(null);
+							robot.setNotActive();
+							robot.setActive();
+							self.executeStageEventCore(i + 1, arr, callback);
+						});
+					}
+					else if (data.targetPeople) {
+						var enemy = this.robots.getRobotByPeopleId(data.targetPeople);
+						if (enemy) {
+							var x = enemy.x + data.targetPeopleX;
+							var y = enemy.y + data.targetPeopleY;
+							robot.moveTo(x, y, function () {
+								self.setBlackEffect(null);
+								robot.setNotActive();
+								robot.setActive();
+								self.executeStageEventCore(i + 1, arr, callback);
+							});
+						}
+						else{
+							log("未识别的剧情事件");
+							log(arr[i]);
+							self.executeStageEventCore(i + 1, arr, callback);
+						}
+						
+					}
+					
+				}
+				else
+				{
+					log("未识别的剧情事件");
+					log(arr[i]);
+					self.executeStageEventCore(i + 1, arr, callback);
 				}
 				g_buttonManager.unshowButton1();
 			}
@@ -621,7 +672,9 @@ var SceneMain = function (game) {
 			}
 			
 			else {
-				callback();
+				log("未识别的剧情事件");
+				log(arr[i]);
+				self.executeStageEventCore(i + 1, arr, callback);
 			}
 		}
 		else
@@ -644,6 +697,23 @@ var SceneMain = function (game) {
 		}
 	}
 
+	this.checkImmediateEvent = function() {
+		//this.immediateEventDone
+		if (g_stages[this.stage] && g_stages[this.stage].immediateEvent) {
+			for (var i = 0; i < g_stages[this.stage].immediateEvent.length; ++i) {
+				if (!this.immediateEventDone[i]) {
+					var d = g_stages[this.stage].immediateEvent[i];
+					if (this.robots.checkCondition(d.check)) {
+						this.immediateEventDone[i] = true;
+						this.executeStageEventCore(0, d.events, function () {
+
+						});
+					}
+				}
+
+			}
+		}
+	}
 	this.checkEvent = function() {
 		
 

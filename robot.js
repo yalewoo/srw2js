@@ -379,6 +379,10 @@ var Robot = function (robotData, scene_main) {
 	this.checkRobotHp = function() {
 		var robot = this;
 		var self = this;
+
+		scene_main.checkImmediateEvent();
+		
+
 		if (robot.hp <= 0) {
 			scene_main.game.musicManager.PlayOnceFromStart("boom");
 
@@ -411,7 +415,8 @@ var Robot = function (robotData, scene_main) {
 	this.setNotActive = function()
 	{
 		
-
+		this.inMove = false;
+		this.afterMove = false;
 		this.active = false;
 		if (this.drawIgnoreMainShip)
 		{

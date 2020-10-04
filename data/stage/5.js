@@ -1,4 +1,4 @@
-var g_stages_data_stage5 = {
+g_stages[5] = {
     title: "背叛的荒野",
     mapStyle: "A",
     map: [
