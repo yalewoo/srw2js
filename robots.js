@@ -503,6 +503,12 @@ var Robots = function (scene_main) {
             this.enemy[i].setActive();
         }
     }
+    this.setAllSpirit = function () {
+        for (var i = 0; i < this.robots.length; ++i) {
+            this.robots[i].spirit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+        
+    }
 
     this.checkCondition = function (checkData) {
         if (checkData) {

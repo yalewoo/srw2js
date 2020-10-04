@@ -488,7 +488,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 BattleCanvas.getDamage = function (robot2, enemy2, weapon2) {
     var damage = robot2.strength + weapon2.firepower[enemy2.property.type] - enemy2.defense;
     if (robot2.spirit[10]) { // 热血
-        damage *= 2;
+        damage *= 3;
     }
     if (robot2.spirit[4]) { // 强攻
         damage *= 2;

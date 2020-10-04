@@ -7,6 +7,8 @@ var SceneMain = function (game) {
 	this.canvas.width = 18*32;
 	this.canvas.height = 22*32;
 
+	this.immediateEventDone = {};
+
 	var self = this;
 
 	this.registerHandler = function() {
@@ -244,7 +246,7 @@ var SceneMain = function (game) {
 
 	this.loadStage = function(stage)
 	{
-		this.immediateEventDone = {};
+		this.immediateEventDone = {}
 		if (stage != 1){
 			var json = window.localStorage.getItem("srw2js_save_data");
 			if (json) {
@@ -290,6 +292,7 @@ var SceneMain = function (game) {
 			self.robots.addRobotsRuntime(o.arr);
 	
 			self.round = o.round;
+			self.immediateEventDone = o.immediateEventDone;
 
 			var stage = self.stage;
 			if (stage != 1) {
@@ -316,7 +319,8 @@ var SceneMain = function (game) {
 	this.saveToFile = function() {
 		var o = {stage: self.stage, round: self.round};
 		o.arr = self.robots.getRobotRuntimeArr();
-		
+		o.immediateEventDone = self.immediateEventDone;
+
 		var str = JSON.stringify(o);
 
 		window.localStorage.setItem("srw2js_save", str);
@@ -669,6 +673,12 @@ var SceneMain = function (game) {
 				}
 				
 				g_buttonManager.unshowButton1();
+			}
+			else if (arr[i].type == "playMusic") {
+				var data = arr[i].data;
+				this.game.musicManager.stopAll();
+				this.game.musicManager.PlayOnceFromStart(data.musicid);
+				self.executeStageEventCore(i + 1, arr, callback);
 			}
 			
 			else {
