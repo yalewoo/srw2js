@@ -79,7 +79,7 @@ var Game = function(canvas, fps)
 
 	
 
-	this.musicManager = new MusicManager();
+	this.musicManager = new MusicManager(this);
 
 	var self = this;
 	canvas.addEventListener("mousemove", function (e) {

@@ -1,4 +1,5 @@
-var MusicManager = function() {
+var MusicManager = function(game) {
+    this.game = game;
     this.audio1 = document.getElementById('music1');
     this.audio2 = document.getElementById('music2');
     this.audio3 = document.getElementById('music3');
@@ -28,7 +29,12 @@ var MusicManager = function() {
         87: "audio/music/87.wav",
         88: "audio/music/88.wav",
         89: "audio/music/89.wav",
-        90: "audio/music/90.wav",
+        "8A": "audio/music/8A.wav",
+        "8B": "audio/music/8B.wav",
+        "8C": "audio/music/8C.wav",
+        "8D": "audio/music/8D.wav",
+        "8E": "audio/music/8E.wav",
+        "9F": "audio/music/9F.wav",
         91: "audio/music/91.wav",
         92: "audio/music/92.wav",
         93: "audio/music/93.wav",
@@ -38,6 +44,10 @@ var MusicManager = function() {
     this.currentLoop = null;
 
     this.PlayOnceFromStart = function(name, callback) {
+        
+
+
+
         if (!this.audios[name])
         {
             this.audios[name] = new Audio(this.audios_name[name]);
@@ -54,6 +64,17 @@ var MusicManager = function() {
         }
     }
     this.PlayLoopFromStart = function (name, recordCurrent) {
+        if (name == "main_robot") {
+            if (this.game && this.game.scene && this.game.scene.map && this.game.scene.map.style == "D") {
+                name = "8C"
+            }
+        }
+        if (name == "main_enemy") {
+            if (this.game && this.game.scene && this.game.scene.map && this.game.scene.map.style == "D") {
+                name = 91
+            }
+        }
+
         recordCurrent = recordCurrent == false ? false : true;
         if (!this.audios[name]) {
             this.audios[name] = new Audio(this.audios_name[name]);
