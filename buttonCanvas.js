@@ -1,4 +1,4 @@
-var ButtonInfo = function (id, name, callback, x, y, width, height) {
+var ButtonInfo = function (id, name, callback, x, y, width, height, font) {
     this.id = id;
     this.text = name;
     this.handler = callback;
@@ -6,6 +6,10 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
     this.y = y;
     this.width = width;
     this.height = height;
+    this.font = 13 * 4 + "px 黑体";
+    if (font) {
+        this.font = font;
+    }
 
     this.clicked = false;
     this.hovered = false;
@@ -28,8 +32,8 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
         {
             this.hovered = false;
         }
-
     }
+
     this.clickHandler = function (event) {
         if (this.intersects(event.offsetX, event.offsetY)) {
             g_buttonCanvasManager.clear();
@@ -45,7 +49,6 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
 
     this.draw = function (context2D) {
         //set color
-
         var color;
         if (this.hovered) {
             color = "red";
@@ -55,21 +58,6 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
         }
 
         this.drawButton(context2D, color, this.x, this.y, this.width, this.height, 20, this.text);
-        // //draw button
-        // context2D.fillRect(this.x, this.y, this.width, this.height);
-
-        // //text options
-        // var fontSize = 20;
-        // context2D.fillStyle = "black";
-        // context2D.font = fontSize + "px sans-serif";
-
-        // //text position
-        // var textSize = context2D.measureText(this.text);
-        // var textX = this.x + (this.width / 2) - (textSize.width / 2);
-        // var textY = this.y + (this.height / 2) - (fontSize / 2);
-
-        // //draw the text
-        // context2D.fillText(this.text, textX, textY);
     }
 
     this.drawButton = function(ctx, color, x, y, width, height, radius, text){
@@ -93,7 +81,7 @@ var ButtonInfo = function (id, name, callback, x, y, width, height) {
 
         ctx.beginPath();
         ctx.fillStyle = "#fff";
-        ctx.font = 13 * 4 + "px 黑体";
+        ctx.font = this.font;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(text, x + width / 2, y + height / 2);
@@ -109,10 +97,26 @@ var ButtonCanvasManager = function (ctx) {
 
 
     this.addButtonHandler = function (name, callback, x, y, width, height) {
-
         var buttoninfo = new ButtonInfo(this.count, name, callback, x, y, width, height);
         this.buttons.push(buttoninfo);
+    }
+    this.addButtonForRobot = function (name, xRobot, yRobot, callback) {
+        var index = this.buttons.length;
+        var x = xRobot * 32 + 32;
+        var y = yRobot * 32;
+        var width = 100;
+        var height = 40;
+        var font = "32px 黑体";
 
+        y += index * 50;
+        if (y > ctx.canvas.height - 32) {
+            y = yRobot * 32 - index * 50;
+        }
+        if (x > ctx.canvas.width - 128) {
+            x = xRobot * 32 - 118;
+        }
+        var buttoninfo = new ButtonInfo(this.count, name, callback, x, y, width, height, font);
+        this.buttons.push(buttoninfo);
     }
 
     this.hasAnyButton = function() {
@@ -133,6 +137,7 @@ var ButtonCanvasManager = function (ctx) {
 
     this.clear = function () {
         this.buttons = []
+        
     }
 
 

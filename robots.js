@@ -19,6 +19,21 @@ var Robots = function (scene_main) {
         }
     }
 
+    this.setRobotToLast = function (robot) {
+        var index = this.robots.indexOf(robot);
+        if (index > -1) {
+            this.robots.splice(index, 1);
+            this.robots.push(robot);
+        }
+
+        index = this.enemy.indexOf(robot);
+        if (index > -1) {
+            this.enemy.splice(index, 1);
+            this.enemy.push(robot);
+        }
+    }
+
+
     this.context2D = context2D;
     this.loadStage = function (stage) {
 
@@ -328,8 +343,6 @@ var Robots = function (scene_main) {
         }
     }
     this.draw = function () {
-        updateRobotUI(this.selectedRobot);
-
         for (var i = 0; i < this.robots.length; ++i) {
             this.robots[i].draw();
         }
@@ -339,7 +352,7 @@ var Robots = function (scene_main) {
     }
 
     this.mousehoverHandler = function (x, y) {
-
+        return;
         for (var i = 0; i < this.robots.length; ++i) {
             if (this.robots[i].x == x && this.robots[i].y == y) {
                 log(this.robots[i]);
@@ -384,103 +397,6 @@ var Robots = function (scene_main) {
         }
         return null;
     }
-    this.mousedownHandler = function (x, y) {
-        var robot = this.getRobotAt(x, y);
-        if (robot) {
-            if (g_debug_mode_enabled){
-                log(robot)
-            
-            }
-                
-            if (robot.inMove) {
-
-            }
-            else if (robot == this.selectedRobot) {
-                if (robot.selectedWeapon && robot.selectedWeapon.id == 164) {
-                    robot.addHp(robot.hp_total/2);
-                }
-                robot.setNotActive();
-
-            }
-
-            else if (this.selectedRobot == null) {
-                updateMapRectUI(null);
-
-                this.selectedRobot = robot;
-
-                var m = this.scene.calculateMoveRangeCore(robot, x, y, -1, false);
-
-                this.scene.setBlackEffect(m);
-
-                showMenu1(this);
-            }
-            else {
-
-                //使用选择的武器攻击
-                if (this.selectedRobot.selectedWeapon && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.selectedWeapon)) {
-
-                    this.selectedRobot.attackDo(robot);
-
-                }
-                // //两个武器都能攻击时，显示菜单让玩家选择武器
-                // else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)
-                // 	&& this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2))
-                // {
-                // 	log("both weapons can attack")
-                // }
-                // 只有武器1能攻击到时自动使用武器1
-                else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon1)) {
-                    this.selectedRobot.selectedWeapon = this.selectedRobot.weapon1;
-                    this.selectedRobot.attackDo(robot);
-                }
-                // 只有武器2能攻击到时自动使用武器2
-                else if (this.selectedRobot && this.selectedRobot.canAttackRobotUsingWeapon(robot, this.selectedRobot.weapon2)) {
-                    this.selectedRobot.selectedWeapon = this.selectedRobot.weapon2;
-                    this.selectedRobot.attackDo(robot);
-                }
-                else if (this.selectedRobot) {
-                    if (robot.pilot.id == 54)
-                    {
-                        var self = this;
-                        if (this.scene.canMoveTo(x, y))
-                        {
-                            // robot是母舰
-                            this.scene.setBlackEffect(null);
-
-                            this.selectedRobot.moveTo(x, y, function() {
-
-                                robot.passengers.push(self.selectedRobot);
-                                self.selectedRobot.inMainShip = robot;
-                                self.selectedRobot.setNotActive();
-                            });
-                            
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
-        else {
-            if (this.selectedRobot) {
-                if (this.selectedRobot.afterMove)
-                {
-
-                }
-                else
-                {
-                    if (this.scene.canMoveTo(x, y)) {
-                        this.selectedRobot.moveTo(x, y);
-                        //this.selectedRobot = null;
-                        this.scene.setBlackEffect(null);
-                    }
-                }
-                
-            }
-
-            return false;
-        }
-    }
 
     this.setSelectedRobotInactive = function () {
         if (this.selectedRobot) {
@@ -490,7 +406,6 @@ var Robots = function (scene_main) {
         }
 
         this.scene.setBlackEffect(null);
-        g_buttonManager.clear();
         g_buttonCanvasManager.clear();
 
     }
@@ -538,7 +453,6 @@ var Robots = function (scene_main) {
         robot.setNotActive();
         robot.setActive();
 
-        g_buttonManager.unshowButton1();
         var stage = this.scene.stage;
 
         if (!this.checkCondition(g_stages[stage].quanxiang.check)) {           

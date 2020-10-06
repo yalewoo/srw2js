@@ -153,3 +153,6 @@ function toBlack(imgdata) {
 }
 
 
+var gf_getNeighbor = function(x, y) {
+    return [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
+}

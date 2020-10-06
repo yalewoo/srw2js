@@ -82,6 +82,8 @@ var Game = function(canvas, fps)
 	this.musicManager = new MusicManager(this);
 
 	var self = this;
+
+	//鼠标滑过
 	canvas.addEventListener("mousemove", function (e) {
 		g_buttonCanvasManager.hoverHandler(e);
 
@@ -89,6 +91,7 @@ var Game = function(canvas, fps)
 
 	});
 
+	// 左键点击
 	canvas.addEventListener("click", function (e) {
 		if (g_buttonCanvasManager.clickHandler(e)) {
 			return;
@@ -97,7 +100,7 @@ var Game = function(canvas, fps)
 		self.scene.clickHandler(e);
 	});
 
-
+	// 右键点击
 	var canvasDom = document.getElementById("myCanvas");
 	canvasDom.oncontextmenu = function (e) {
 		self.scene.rightClickHandler(e);

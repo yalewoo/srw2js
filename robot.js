@@ -95,34 +95,42 @@ var Robot = function (robotData, scene_main) {
 
 	this.moveSpeedUI = 4;
 	this.update = function () {
-		var inMoveOld = this.inMove;
-		if (this.xFloat < 0) {
-			this.xFloat += this.moveSpeedUI;
-			this.xFloat = Math.min(this.xFloat, 0)
-		}
-		else if (this.xFloat > 0) {
-			this.xFloat -= this.moveSpeedUI;
-			this.xFloat = Math.max(this.xFloat, 0)
+		if (this.inMove && this.movePaths && this.movePaths.length > 0) {
+			var inMoveOld = this.inMove;
+			var point = this.movePaths[this.movePaths.length - 1];
+			var xTarget = point[0] * 32;
+			var yTarget = point[1] * 32;
 
-		}
-		else if (this.yFloat < 0) {
-			this.yFloat += this.moveSpeedUI;
-			this.yFloat = Math.min(this.yFloat, 0)
+			if (this.xFloat < xTarget) {
+				this.xFloat += this.moveSpeedUI;
+				this.xFloat = Math.min(this.xFloat, xTarget)
+			}
+			else if (this.xFloat > xTarget) {
+				this.xFloat -= this.moveSpeedUI;
+				this.xFloat = Math.max(this.xFloat, xTarget)
 
-		}
-		else if (this.yFloat > 0) {
-			this.yFloat -= this.moveSpeedUI;
-			this.yFloat = Math.max(this.yFloat, 0)
+			}
+			else if (this.yFloat < yTarget) {
+				this.yFloat += this.moveSpeedUI;
+				this.yFloat = Math.min(this.yFloat, yTarget)
 
-		}
-		else
-		{
-			this.inMove = false;
-			if (inMoveOld != this.inMove)
-			{
-				this.moveFinished(this.x, this.y);
+			}
+			else if (this.yFloat > yTarget) {
+				this.yFloat -= this.moveSpeedUI;
+				this.yFloat = Math.max(this.yFloat, yTarget)
+
+			}
+			else {
+				this.movePaths.pop();
+				if (this.movePaths.length == 0) {
+					this.inMove = false;
+					if (inMoveOld != this.inMove) {
+						this.moveFinished(this.x, this.y);
+					}
+				}
 			}
 		}
+		
 	}
 	this.draw = function() {
 
@@ -134,45 +142,48 @@ var Robot = function (robotData, scene_main) {
 		{
 			if (this.inMove)
 			{
-				this.context2D.drawImage(this.img, this.x*32 - this.xFloat, this.y*32 - this.yFloat, this.img.width, this.img.height);
+				this.context2D.drawImage(this.img, this.xFloat, this.yFloat-3, this.img.width, this.img.height);
 
 			}
 			else
 			{
 				this.context2D.drawImage(this.img, this.x * 32, this.y * 32, this.img.width, this.img.height);
 
-			}
+				if (!this.active) {
+					var imgdata = this.context2D.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
+					//console.log(imgdata);
+					imgdata = toGray(imgdata);//灰白滤镜
+					this.context2D.putImageData(imgdata, this.x * 32, this.y * 32);
 
+					// var ctx = this.context2D;
+					// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
 
-			if (!this.active)
-			{
-				var imgdata = this.context2D.getImageData(this.x * 32, this.y * 32, this.img.width, this.img.height);
-				//console.log(imgdata);
-				imgdata = toGray(imgdata);//灰白滤镜
-				this.context2D.putImageData(imgdata, this.x * 32, this.y * 32);
+					// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);
 
-				// var ctx = this.context2D;
-				// ctx.fillColor = 'rgba(66, 66, 66, 0.5)';
-
-				// ctx.fillRect(this.x * 32, this.y * 32, this.img.width, this.img.height, false);
+				}
 
 			}
+
+
+			
 		}
 
 	}
 
 	this.moveTo = function (x, y, callback) {
+		this.scene.robots.setRobotToLast(this);
+		this.movePaths = this.scene.calculateMovePath(this, x, y);
 
 		this.scene.hoverData = null;
 
 		this.xOriginal = this.x;
 		this.yOriginal = this.y;
-		this.xFloat = (x - this.x) * 32;
-		this.yFloat = (y - this.y) * 32;
+		this.xFloat = this.x * 32;
+		this.yFloat = this.y * 32;
 		this.x = x;
 		this.y = y;
 		this.inMove = true;
-		this.moveToCallback = callback;
+		this.moveToCallback = callback;		
 	}
 
 	this.moveFinished = function(x, y) {
@@ -188,10 +199,6 @@ var Robot = function (robotData, scene_main) {
 			{
 				this.drawIgnoreMainShip = false;
 			}
-
-			showMenu1(this.scene.robots);
-
-
 		}
 		else if (this.inAIMove)
 		{
@@ -200,11 +207,29 @@ var Robot = function (robotData, scene_main) {
 
 		}
 		else{
+			// 移动结束后显示武器范围
 			this.afterMove = true;
-			var m = this.scene.calculateMoveRangeCore(this, x, y, 1, true, true);
+
+			var range1 = this.weapon1.range;
+			var range2 = this.weapon2.range;
+			if (range1 != 1 && range2 != 1) {
+				rangeMax = 0;
+			}
+			else {
+				rangeMax = 1;
+			}
+			var m = this.scene.calculateMoveRangeCore(this, x, y, rangeMax, true, true);
+			var neighbors = gf_getNeighbor(x, y);
+			for (var i = 0; i < neighbors.length; ++i) {
+				var enemy = this.scene.robots.getRobotAt(neighbors[i][0], neighbors[i][1]);
+				if (enemy && !this.canAttackRobot(enemy)) {
+					m[neighbors[i][0]][neighbors[i][1]] = -1;
+				}
+			}
+			
+
 
 			this.scene.setBlackEffect(m);
-			showMenu1(this.scene.robots);
 		}
 
 		if (this.passengers.length > 0)
@@ -284,6 +309,15 @@ var Robot = function (robotData, scene_main) {
 
 		return false;
 	}
+	this.canAttackRobot = function (enemy) {
+		if (this.canAttackRobotUsingWeapon(enemy, this.weapon1)) {
+			return true;
+		}
+		if (this.canAttackRobotUsingWeapon(enemy, this.weapon2)) {
+			return true;
+		}
+		return false;
+	}
 
 
 	this.canAttack1 = function() {
@@ -339,8 +373,6 @@ var Robot = function (robotData, scene_main) {
 			this.scene.setBlackEffect(m);
 			
 		}
-		g_buttonManager.clear();
-
 	}
 
 	this.attackDo = function(enemy, callback)
@@ -616,7 +648,6 @@ Robot.prototype.AI_action = function () {
 				canAttack = false;
 			}
 
-			g_buttonManager.clear();
 
 			if (canAttack) {
 				selectedRobot.inAIMove = true;
@@ -660,7 +691,7 @@ Robot.prototype.use_sprit_begin = function (id) {
 
 }
 Robot.prototype.use_sprit_end = function (id) {
-	this.scene.undoSelectedRobot();
+	
 }
 
 Robot.prototype.use_sprit_0 = function ()	//毅力
@@ -864,6 +895,14 @@ Robot.prototype.canUseSpirit = function(id)
 		default: break;
 	}
 }
+Robot.prototype.canUseAnySpirit = function () {
+	for (var i = 0; i < 19; ++i) {
+		if (this.pilot.spirit_table[i] && this.pilot.spirit >= g_spirit_consume_table[i] && this.canUseSpirit(i)) {
+			return true;
+		}
+	}
+	return false;
+}
 
 
 Robot.prototype.canTransform = function()
@@ -932,8 +971,6 @@ Robot.prototype.transform = function(property2)
 
 
 	this.updateLevel();
-
-	showMenu1(this.scene.robots);
 
 }
 

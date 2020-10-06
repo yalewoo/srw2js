@@ -9,17 +9,11 @@ var SceneMain = function (game) {
 
 	this.immediateEventDone = {};
 
+	this.status = "normal";
+
 	var self = this;
 
-	this.registerHandler = function() {
-		var self = this;
-		window.addEventListener("keydown", function (e) {
-			if (Number(e.key)) {
-				self.loadStage(Number(e.key));
-			}
-		})
 
-	}
 
 	this.hoverData = []
 
@@ -34,28 +28,144 @@ var SceneMain = function (game) {
 		if (x != self.currentHoverX || y != self.currentHoverY) {
 			this.hoverData = [x, y];
 		}
+
+		this.robots.mousehoverHandler(x, y);
 	}
+
 	this.clickHandler = function (event)
 	{
 		g_buttonCanvasManager.clear();
 
-		if (self.talkDiag)
+		if (this.talkDiag)
 		{
-			self.talkDiag.clickHandler();
+			this.talkDiag.clickHandler();
 			return;
 		}
 
 
-		var x = Math.floor(event.offsetX / 32)
-		var y = Math.floor(event.offsetY / 32)
+		var x = Math.floor(event.offsetX / 32);
+		var y = Math.floor(event.offsetY / 32);
 
-
-		if (!self.robots.mousedownHandler(x, y)) {
-			self.map.mousedownHandler(x, y);
-
+		var robot = this.robots.getRobotAt(x, y);
+		if (g_debug_mode_enabled) {
+			log(robot);
 		}
 
-		self.game.musicManager.PlayOnceFromStart("click");
+		if (this.status == "normal") {
+			if (robot) {
+				updateRobotUI(robot);
+				if (robot.active || g_debug_mode_enabled) {
+					this.robots.selectedRobot = robot;
+					var m = this.calculateMoveRangeCore(robot, x, y, -1, false);
+					for (var i = 0; i < this.robots.enemy.length; ++i) {
+						var r = this.robots.enemy[i];
+						if (robot.canAttackRobot(r)) {
+							m[r.x][r.y] = 1;
+						}
+						else {
+							m[r.x][r.y] = -1;
+						}
+					}
+					this.setBlackEffect(m);
+					this.status = "robotSelected";
+				}
+				else {
+
+				}
+				
+			}
+			else {
+				this.map.mousedownHandler(x, y);
+			}
+		}
+		else if (this.status == "robotSelected") {
+			var selectedRobot = this.robots.selectedRobot;
+			if (robot) {
+				if (robot == selectedRobot) {
+					// 点击自己显示菜单
+					// this.showRobotMenu(robot);
+				}
+				// 只有武器1能攻击到时自动使用武器1
+                else if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
+					selectedRobot.selectedWeapon = selectedRobot.weapon1;
+					selectedRobot.attackDo(robot);
+					this.status = "normal";
+				}
+				// 只有武器2能攻击到时自动使用武器2
+				else if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon2)) {
+					selectedRobot.selectedWeapon = selectedRobot.weapon2;
+					selectedRobot.attackDo(robot);
+					this.status = "normal";
+				}
+				else if (robot.pilot.id == 54) {
+					
+					if (this.canMoveTo(x, y)) {
+						// robot是母舰
+						this.setBlackEffect(null);
+
+						var self = this;
+						selectedRobot.moveTo(x, y, function () {
+							robot.passengers.push(selectedRobot);
+							selectedRobot.inMainShip = robot;
+							selectedRobot.setNotActive();
+							self.status = "normal";
+						});
+
+					}
+				}
+			}
+			else {
+				// 移动
+				if (this.canMoveTo(x, y) || g_debug_mode_enabled) {
+					var self = this;
+					selectedRobot.moveTo(x, y, function() {
+						self.status = "robotMoved"
+					});
+					this.setBlackEffect(null);
+					this.status = "robotMoving";
+				}
+			}
+		}
+		else if (this.status == "robotMoving") {
+
+		}
+		else if (this.status == "robotMoved") {
+			var selectedRobot = this.robots.selectedRobot;
+			if (robot) {
+				if (robot == selectedRobot) {
+					// 移动后点击自己结束移动
+					// 修理装置修理自己
+					if (robot.selectedWeapon && robot.selectedWeapon.id == 164) {
+						robot.addHp(robot.hp_total / 2);
+					}
+					robot.setNotActive();
+					this.status = "normal";
+				}
+				// 只有武器1能攻击到时自动使用武器1，移动后不能使用远程武器
+				if (selectedRobot && selectedRobot.weapon1.range == 1 && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
+					selectedRobot.selectedWeapon = selectedRobot.weapon1;
+					selectedRobot.attackDo(robot);
+					this.status = "normal";
+				}
+				// 只有武器2能攻击到时自动使用武器2，移动后不能使用远程武器
+				else if (selectedRobot && selectedRobot.weapon2.range && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon2)) {
+					selectedRobot.selectedWeapon = selectedRobot.weapon2;
+					selectedRobot.attackDo(robot);
+					this.status = "normal";
+				}
+			}
+			else {
+				
+			}
+		}
+
+
+
+		
+		
+		
+
+		this.game.musicManager.PlayOnceFromStart("click");
 	}
 
 	this.undoSelectedRobot = function() {
@@ -64,6 +174,7 @@ var SceneMain = function (game) {
 			robot.inCancelMove = true;
 			robot.moveTo(robot.xOriginal, robot.yOriginal);
 			self.setBlackEffect(null);
+			this.status = "robotSelected";
 		}
 		else {
 			
@@ -75,36 +186,157 @@ var SceneMain = function (game) {
 			self.robots.selectedRobot.selectedWeapon = null;
 			self.robots.selectedRobot = null;
 			self.setBlackEffect(null);
-			g_buttonManager.clear();
 			g_buttonCanvasManager.clear();
+			this.status = "normal";
 
 		}
 	}
+
+	this.showRobotMenu = function(robot) {
+		var robots = robot.scene.robots;
+		if (g_debug_mode_enabled) {
+			g_buttonCanvasManager.addButtonForRobot("AI", robot.x, robot.y, function () {
+				robot.AI_action();
+			});
+		}
+
+		// 劝降
+		var stage = this.stage;
+		if (g_stages[stage].quanxiang) {
+
+			var enemyPeople = g_stages[stage].quanxiang[robot.pilot.id];
+			if (enemyPeople) {
+				var enemy = robots.getRobotByPeopleId(enemyPeople);
+				if (enemy) {
+					if ((enemy.x == robot.x && (enemy.y == robot.y - 1 || enemy.y == robot.y + 1)) ||
+						(enemy.y == robot.y && (enemy.x == robot.x - 1 || enemy.x == robot.x + 1))) {
+						g_buttonCanvasManager.addButtonForRobot("劝降", robot.x, robot.y, function () {
+							robots.quanxiang(robot, enemy);
+						})
+					}
+				}
+			}
+
+		}
+
+		// 状态
+		g_buttonCanvasManager.addButtonForRobot("状态", robot.x, robot.y, function () {
+			updateRobotUI(robot);
+		});
+
+		// 起飞
+		if (robot.pilot.id == 54 && robot.passengers.length > 0) {
+			g_buttonCanvasManager.addButtonForRobot("起飞", robot.x, robot.y, function () {
+				for (var i = 0; i < robot.passengers.length; ++i) {
+					var r = robot.passengers[i];
+					(function (r) {
+						g_buttonCanvasManager.addButtonForRobot(r.property.robotName, r.x, r.y, function () {
+							r.scene.robots.selectedRobot = r;
+							r.drawIgnoreMainShip = true;
+							var m = r.scene.calculateMoveRangeCore(r, r.x, r.y, -1, false);
+							r.scene.setBlackEffect(m);
+							r.scene.status = "robotSelected";
+						});
+					})(r);
+
+				}
+			})
+
+		}
+
+		// 精神
+		if (robot.canUseAnySpirit()) {
+			g_buttonCanvasManager.addButtonForRobot("精神", robot.x, robot.y, function () {
+				g_buttonCanvasManager.clear();
+				for (var i = 0; i < 19; ++i) {
+					if (robot.pilot.spirit_table[i] && robot.pilot.spirit >= g_spirit_consume_table[i] && robot.canUseSpirit(i)) {
+						var text = g_spirit_name[i] + "(" + g_spirit_consume_table[i] + ")";
+						(function (text2, i2) {
+							switch (i2) {
+								case 0: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_0() }); break;
+								case 1: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_1() }); break;
+								case 2: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_2() }); break;
+								case 3: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_3() }); break;
+								case 4: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_4() }); break;
+								case 5: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_5() }); break;
+								case 6: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_6() }); break;
+								case 7: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_7() }); break;
+								case 8: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_8() }); break;
+								case 9: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_9() }); break;
+								case 10: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_10() }); break;
+								case 11: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_11() }); break;
+								case 12: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_12() }); break;
+								case 13: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_13() }); break;
+								case 14: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_14() }); break;
+								case 15: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_15() }); break;
+								case 16: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_16() }); break;
+								case 17: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_17() }); break;
+								case 18: g_buttonCanvasManager.addButtonForRobot(text2, robot.x, robot.y, function () { robot.use_sprit_18() }); break;
+								default: break;
+							}
+						})(text, i);
+					}
+				}
+			})
+		}
+
+		// 变形
+		var transforms = robot.canTransform();
+
+		if (transforms.length > 0) {
+			g_buttonCanvasManager.addButtonForRobot("变形", robot.x, robot.y, function () {
+				g_buttonCanvasManager.clear();
+
+				for (var i = 0; i < transforms.length; ++i) {
+					var property = transforms[i];
+					(function (property) {
+						g_buttonCanvasManager.addButtonForRobot(property.robotName, robot.x, robot.y, function () {
+							robot.transform(property);
+						})
+					})(property);
+
+
+				}
+
+			});
+
+
+		}
+
+
+		g_buttonCanvasManager.addButtonForRobot("待命", robot.x, robot.y, function () {
+			robot.setNotActive();
+		})
+
+	}
 	this.rightClickHandler = function (e) {
+		if (g_buttonCanvasManager.hasAnyButton()) {
+			g_buttonCanvasManager.clear();
+			return;
+		}
+
+		var x = Math.floor(e.offsetX / 32);
+		var y = Math.floor(e.offsetY / 32);
+		var robot = this.robots.getRobotAt(x, y);
+		var robots = this.robots;
+		if (robot && this.status == "normal") {
+			this.showRobotMenu(robot);
+			return;
+		}
+
+		// Undo
 		var robot = self.robots.selectedRobot;
 		if (robot) {
 			self.undoSelectedRobot();
 		}
 		else{
-			if (g_buttonCanvasManager.hasAnyButton())
-			{
-				g_buttonCanvasManager.clear();
+			g_buttonCanvasManager.addButtonHandler("回合" + this.round + "结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
 
-			}
-			else
-			{
-				g_buttonCanvasManager.addButtonHandler("回合" + this.round + "结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
-
-				g_buttonCanvasManager.addButtonHandler("Save", self.saveToFile, e.offsetX, e.offsetY+100, 200, 60);
-				g_buttonCanvasManager.addButtonHandler("Load", self.loadFromFile, e.offsetX, e.offsetY+200, 200, 60);
-
-			}
-
+			g_buttonCanvasManager.addButtonHandler("Save", self.saveToFile, e.offsetX, e.offsetY+100, 200, 60);
+			g_buttonCanvasManager.addButtonHandler("Load", self.loadFromFile, e.offsetX, e.offsetY+200, 200, 60);
 		}
 	}
 
-	
-	this.registerHandler();
 
 
 	this.startAttackArrow = function(x, y, x2, y2, callback) {
@@ -129,7 +361,7 @@ var SceneMain = function (game) {
 		g_buttonCanvasManager.update(this.context2D);
 
 		if (this.arrowImg) {
-			this.arrowMoveSpeedUI = 4;
+			this.arrowMoveSpeedUI = 6;
 				if (this.arrowXFloat < 0) {
 					this.arrowXFloat += this.arrowMoveSpeedUI;
 					this.arrowXFloat = Math.min(this.arrowXFloat, 0)
@@ -189,13 +421,28 @@ var SceneMain = function (game) {
 						//console.log(imgdata);
 						imgdata = toGray(imgdata);//灰白滤镜
 						this.context2D.putImageData(imgdata, x * 32, y * 32);
+
+
+
+					}
+
+					if (g_debug_mode_enabled) {
+						var showText = function (ctx, x, y, text) {
+							ctx.beginPath();
+							ctx.fillStyle = "white";
+							ctx.font = 16 + "px 黑体";
+							ctx.textAlign = "middle";
+							ctx.textBaseline = "middle";
+							ctx.fillText(text, x, y);
+							ctx.closePath();
+						}
+						showText(this.context2D, i*32+10, j*32+10, this.effectMap[i][j]);
 					}
 				}
 			}
 
 		}
 
-		g_buttonManager.draw();
 
 		g_buttonCanvasManager.draw(this.context2D);
 
@@ -359,10 +606,9 @@ var SceneMain = function (game) {
 	this.calculateMoveRange = function (robot) {
 		return this.calculateMoveRangeCore(robot, robot.x, robot.y, -1, false, false);
 	}
+
 	this.calculateMoveRangeCore = function(robot, x_start, y_start, move_value, ignore_robots, ignore_maprect)
 	{
-		//qDebug() << robot->property.robotName << "start searching";
-
 		var xPos = robot.x;
 		var yPos = robot.y;
 
@@ -375,7 +621,7 @@ var SceneMain = function (game) {
 		for (var i = 0; i < this.map.width; i++) { 
 			var m2 = [];
 			for (var j = 0; j < this.map.height; j++) { 
-				m2.push(-99);
+				m2.push(-1);
 			}
 			m.push(m2);
 		}
@@ -401,7 +647,7 @@ var SceneMain = function (game) {
 			//up
 			if (m[x][y - 1] < m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect)) {
 				m[x][y - 1] = m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect);
-				if (m[x][y - 1] >= 0) {
+				if (m[x][y - 1] > 0) {
 					visited.push([x, y - 1]);
 				}
 			}
@@ -409,7 +655,7 @@ var SceneMain = function (game) {
 			//down
 			if (m[x][y + 1] < m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect)) {
 				m[x][y + 1] = m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect);
-				if (m[x][y + 1] >= 0) {
+				if (m[x][y + 1] > 0) {
 					visited.push([x, y + 1]);
 				}
 			}
@@ -417,7 +663,7 @@ var SceneMain = function (game) {
 			//left
 			if (m[x - 1][y] < m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect)) {
 				m[x - 1][y] = m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect);
-				if (m[x - 1][y] >= 0) {
+				if (m[x - 1][y] > 0) {
 					visited.push([x - 1, y]);
 				}
 			}
@@ -425,13 +671,93 @@ var SceneMain = function (game) {
 			//right
 			if (m[x + 1][y] < m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect)) {
 				m[x + 1][y] = m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect);
-				if (m[x + 1][y] >= 0) {
+				if (m[x + 1][y] > 0) {
 					visited.push([x + 1, y]);
 				}
 			}
 
 		}
 		return m;
+	}
+
+	this.calculateMovePath = function (robot, x_target, y_target) {
+		var ignore_maprect = false;
+		var ignore_robots = false;
+		var xPos = robot.x;
+		var yPos = robot.y;
+
+
+		var m = [];
+		for (var i = 0; i < this.map.width; i++) {
+			var m2 = [];
+			for (var j = 0; j < this.map.height; j++) {
+				m2.push(-1);
+			}
+			m.push(m2);
+		}
+		m[xPos][yPos] = robot.t_move();    //行动力
+
+		var paths = {};
+		var visited = [];
+		visited.push([xPos, yPos]);
+
+		while (!visited.length == 0) {
+
+			var now = visited.pop();
+
+
+			var x = now[0];
+			var y = now[1];
+			//up
+			if (m[x][y - 1] < m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect)) {
+				m[x][y - 1] = m[x][y] - this.getMoveConsume(robot, x, y - 1, ignore_robots, ignore_maprect);
+				paths[[x, y-1]] = [x, y];
+				if (m[x][y - 1] > 0) {
+					visited.push([x, y - 1]);
+				}
+			}
+
+			//down
+			if (m[x][y + 1] < m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect)) {
+				m[x][y + 1] = m[x][y] - this.getMoveConsume(robot, x, y + 1, ignore_robots, ignore_maprect);
+				paths[[x, y + 1]] = [x, y];
+				if (m[x][y + 1] > 0) {
+					visited.push([x, y + 1]);
+				}
+			}
+
+			//left
+			if (m[x - 1][y] < m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect)) {
+				m[x - 1][y] = m[x][y] - this.getMoveConsume(robot, x - 1, y, ignore_robots, ignore_maprect);
+				paths[[x-1, y]] = [x, y];
+				if (m[x - 1][y] > 0) {
+					visited.push([x - 1, y]);
+				}
+			}
+
+			//right
+			if (m[x + 1][y] < m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect)) {
+				m[x + 1][y] = m[x][y] - this.getMoveConsume(robot, x + 1, y, ignore_robots, ignore_maprect);
+				paths[[x + 1, y]] = [x, y];
+				if (m[x + 1][y] > 0) {
+					visited.push([x + 1, y]);
+				}
+			}
+
+		}
+
+		var res = [];
+		var current = [x_target, y_target];
+		res.push(current);
+		while (current && current[0] != xPos || current[1] != yPos) {
+			current = paths[current];
+			if (!current) {
+				current = [xPos, yPos];
+			}
+			res.push(current);
+		}
+
+		return res;
 	}
 
 	this.setBlackEffect = function(effectMap) {
@@ -477,7 +803,6 @@ var SceneMain = function (game) {
 		}
 
 
-		g_buttonManager.clear();
 
 		if (xTo && yTo) {
 			selectedRobot.inAIMove = true;
@@ -500,7 +825,6 @@ var SceneMain = function (game) {
 	this.init = function() {
 		var self = this;
 
-		g_buttonManager.unshowButton1();
 		if (!this.startFromFile)
 		{
 			self.game.musicManager.stopAll();
@@ -534,10 +858,7 @@ var SceneMain = function (game) {
 
 				this.robots.addEnemyAni(add_enemy, 0, function () {
 					self.executeStageEventCore(i+1, arr, callback);
-				});
-
-				g_buttonManager.unshowButton1();
-				
+				});				
 			}
 			else if (arr[i].type == "talks") {
 				var talk_data = arr[i].data;
@@ -547,10 +868,7 @@ var SceneMain = function (game) {
 					self.talkDiag.clear();
 					self.talkDiag = null;
 					self.executeStageEventCore(i + 1, arr, callback);
-				})
-
-				g_buttonManager.unshowButton1();
-				
+				})				
 			}
 			else if (arr[i].type == "addRobots") {
 				var add_robot = arr[i].data;
@@ -558,10 +876,7 @@ var SceneMain = function (game) {
 
 				this.robots.addRobotAni(add_robot, 0, function () {
 					self.executeStageEventCore(i + 1, arr, callback);
-				});
-
-				g_buttonManager.unshowButton1();
-				
+				});				
 			}
 			else if (arr[i].type == "checkAndTalk") {
 				var data = arr[i].data;
@@ -576,8 +891,6 @@ var SceneMain = function (game) {
 							self.talkDiag = null;
 							self.executeStageEventCore(i + 1, arr, callback);
 						})
-
-						g_buttonManager.unshowButton1();
 					}
 					else
 					{
@@ -589,9 +902,6 @@ var SceneMain = function (game) {
 							self.talkDiag = null;
 							self.executeStageEventCore(i + 1, arr, callback);
 						})
-
-						g_buttonManager.unshowButton1();
-
 					}
 				}
 			}
@@ -635,7 +945,6 @@ var SceneMain = function (game) {
 					log(arr[i]);
 					self.executeStageEventCore(i + 1, arr, callback);
 				}
-				g_buttonManager.unshowButton1();
 			}
 			else if (arr[i].type == "removeRobot") {
 				var data = arr[i].data;
@@ -646,7 +955,6 @@ var SceneMain = function (game) {
 					self.executeStageEventCore(i + 1, arr, callback);
 					
 				}
-				g_buttonManager.unshowButton1();
 			}
 			else if (arr[i].type == "attackRobot") {
 				var data = arr[i].data;
@@ -672,7 +980,6 @@ var SceneMain = function (game) {
 					
 				}
 				
-				g_buttonManager.unshowButton1();
 			}
 			else if (arr[i].type == "playMusic") {
 				var data = arr[i].data;

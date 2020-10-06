@@ -75,7 +75,7 @@ var Map = function(scene_main, stage){
 
 	this.mousedownHandler = function (x, y) {
 		//log(this.maprects[x][y]);
-
+		updateRobotUI(null);
 		updateMapRectUI(this.maprects[x][y]);
 
 		// var ani = new Weapon66(this.scene, x, y, 1, 30);
