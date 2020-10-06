@@ -337,13 +337,31 @@ var Robot = function (robotData, scene_main) {
 		this.attackCore();
 	}
 	this.attackCore = function(callback) {
-		if (this.selectedWeapon.id == 66) {
+		
+		
+			var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
+			this.scene.setBlackEffect(m);
+			
+		
+	}
+
+	this.attackDo = function(enemy, callback)
+	{
+		var self = this;
+
+		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
+		{
+			enemy.addHp(this.hp_total / 2);
+
+			this.setNotActive();
+		}
+		else if (this.selectedWeapon.id == 66) {
 			this.scene.setBlackEffect(null);
 			this.scene.game.musicManager.PlayOnceFromStart("weapon66");
 
 			var robot = this;
 			var scene = robot.scene;
-			var ani = new Weapon66(this.scene, this.x, this.y, function() {
+			var ani = new Weapon66(this.scene, this.x, this.y, function () {
 				var robots = robot.scene.robots;
 				var enemys = robots.enemy;
 
@@ -351,7 +369,7 @@ var Robot = function (robotData, scene_main) {
 					var enemy = enemys[i];
 					if (robot.canAttackRobotUsingWeapon(enemy, robot.selectedWeapon)) {
 						var damage = BattleCanvas.getDamage(robot, enemy, robot.selectedWeapon);
-						var ani = new TextAnimation(scene, enemy.x, enemy.y, "-" + damage, function() {
+						var ani = new TextAnimation(scene, enemy.x, enemy.y, "-" + damage, function () {
 							if (callback) {
 								callback();
 							}
@@ -366,24 +384,7 @@ var Robot = function (robotData, scene_main) {
 				robot.setNotActive();
 			});
 			this.scene.addAnimation(ani);
-		}
-		else
-		{
-			var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
-			this.scene.setBlackEffect(m);
 			
-		}
-	}
-
-	this.attackDo = function(enemy, callback)
-	{
-		var self = this;
-
-		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
-		{
-			enemy.addHp(this.hp_total / 2);
-
-			this.setNotActive();
 		}
 		else
 		{
@@ -559,7 +560,7 @@ Robot.prototype.InitValue = function () {
 }
 
 
-Robot.prototype.AI_action = function () {
+Robot.prototype.AI_action = function (callback) {
 	var selectedRobot = this;
 	var scene = selectedRobot.scene;
 	//if (selectedRobot.robotBehavior && scene.round < selectedRobot.robotBehavior) {
@@ -628,7 +629,7 @@ Robot.prototype.AI_action = function () {
 		// 无须移动的情况
 		
 		if (selectedRobot.canAttackRobotUsingWeapon(target, selectedRobot.selectedWeapon)) {
-			selectedRobot.attackDo(target);
+			selectedRobot.attackDo(target, callback);
 		}
 		else {
 			// 先移动在攻击
@@ -653,7 +654,7 @@ Robot.prototype.AI_action = function () {
 				selectedRobot.inAIMove = true;
 
 				selectedRobot.moveTo(target_x, target_y, function() {
-					selectedRobot.attackDo(target);
+					selectedRobot.attackDo(target, callback);
 					selectedRobot.setNotActive();
 				});
 
@@ -662,6 +663,9 @@ Robot.prototype.AI_action = function () {
 				scene.AI_move(selectedRobot, function() {
 					selectedRobot.setNotActive();
 					selectedRobot.selectedWeapon = null;
+					if (callback) {
+						callback();
+					}
 				});
 
 				
@@ -675,6 +679,9 @@ Robot.prototype.AI_action = function () {
 		scene.AI_move(selectedRobot, function() {
 			selectedRobot.setNotActive();
 			selectedRobot.selectedWeapon = null;
+			if (callback) {
+				callback();
+			}
 		});
 
 		

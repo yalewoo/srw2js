@@ -81,12 +81,8 @@ var SceneMain = function (game) {
 		else if (this.status == "robotSelected") {
 			var selectedRobot = this.robots.selectedRobot;
 			if (robot) {
-				if (robot == selectedRobot) {
-					// 点击自己显示菜单
-					// this.showRobotMenu(robot);
-				}
-				// 只有武器1能攻击到时自动使用武器1
-                else if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
+
+				if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
 					selectedRobot.selectedWeapon = selectedRobot.weapon1;
 					selectedRobot.attackDo(robot);
 					this.status = "normal";
@@ -426,18 +422,19 @@ var SceneMain = function (game) {
 
 					}
 
-					if (g_debug_mode_enabled) {
-						var showText = function (ctx, x, y, text) {
-							ctx.beginPath();
-							ctx.fillStyle = "white";
-							ctx.font = 16 + "px 黑体";
-							ctx.textAlign = "middle";
-							ctx.textBaseline = "middle";
-							ctx.fillText(text, x, y);
-							ctx.closePath();
-						}
-						showText(this.context2D, i*32+10, j*32+10, this.effectMap[i][j]);
-					}
+					// 显示移动消耗剩余
+					// if (g_debug_mode_enabled) {
+					// 	var showText = function (ctx, x, y, text) {
+					// 		ctx.beginPath();
+					// 		ctx.fillStyle = "white";
+					// 		ctx.font = 16 + "px 黑体";
+					// 		ctx.textAlign = "middle";
+					// 		ctx.textBaseline = "middle";
+					// 		ctx.fillText(text, x, y);
+					// 		ctx.closePath();
+					// 	}
+					// 	showText(this.context2D, i*32+10, j*32+10, this.effectMap[i][j]);
+					// }
 				}
 			}
 
@@ -1079,11 +1076,17 @@ var SceneMain = function (game) {
 	}
 
 	this.nextRound = function () {
+		self.robots.setAllActive();
+
+
 		self.inAIActions = true;
 
 		++self.round;
 		self.game.musicManager.stopAll();
 		self.game.musicManager.PlayLoopFromStart("main_enemy");
+
+		self.AIRobotList = self.robots.enemy.slice();
+
 
 		var callback = function() {
 			self.AI(0);
@@ -1096,30 +1099,23 @@ var SceneMain = function (game) {
 	this.AI = function (i) {
 		
 		var self = this;
-		var enemys = this.robots.enemy;
+		var enemys = this.AIRobotList;
 		if (enemys.length > i) {
 			var enemy = enemys[i];
+
 			this.hoverData = [enemy.x, enemy.y];
 			
 			this.game.addTimer(0.1, function() {
-				enemy.setNotActiveCallbackOnce = function () {
-					self.AI(i + 1);
-
-				}
-
-
 				if (enemy.robotBehavior < self.round) {
-					enemy.AI_action();
-
+					enemy.AI_action(function() {
+						self.AI(i + 1);
+					});
 				}
 				else {
 					enemy.setNotActive();
-					
+					self.AI(i + 1);
 				}
 			})
-
-			
-
 		}
 		else {
 			this.game.musicManager.stopAll();

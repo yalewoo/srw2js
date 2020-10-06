@@ -182,7 +182,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
                 });
             }
-            else if (enemy.speed - robot.speed >= 50 && this.enemy_weapon != 0) {
+            else if (enemy.speed - robot.speed >= 50 && this.enemy_weapon) {
                 this.textRobot = enemy.property.name + "再次反击！";
                 this.textPeople = enemy.pilot.name + "：再来！";
                 this.game.musicManager.PlayOnceFromStart("attack");

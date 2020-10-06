@@ -444,7 +444,7 @@ var Robots = function (scene_main) {
                 }
             }
         }
-        return false;
+        return true;
     }
 
     this.quanxiang = function (robot, enemy) {
