@@ -434,6 +434,9 @@ var Robots = function (scene_main) {
                 if (robot.hp < hpTarget) {
                     return true;
                 }
+                else {
+                    return false;
+                }
             }
             else if (checkData.type == "hpLessThanMax") {
                 var pid = checkData.peopleId;
@@ -442,7 +445,32 @@ var Robots = function (scene_main) {
                 if (robot.hp < robot.hp_total) {
                     return true;
                 }
+                else {
+                    return false;
+                }
             }
+            else if (checkData.type == "AllRobotsPositionYMore") {
+                var value = checkData.value;
+                for (var i = 0; i < this.robots.length; ++i) {
+                    if (this.robots[i].y < value) {
+                        return false;
+                    }
+                }
+                return true;               
+            }
+            else if (checkData.type == "RobotBoom") {
+                var pid = checkData.peopleId;
+                
+                var robot = this.getRobotByPeopleId(pid);
+                if (robot && robot.hp > 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+
+            
         }
         return true;
     }

@@ -35,6 +35,7 @@ var MusicManager = function(game) {
         "8D": "audio/music/8D.wav",
         "8E": "audio/music/8E.wav",
         "9F": "audio/music/9F.wav",
+        90: "audio/music/90.wav",
         91: "audio/music/91.wav",
         92: "audio/music/92.wav",
         93: "audio/music/93.wav",

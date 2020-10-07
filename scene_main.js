@@ -847,11 +847,23 @@ var SceneMain = function (game) {
 		{
 			if (arr[i].type == "addEnemys") {
 				var add_enemy = arr[i].data;
+				var music_id = arr[i].music;
+				if (music_id == undefined) {
+					this.game.musicManager.stopAll();
+					this.game.musicManager.PlayOnceFromStart("main_add_enemy", function () {
+						self.game.musicManager.PlayLoopContinue();
+					});
+				}
+				else if (music_id == "NoMusic") {
+
+				}
+				else {
+					this.game.musicManager.stopAll();
+					this.game.musicManager.PlayOnceFromStart(music_id, function () {
+						self.game.musicManager.PlayLoopContinue();
+					});
+				}
 				
-				this.game.musicManager.stopAll();
-				this.game.musicManager.PlayOnceFromStart("main_add_enemy", function () {
-					self.game.musicManager.PlayLoopContinue();
-				});
 
 				this.robots.addEnemyAni(add_enemy, 0, function () {
 					self.executeStageEventCore(i+1, arr, callback);
@@ -948,10 +960,10 @@ var SceneMain = function (game) {
 				peopleid = data.people;
 				var robot = this.robots.getRobotByPeopleId(peopleid)
 				if (robot) {
-					this.robots.deleteRobot(robot);
-					self.executeStageEventCore(i + 1, arr, callback);
-					
+					this.robots.deleteRobot(robot);					
 				}
+				
+				self.executeStageEventCore(i + 1, arr, callback);
 			}
 			else if (arr[i].type == "attackRobot") {
 				var data = arr[i].data;
@@ -1011,7 +1023,7 @@ var SceneMain = function (game) {
 		}
 	}
 
-	this.checkImmediateEvent = function() {
+	this.checkImmediateEvent = function(callback) {
 		//this.immediateEventDone
 		if (g_stages[this.stage] && g_stages[this.stage].immediateEvent) {
 			for (var i = 0; i < g_stages[this.stage].immediateEvent.length; ++i) {
@@ -1020,18 +1032,28 @@ var SceneMain = function (game) {
 					if (this.robots.checkCondition(d.check)) {
 						this.immediateEventDone[i] = true;
 						this.executeStageEventCore(0, d.events, function () {
-
+							callback();
+							return;
 						});
 					}
 				}
 
 			}
 		}
+		callback();
 	}
 	this.checkEvent = function() {
 		
-
-		if (this.robots.enemy.length == 0)
+		var passed = false;
+		if (g_stages[this.stage].successCondition) {
+			passed = this.robots.checkCondition(g_stages[this.stage].successCondition.check);
+		}
+		else {
+			passed = (this.robots.enemy.length == 0);
+		}
+		
+		
+		if (passed)
 		{
 			// Save data
 			var datas = {};
@@ -1076,6 +1098,8 @@ var SceneMain = function (game) {
 	}
 
 	this.nextRound = function () {
+		self.checkEvent();
+
 		self.robots.setAllActive();
 
 
@@ -1085,10 +1109,11 @@ var SceneMain = function (game) {
 		self.game.musicManager.stopAll();
 		self.game.musicManager.PlayLoopFromStart("main_enemy");
 
-		self.AIRobotList = self.robots.enemy.slice();
+		
 
 
 		var callback = function() {
+			self.AIRobotList = self.robots.enemy.slice();
 			self.AI(0);
 		}
 		self.executeStageEvent(callback);

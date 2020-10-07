@@ -413,34 +413,35 @@ var Robot = function (robotData, scene_main) {
 		var robot = this;
 		var self = this;
 
-		scene_main.checkImmediateEvent();
-		
+		scene_main.checkImmediateEvent(function() {
+			if (robot.hp <= 0) {
+				scene_main.game.musicManager.PlayOnceFromStart("boom");
 
-		if (robot.hp <= 0) {
-			scene_main.game.musicManager.PlayOnceFromStart("boom");
+				var ani = new AnimationBoom(scene_main, robot.x, robot.y, 1, 24, function () {
+					scene_main.robots.deleteRobot(robot);
+					scene_main.checkEvent();
+					var stage = self.scene.stage;
+					if (g_stages[stage] && g_stages[stage].afterboom_event) {
+						if (g_stages[stage].afterboom_event) {
+							if (g_stages[stage].afterboom_event[robot.people]) {
+								var arr = g_stages[stage].afterboom_event[robot.people];
+								self.scene.executeStageEventCore(0, arr, function () {
 
-			var ani = new AnimationBoom(scene_main, robot.x, robot.y, 1, 24, function () {
-				scene_main.robots.deleteRobot(robot);
-				scene_main.checkEvent();
-				var stage = self.scene.stage;
-				if (g_stages[stage] && g_stages[stage].afterboom_event) {
-					if (g_stages[stage].afterboom_event) {
-						if (g_stages[stage].afterboom_event[robot.people]) {
-							var arr = [];
-							arr.push(g_stages[stage].afterboom_event[robot.people])
-							self.scene.executeStageEventCore(0, arr, function () {
-
-							});
+								});
+							}
 						}
 					}
-				}
 
 
 
-			});
-			scene_main.addAnimation(ani);
+				});
+				scene_main.addAnimation(ani);
 
-		}
+			}
+		});
+		
+
+		
 	}
 
 	
@@ -869,6 +870,13 @@ Robot.prototype.use_sprit_17 = function ()	//狂怒
 Robot.prototype.use_sprit_18 = function ()	//爱心
 {
 	this.use_sprit_begin(18);
+
+	for (var i = 0; i < this.scene.robots.robots.length; ++i) {
+		var robot = this.scene.robots.robots[i];
+		var hp_plus = robot.hp_total - robot.hp;
+		robot.addHp(hp_plus);
+
+	}
 
 	log("use_sprit_18");
 }
