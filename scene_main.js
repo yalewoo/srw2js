@@ -474,6 +474,7 @@ var SceneMain = function (game) {
 
 	this.getSavedExp = function(peopleId) {
 		var json = window.localStorage.getItem("srw2js_save_data");
+		var datas = null;
 		if (json) {
 			datas = JSON.parse(json);
 		}

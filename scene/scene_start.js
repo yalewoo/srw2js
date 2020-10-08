@@ -55,7 +55,7 @@ var SceneStart = function (game) {
     this.setDataLoadButton = function (handler) {
         var self = this;
         this.setButton("Data Load", function () {
-            self.clear();
+            g_buttonCanvasManager.clear();
 
             var datas = {};
             var json = window.localStorage.getItem("srw2js_save_data");
@@ -67,7 +67,7 @@ var SceneStart = function (game) {
                     if (datas[i]) {
                         self.setButton(i+1, function() {
                             handler(i+1);
-                        }, Math.floor((i-1)%6)*100, 300 + Math.floor((i-1)/6) * 100, 80, 80);
+                        }, Math.floor((i-1)%6)*100, 240 + Math.floor((i-1)/6) * 100, 80, 80);
                     }
                 })(i);
             }
@@ -83,6 +83,5 @@ var SceneStart = function (game) {
         g_buttonCanvasManager.clear();
         this.game.musicManager.stopAll();
         this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     }
 }

@@ -32,12 +32,6 @@ var SceneBattle = function (scene_main, robot, enemy) {
     this.draw = function () {
         this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-
-        var peopleid = this.talks[this.currentTalk][0]
-        var img = g_resourceManager.get_img_people_image(peopleid);
-
-
-
         battleCanvas.draw();
 
         var robot2 = robot.isPlayer ? robot : enemy;
@@ -51,11 +45,6 @@ var SceneBattle = function (scene_main, robot, enemy) {
 
 
     }
-
-    this.talks = g_stage_prelude_talk_date[0][0];
-    this.currentTalk = 0;
-
-
 
 
     this.init = function () {
