@@ -3,20 +3,61 @@ var TalkDiag = function (game, story) {
     this.context2D = game.context2D;
     this.canvas = game.canvas;
 
-    var self = this;
-
+    this.width = 600;
+    this.height = 200;
+    this.xStart = 0; // 左上角
+    this.yStart = 350;
 
     this.hoverHandler = function (event) {
 
     }
     this.clickHandler = function (event) {
         ++this.currentTalk;
+        
 
         if (this.currentTalk >= this.talks.length) {
-           
             this.finishHandler();
-
         }
+        else {
+            this.getDiagPosition();
+        }
+    }
+
+    this.getDiagPosition = function() {
+        var peopleid = this.talks[this.currentTalk][0];
+        if (this.game && this.game.scene && this.game.scene.robots) {
+            var robot = this.game.scene.robots.getRobotByPeopleId(peopleid);
+            if (robot) {
+                var yDistance = 50;
+                
+                var xRobot = robot.x*32 + 16;
+                var yRobot = robot.y*32 + 16;
+
+                this.xStart = Math.max(xRobot - this.width / 2, 0);
+                this.yStart = yRobot;
+
+
+
+                if (this.yStart + this.height + yDistance + 20 > this.game.canvas.height) {
+                    // 对话框在机器人上方
+                    this.yStart = Math.max(this.yStart - this.height - 16 - yDistance, 0);
+                    this.fillPoints = [[xRobot, yRobot], [xRobot - 16, this.yStart + this.height], [xRobot + 16, this.yStart + this.height]];
+                }
+                else {
+                    // 对话框在机器人下方
+                    this.yStart = yRobot + yDistance;
+                    this.fillPoints = [[xRobot, yRobot], [xRobot - 16, this.yStart], [xRobot + 16, this.yStart]];
+                }
+
+                if (this.xStart < 0) {
+                    this.xStart = 0;
+                }
+                else if (this.xStart + this.width > this.canvas.width) {
+                    this.xStart = Math.max(this.canvas.width - this.width, 0);
+                }
+            }
+        }
+
     }
 
     this.rightClickHandler = function (e) {
@@ -37,18 +78,17 @@ var TalkDiag = function (game, story) {
     }
 
     this.draw = function () {
+        var peopleid = this.talks[this.currentTalk][0];
 
-        var peopleid = this.talks[this.currentTalk][0]
         var img = g_resourceManager.get_img_people_image(peopleid);
 
         var name = g_people_data[peopleid][1];
 
         var ctx = this.context2D;
 
-        var x = 0;
-        var y = 350;
-        var width = 600;
-        var height = 200;
+        var x = this.xStart;
+        var y = this.yStart;
+
         var text = this.talks[this.currentTalk][1];
 
         var fillStyleOld = ctx.fillStyle;
@@ -56,9 +96,9 @@ var TalkDiag = function (game, story) {
         ctx.beginPath();
         ctx.fillStyle = "#7f7f7f";
         ctx.moveTo(x, y);
-        ctx.lineTo(x + width, y);
-        ctx.lineTo(x + width, y + height);
-        ctx.lineTo(x, y + height);
+        ctx.lineTo(x + this.width, y);
+        ctx.lineTo(x + this.width, y + this.height);
+        ctx.lineTo(x, y + this.height);
         ctx.lineTo(x, y);
 
         ctx.closePath();
@@ -70,26 +110,69 @@ var TalkDiag = function (game, story) {
         ctx.font = 26 + "px 黑体";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        ctx.fillText(name+":", 100, 400);
+        ctx.fillText(name+":", x+100, y+50);
         ctx.closePath();
 
+        this.drawText(ctx, text, x+100, y+100, this.width-100);
+
+        ctx.fillStyle = fillStyleOld;
+
+        this.context2D.drawImage(img, x+10, y+70);
+
+        this.drawFill(ctx, this.fillPoints);
+    }
+
+    this.drawFill = function (cxt, points) {
+        if (points) {
+            cxt.fillStyle = "#7f7f7f";
+            cxt.beginPath();
+
+            cxt.moveTo(points[0][0], points[0][1]);
+            cxt.lineTo(points[1][0], points[1][1]);
+            cxt.lineTo(points[2][0], points[2][1]);
+            cxt.closePath();
+            cxt.fill();
+        }
+        
+    }
+
+    this.drawText = function(ctx, text, x, y, width) {
         ctx.beginPath();
         ctx.fillStyle = "#fff";
         ctx.font = 26 + "px 黑体";
         ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, 100, 450);
+        ctx.textBaseline = "middle";      
+
+        var t = text;
+        var w = width;
+        var chr = t.split("");
+        var temp = "";
+        var row = [];
+
+
+        for (var a = 0; a < chr.length; a++) {
+            if (ctx.measureText(temp).width < w-60) {
+                ;
+            }
+            else {
+                row.push(temp);
+                temp = "";
+            }
+            temp += chr[a];
+        }
+
+        row.push(temp);
+
+        for (var b = 0; b < row.length; b++) {
+            ctx.fillText(row[b], x, y + (b) * 30);
+        }
+
         ctx.closePath();
-
-        ctx.fillStyle = fillStyleOld;
-
-        this.context2D.drawImage(img, 10, 420);
-
 
     }
 
     this.talks = story;
     this.currentTalk = 0;
-
+    this.getDiagPosition();
 
 }

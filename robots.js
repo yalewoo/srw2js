@@ -207,11 +207,12 @@ var Robots = function (scene_main) {
 
     this.getRobotByPeopleId = function(id) {
         for (var i = 0; i < this.robots.length; ++i) {
-                if (this.robots[i].pilot.id == id)
+            if (this.robots[i].pilot.id == id || 
+                (id >= 8 && id <= 10 && this.robots[i].pilot.id >= 8 
+                    && this.robots[i].pilot.id <= 10))
                 {
                     return this.robots[i];
                 }                
-            
         }
         for (var i = 0; i < this.enemy.length; ++i) {
                 if (this.enemy[i].pilot.id == id)

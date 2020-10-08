@@ -49,6 +49,7 @@ var Game = function(canvas, fps)
 	}
 
 	this.draw = function() {
+		this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		game.scene.draw();
 
 	}
