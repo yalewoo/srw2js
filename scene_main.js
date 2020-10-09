@@ -51,6 +51,7 @@ var SceneMain = function (game) {
 			log(robot);
 		}
 
+		var self = this;
 		if (this.status == "normal") {
 			if (robot) {
 				updateRobotUI(robot);
@@ -81,8 +82,25 @@ var SceneMain = function (game) {
 		else if (this.status == "robotSelected") {
 			var selectedRobot = this.robots.selectedRobot;
 			if (robot) {
+				// 都能攻击时让玩家选择武器
+				if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1) && 
+					selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon2)) {
 
-				if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
+					g_buttonCanvasManager.addButtonForRobot(selectedRobot.weapon1.name, robot.x, robot.y, function () {
+						g_buttonCanvasManager.clear();
+						selectedRobot.selectedWeapon = selectedRobot.weapon1;
+						selectedRobot.attackDo(robot);
+						self.status = "normal";
+					});
+					g_buttonCanvasManager.addButtonForRobot(selectedRobot.weapon2.name, robot.x, robot.y, function () {
+						g_buttonCanvasManager.clear();
+						selectedRobot.selectedWeapon = selectedRobot.weapon2;
+						selectedRobot.attackDo(robot);
+						self.status = "normal";
+					});
+					
+				}
+				else if (selectedRobot && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
 					selectedRobot.selectedWeapon = selectedRobot.weapon1;
 					selectedRobot.attackDo(robot);
 					this.status = "normal";
@@ -93,13 +111,13 @@ var SceneMain = function (game) {
 					selectedRobot.attackDo(robot);
 					this.status = "normal";
 				}
-				else if (robot.pilot.id == 54) {
+				else if (robot.pilot.id == 54 && selectedRobot != robot) {
 					
 					if (this.canMoveTo(x, y)) {
 						// robot是母舰
 						this.setBlackEffect(null);
 
-						var self = this;
+						
 						selectedRobot.moveTo(x, y, function () {
 							robot.passengers.push(selectedRobot);
 							selectedRobot.inMainShip = robot;
@@ -137,8 +155,27 @@ var SceneMain = function (game) {
 					robot.setNotActive();
 					this.status = "normal";
 				}
+
+				// 都能攻击时让玩家选择武器
+				if (selectedRobot && selectedRobot.weapon1.range == 1 && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1) &&
+					selectedRobot.weapon2.range && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon2)) {
+
+					g_buttonCanvasManager.addButtonForRobot(selectedRobot.weapon1.name, robot.x, robot.y, function () {
+						g_buttonCanvasManager.clear();
+						selectedRobot.selectedWeapon = selectedRobot.weapon1;
+						selectedRobot.attackDo(robot);
+						self.status = "normal";
+					});
+					g_buttonCanvasManager.addButtonForRobot(selectedRobot.weapon2.name, robot.x, robot.y, function () {
+						g_buttonCanvasManager.clear();
+						selectedRobot.selectedWeapon = selectedRobot.weapon2;
+						selectedRobot.attackDo(robot);
+						self.status = "normal";
+					});
+
+				}
 				// 只有武器1能攻击到时自动使用武器1，移动后不能使用远程武器
-				if (selectedRobot && selectedRobot.weapon1.range == 1 && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
+				else if (selectedRobot && selectedRobot.weapon1.range == 1 && selectedRobot.canAttackRobotUsingWeapon(robot, selectedRobot.weapon1)) {
 					selectedRobot.selectedWeapon = selectedRobot.weapon1;
 					selectedRobot.attackDo(robot);
 					this.status = "normal";

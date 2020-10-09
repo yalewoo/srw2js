@@ -30,18 +30,9 @@ var SceneBattle = function (scene_main, robot, enemy) {
     }
 
     this.draw = function () {
-        this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         battleCanvas.draw();
 
-        var robot2 = robot.isPlayer ? robot : enemy;
-        var enemy2 = robot.isPlayer ? enemy : robot;
-
-        var img = g_resourceManager.get_img_robot_image(robot2.robot_id);
-        this.context2D.drawImage(img, 400, 180);
-
-        img = g_resourceManager.get_img_robot_image(enemy2.robot_id);
-        this.context2D.drawImage(img, 50, 180);
+        
 
 
     }

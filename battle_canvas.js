@@ -8,7 +8,18 @@ var BattleCanvas = function (scene_main, robot, enemy) {
     this.stage = 0;
     this.robot = robot;
     this.enemy = enemy;
+
+    this.robot2 = robot.isPlayer ? robot : enemy;
+    this.enemy2 = robot.isPlayer ? enemy : robot;
+    this.imgRight = g_resourceManager.get_img_robot_image(this.robot2.robot_id);
+    this.imgLeft = g_resourceManager.get_img_robot_image(this.enemy2.robot_id);
+
+    this.imgRightX = 400;
+    this.imgRightY = 180;
+    this.imgLeftX = 50;
+    this.imgLeftY = 180;
     
+
 
     this.showAttackAnimationRobot = function(callback) {
         if (!this.robot.isPlayer)
@@ -30,16 +41,14 @@ var BattleCanvas = function (scene_main, robot, enemy) {
     }
     this.showAttackAnimationLeftToRight = function(callback) {
         this.callback = callback;
-        this.inMove = true;
-        this.fire_x = 150;
-        this.fire_x2 = 350;
+        this.weaponAni = WeaponFactory.getWeapon(this.enemy2.selectedWeapon.id, scene_main, this.imgLeftX, this.imgLeftY, this.imgLeft,
+            this.imgRightX, this.imgRightY, this.imgRight, true);
+        
     }
     this.showAttackAnimationRightToLeft = function (callback) {
         this.callback = callback;
-
-        this.inMove = true;
-        this.fire_x = 350;
-        this.fire_x2 = 150;
+        this.weaponAni = WeaponFactory.getWeapon(this.robot2.selectedWeapon.id, scene_main, this.imgLeftX, this.imgLeftY, this.imgLeft,
+            this.imgRightX, this.imgRightY, this.imgRight, false);
     }
 
     this.executeStage = function()
@@ -70,6 +79,8 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
             this.weapon = robot.selectedWeapon;
             this.enemy_weapon = this.getEnemyBackWeapon();
+            enemy.selectedWeapon = this.enemy_weapon;
+
 
             this.enemy_rate = Math.floor( this.calcRadio(enemy, this.enemy_weapon, robot));
             this.player_rate = Math.floor( this.calcRadio(robot, this.weapon, enemy));
@@ -244,8 +255,13 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
 
                 self.textRobot = this.playerRobot.property.name + "获得经验 " + exp + "和金钱 " + money;
-                if (this.playerRobot.level != oldLevel)
-                    self.textPeople = this.playerRobot.property.name + "升级到" + this.playerRobot.level + "级";
+                if (this.playerRobot.level != oldLevel) {
+                    this.game.musicManager.stopAll();
+                    this.game.musicManager.PlayOnceFromStart("8E", function () {
+                        self.game.musicManager.PlayLoopContinue();
+                    });
+                    self.textPeople = this.playerRobot.property.name + "升级到" + this.playerRobot.level + "级"; 
+                }
             }
             else
             {
@@ -352,27 +368,15 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         this.finishHandler = callback;
     }
 
-    this.clear = function () {
-        this.currentTalk = 0;
-        this.talks = [];
-    }
+
 
     this.update = function () {
-        if (this.fire_x < this.fire_x2)
-        {
-            this.fire_x += 2;
-        }
-        else if (this.fire_x > this.fire_x2)
-        {
-            this.fire_x -= 2;
-        }
-        else{
-            this.inMove = false;
+        if (this.weaponAni && this.weaponAni.update() == false) {
+            this.weaponAni = null;
             if (this.callback) {
                 this.callback();
                 this.callback = null;
             }
-
         }
     }
 
@@ -387,6 +391,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         ctx.fillText(text, x, y);
         ctx.closePath();
     }
+
     this.showRect = function (ctx, x, y, width, height, color) {
         ctx.beginPath();
         ctx.fillStyle = color;
@@ -402,7 +407,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     this.draw = function () {
 
-        var peopleid = this.people.id;
+       
         var text = this.text;
         var text2 = this.text2;
 
@@ -460,29 +465,22 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         
 
 
-        ctx.fillStyle = fillStyleOld;
+        // ctx.fillStyle = fillStyleOld;
 
-        var img = g_resourceManager.get_img_people_image(peopleid);
+        var peopleid = this.people.id;
+        var imgPeople = g_resourceManager.get_img_people_image(peopleid);
+        this.context2D.drawImage(imgPeople, 10, 470);
 
-        this.context2D.drawImage(img, 10, 470);
 
-        if (this.inMove) {
-            img = g_resourceManager.img_logos["fire"];
-            this.context2D.drawImage(img, this.fire_x, 200);
+        this.context2D.drawImage(this.imgRight, this.imgRightX, this.imgRightY);
+        this.context2D.drawImage(this.imgLeft, this.imgLeftX, this.imgLeftY);
+        
+        if (this.weaponAni) {
+            this.weaponAni.draw();
         }
 
     }
 
-    this.talks = [
-        [54, 161, "很好，正如情报所说，敌人防守较差"],
-        [54, 161, "全歼他们！就出热核装置！"],
-        [7, 29, "是！我去把他们全干掉！"],
-        [15, 34, "加代，可不能蛮干呀！HP减少的话，我给你修理。"],
-        [54, 161, "如果有人受伤，不要勉强。让阿波罗A给你们修理，或者回我这里。"],
-        [6, 126, "明白了，舰长"],
-    ];
-
-    this.currentTalk = 0;
 }
 
 BattleCanvas.getDamage = function (robot2, enemy2, weapon2) {

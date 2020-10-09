@@ -7,7 +7,7 @@ var SceneStartMap1 = function (game, stage) {
 
     var talk_data = g_stages[self.stage].talk_map;
 
-    var talkDiag = new TalkDiag(game, talk_data);
+    var talkDiag = new TalkDiag(game, talk_data, false);
 
     this.hoverHandler = function (event) {
         talkDiag.hoverHandler();

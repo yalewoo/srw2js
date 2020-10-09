@@ -1,4 +1,4 @@
-var TalkDiag = function (game, story) {
+var TalkDiag = function (game, story, notPoint) {
     this.game = game;
     this.context2D = game.context2D;
     this.canvas = game.canvas;
@@ -19,7 +19,13 @@ var TalkDiag = function (game, story) {
             this.finishHandler();
         }
         else {
-            this.getDiagPosition();
+            if (notPoint == false) {
+
+            }
+            else {
+                this.getDiagPosition();
+            }
+            
         }
     }
 
@@ -119,22 +125,10 @@ var TalkDiag = function (game, story) {
 
         this.context2D.drawImage(img, x+10, y+70);
 
-        this.drawFill(ctx, this.fillPoints);
+        CanvasHelper.drawFillPointsRect(ctx, this.fillPoints, "#7f7f7f");
     }
 
-    this.drawFill = function (cxt, points) {
-        if (points) {
-            cxt.fillStyle = "#7f7f7f";
-            cxt.beginPath();
-
-            cxt.moveTo(points[0][0], points[0][1]);
-            cxt.lineTo(points[1][0], points[1][1]);
-            cxt.lineTo(points[2][0], points[2][1]);
-            cxt.closePath();
-            cxt.fill();
-        }
-        
-    }
+   
 
     this.drawText = function(ctx, text, x, y, width) {
         ctx.beginPath();
@@ -173,6 +167,12 @@ var TalkDiag = function (game, story) {
 
     this.talks = story;
     this.currentTalk = 0;
-    this.getDiagPosition();
+
+    if (notPoint == false) {
+
+    }
+    else {
+        this.getDiagPosition();
+    }
 
 }
