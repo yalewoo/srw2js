@@ -36,7 +36,9 @@ var ButtonInfo = function (id, name, callback, x, y, width, height, font) {
 
     this.clickHandler = function (event) {
         if (this.intersects(event.offsetX, event.offsetY)) {
-            g_buttonCanvasManager.clear();
+            if (this.clearWhenClick) {
+                g_buttonCanvasManager.clear();
+            }
 
             if (this.handler) {
                 this.handler();
@@ -96,8 +98,9 @@ var ButtonCanvasManager = function (ctx) {
     this.buttons = []
 
 
-    this.addButtonHandler = function (name, callback, x, y, width, height) {
+    this.addButtonHandler = function (name, callback, x, y, width, height, clearWhenClick) {
         var buttoninfo = new ButtonInfo(this.count, name, callback, x, y, width, height);
+        buttoninfo.clearWhenClick = clearWhenClick === false ? false : true;
         this.buttons.push(buttoninfo);
     }
     this.addButtonForRobot = function (name, xRobot, yRobot, callback) {

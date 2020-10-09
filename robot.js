@@ -162,6 +162,12 @@ var Robot = function (robotData, scene_main) {
 
 				}
 
+				// 画血条
+				if (g_options.showHp) {
+					CanvasHelper.drawRect(this.context2D, this.x*32, this.y*32-3, Math.round(32*(this.hp)/this.hp_total), 3, "#00ff00");
+				}
+				
+
 			}
 
 

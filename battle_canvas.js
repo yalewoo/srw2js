@@ -19,7 +19,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
     this.imgLeftX = 50;
     this.imgLeftY = 180;
     
-
+    this.ignoreClick = false;
 
     this.showAttackAnimationRobot = function(callback) {
         if (!this.robot.isPlayer)
@@ -53,6 +53,14 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     this.executeStage = function()
     {
+        if (this.weaponAni) {
+            this.weaponAni = null;
+            if (this.callback) {
+                this.callback();
+                this.callback = null;
+            }
+            return;
+        }
         var self = this;
         if (this.stage == 0) {
             if (robot.isPlayer)
@@ -235,6 +243,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
             ++this.stage;
             if (this.enemyRobot.hp <= 0)
             {
+                this.people = this.playerRobot.pilot;
                 // 获得经验
                 var diffLevel = this.enemyRobot.level - this.playerRobot.level;
                 var exp = this.enemyRobot.property.exp_dievalue * this.enemyRobot.level;
@@ -256,6 +265,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
                 self.textRobot = this.playerRobot.property.name + "获得经验 " + exp + "和金钱 " + money;
                 if (this.playerRobot.level != oldLevel) {
+                    this.stage = 1024;
                     this.game.musicManager.stopAll();
                     this.game.musicManager.PlayOnceFromStart("8E", function () {
                         self.game.musicManager.PlayLoopContinue();
@@ -267,6 +277,13 @@ var BattleCanvas = function (scene_main, robot, enemy) {
             {
                 this.executeStage();
             }
+        }
+        else if (this.stage == 1024) {
+            this.stage++;
+            this.textPeople = "强度升级到" + this.playerRobot.strength + ".";
+            this.textPeople += "防卫升级到" + this.playerRobot.defense + ".";
+            this.textPeople += "速度升级到" + this.playerRobot.speed + ".";
+            this.textPeople += "HP升级到" + this.playerRobot.hp_total + "."; 
         }
         else
         {
@@ -357,6 +374,9 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
     }
     this.clickHandler = function (event) {
+        if (this.ignoreClick) {
+            return;
+        }
         this.executeStage();
     }
 
@@ -427,7 +447,8 @@ var BattleCanvas = function (scene_main, robot, enemy) {
 
         this.showRect(ctx, x, y, width, height, "#7f7f7f");
 
-        this.showText(ctx, 100, 460, this.textPeople);
+        CanvasHelper.drawTextWrapLine(ctx, this.textPeople, 100, 470, 500);
+
         this.showText(ctx, 10, 430, this.textRobot);
 
 

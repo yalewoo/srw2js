@@ -3,7 +3,7 @@ var Game = function(canvas, fps)
 	this.canvas = canvas;
 	this.context2D = canvas.getContext("2d");
 	this.fps = fps;
-	this.FPS = 1000 / fps;
+	this.intervalTime = 1000 / fps;
 
 
 	this.setupCanvas = function() {
@@ -52,16 +52,32 @@ var Game = function(canvas, fps)
 		this.context2D.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		game.scene.draw();
 
+		if (g_options.showfps ) {
+			CanvasHelper.drawTextWrapLine(game.context2D, "fps:" + game.actualFps.toString(), 0, 30, 350);
+		}
+
 	}
 
-	var self = this;
-	this.run = function() {
-		
-		var desiredTime = Date.now() + game.FPS;
-		var interval = Math.max(0, desiredTime - Date.now());
+	this.lastTime = Date.now();
+	this.thisTime = Date.now();
+	this.frame = 0;
+	this.actualFps = 0;
 
-		self.update();
-		self.draw();
+	this.run = function() {
+		++game.frame;
+		game.thisTime = Date.now();
+		var desiredTime = game.lastTime + game.intervalTime;
+		var interval = Math.max(0, desiredTime - game.thisTime);
+		
+
+		game.update();
+
+		game.draw();
+
+		if (g_options.showfps && game.frame % 20 == 0) {
+			game.actualFps = Math.round(1000 / (game.thisTime - game.lastTime));
+		}
+		game.lastTime = game.thisTime;
 		
 		setTimeout(game.run, interval);
 	}
@@ -82,13 +98,12 @@ var Game = function(canvas, fps)
 
 	this.musicManager = new MusicManager(this);
 
-	var self = this;
 
 	//鼠标滑过
 	canvas.addEventListener("mousemove", function (e) {
 		g_buttonCanvasManager.hoverHandler(e);
 
-		self.scene.hoverHandler(e);
+		game.scene.hoverHandler(e);
 
 	});
 
@@ -98,13 +113,13 @@ var Game = function(canvas, fps)
 			return;
 		}
 		
-		self.scene.clickHandler(e);
+		game.scene.clickHandler(e);
 	});
 
 	// 右键点击
 	var canvasDom = document.getElementById("myCanvas");
 	canvasDom.oncontextmenu = function (e) {
-		self.scene.rightClickHandler(e);
+		game.scene.rightClickHandler(e);
 		return false;
 	};
 

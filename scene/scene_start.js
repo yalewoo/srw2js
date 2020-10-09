@@ -6,6 +6,9 @@ var SceneStart = function (game) {
     var self = this;
     this.musicStarted = false;
 
+
+    
+
     
     this.hoverHandler = function (event) {
         
@@ -37,6 +40,9 @@ var SceneStart = function (game) {
 
         this.context2D.drawImage(img, 0, 60);
         
+        if (!g_buttonCanvasManager.hasAnyButton()) {
+            CanvasHelper.drawTextWrapLine(this.context2D, "请刷新重新开始", 150, 300, 300);
+        }
 
     }
 
@@ -46,15 +52,15 @@ var SceneStart = function (game) {
 
     this.setStartButton = function(handler)
     {
-        this.setButton("Start", handler, 150, 300, 200, 80);
+        this.setButton("重新开始", handler, 100, 300, 300, 80);
     }
     this.setContinueButton = function(handler)
     {
-        this.setButton("Continue", handler, 150, 400, 200, 80);
+        this.setButton("继续游戏", handler, 100, 400, 300, 80);
     }
     this.setDataLoadButton = function (handler) {
         var self = this;
-        this.setButton("Data Load", function () {
+        this.setButton("关卡存档", function () {
             g_buttonCanvasManager.clear();
 
             var datas = {};
@@ -72,12 +78,54 @@ var SceneStart = function (game) {
                 })(i);
             }
 
-        }, 150, 500, 200, 80);
+        }, 100, 500, 300, 80);
 
     }
 
     this.init = function() {
         this.game.musicManager.PlayLoopFromStart("start");
+
+        // 设置
+        g_buttonCanvasManager.addButtonHandler("设置", function () {
+            g_buttonCanvasManager.clear();
+
+            var addFpsButton = function() {
+                var text = "显示FPS:" + (g_options.showfps ? "开" : "关");
+                g_buttonCanvasManager.addButtonHandler(text, function () {
+                    g_options.showfps = !g_options.showfps;
+
+                    var str = JSON.stringify(g_options);
+                    window.localStorage.setItem("srw2js_save_options", str);
+
+                    addFpsButton();
+                }, 100, 300, 310, 80, false);
+            }
+            addFpsButton();
+
+            var addhpButton = function () {
+                var text = "显示血条:" + (g_options.showHp ? "开" : "关");
+                g_buttonCanvasManager.addButtonHandler(text, function () {
+                    g_options.showHp = !g_options.showHp;
+
+                    var str = JSON.stringify(g_options);
+                    window.localStorage.setItem("srw2js_save_options", str);
+
+                    addhpButton();
+                }, 100, 400, 310, 80, false);
+            }
+            addhpButton();
+
+
+            g_buttonCanvasManager.addButtonHandler("设置后刷新页面", function () {
+                
+            }, 100, 500, 310, 80, false);
+
+
+        }, 100, 600, 150, 80, false);
+        g_buttonCanvasManager.addButtonHandler("帮助", function () {
+            window.open("http://www.yalewoo.com/srw2js.html");
+        }, 280, 600, 150, 80, false);
+        
     }
     this.clear = function() {
         g_buttonCanvasManager.clear();
