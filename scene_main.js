@@ -51,6 +51,18 @@ var SceneMain = function (game) {
 		if (g_debug_mode_enabled) {
 			log(robot);
 		}
+		
+		if (this.chuanzhenCallback) {
+			if (robot) {
+				this.chuanzhenCallback = null;
+			}
+			else {
+				this.chuanzhenCallback(x, y);
+				this.chuanzhenCallback = null;
+			}
+			return;				
+		}
+		
 
 		var self = this;
 		if (this.status == "normal") {

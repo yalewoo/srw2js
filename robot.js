@@ -699,13 +699,11 @@ Robot.prototype.AI_action = function (callback) {
 
 
 Robot.prototype.use_sprit_begin = function (id) {
-	this.pilot.spirit -= g_spirit_consume_table[id];
-
 	this.spirit[id] = true;
 
 }
 Robot.prototype.use_sprit_end = function (id) {
-	
+	this.pilot.spirit -= g_spirit_consume_table[id];
 }
 
 Robot.prototype.use_sprit_0 = function ()	//毅力
@@ -758,9 +756,22 @@ Robot.prototype.use_sprit_5 = function ()	//友情
 	this.use_sprit_begin(5);
 
 	log("use_sprit_5");
-
-
-	this.use_sprit_end(5);
+	
+	var robots = this.scene.robots.robots;
+	var self = this;
+	for (var i = 0; i < robots.length; ++i) {
+		(function (i) {
+			if (robots[i].hp < robots[i].hp_total) {
+				var robot = robots[i];
+				g_buttonCanvasManager.addButtonForRobot(robot.property.name, self.x, self.y, function () {
+					g_buttonCanvasManager.clear();
+					robot.addHp(50);
+					self.use_sprit_end(5);
+				});
+			}
+		})(i);
+	}
+	
 }
 Robot.prototype.use_sprit_6 = function ()	//必杀
 {
@@ -817,13 +828,44 @@ Robot.prototype.use_sprit_11 = function ()	//情义
 	log("use_sprit_11");
 
 
-	this.use_sprit_end(11);
+	var robots = this.scene.robots.robots;
+	var self = this;
+	for (var i = 0; i < robots.length; ++i) {
+		(function (i) {
+			if (robots[i].hp < robots[i].hp_total) {
+				var robot = robots[i];
+				g_buttonCanvasManager.addButtonForRobot(robot.property.name, self.x, self.y, function () {
+					g_buttonCanvasManager.clear();
+					robot.addHp(robot.hp_total - robot.hp);
+					self.use_sprit_end(11);
+				});
+			}
+		})(i);
+	}
 }
 Robot.prototype.use_sprit_12 = function ()	//传真
 {
 	this.use_sprit_begin(12);
 
 	log("use_sprit_12");
+
+	var robots = this.scene.robots.robots;
+	var self = this;
+	for (var i = 0; i < robots.length; ++i) {
+		(function (i) {
+			var robot = robots[i];
+			g_buttonCanvasManager.addButtonForRobot(robot.property.name, self.x, self.y, function () {
+				g_buttonCanvasManager.clear();
+				self.scene.chuanzhenCallback = function(x, y) {
+					robot.x = x;
+					robot.y = y;
+					self.use_sprit_end(11);
+				}
+				
+			});
+			
+		})(i);
+	}
 
 
 	this.use_sprit_end(12);
@@ -834,14 +876,33 @@ Robot.prototype.use_sprit_13 = function ()	//援助
 
 	log("use_sprit_13");
 
+	for (var i = 0; i < this.scene.robots.robots.length; ++i) {
+		var robot = this.scene.robots.robots[i];
+		robot.addHp(50);
+	}
+
 
 	this.use_sprit_end(13);
 }
 Robot.prototype.use_sprit_14 = function ()	//怒
 {
 	this.use_sprit_begin(14);
+	this.scene.game.musicManager.PlayOnceFromStart("weapon66");
 
 	log("use_sprit_14");
+	var enemys = this.scene.robots.enemy;
+	var scene = this.scene;
+	for (var i = 0; i < enemys.length; ++i) {
+		var enemy = enemys[i];
+
+		var damage = Math.round(Math.random() * 100);
+		var ani = new TextAnimation(scene, enemy.x, enemy.y, "-" + damage, function () {
+
+		});
+		scene.addAnimation(ani);
+		enemy.hp = Math.max(enemy.hp - damage, 0);
+		enemy.checkRobotHp();
+	}
 
 
 	this.use_sprit_end(14);
@@ -851,7 +912,10 @@ Robot.prototype.use_sprit_15 = function ()	//祈祷
 	this.use_sprit_begin(15);
 
 	log("use_sprit_15");
-
+	for (var i = 0; i < this.scene.robots.robots.length; ++i) {
+		var robot = this.scene.robots.robots[i];
+		robot.addHp(100);
+	}
 
 	this.use_sprit_end(15);
 }
@@ -867,8 +931,23 @@ Robot.prototype.use_sprit_16 = function ()	//干扰
 Robot.prototype.use_sprit_17 = function ()	//狂怒
 {
 	this.use_sprit_begin(17);
+	this.scene.game.musicManager.PlayOnceFromStart("weapon66");
 
 	log("use_sprit_17");
+
+	var enemys = this.scene.robots.enemy;
+	var scene = this.scene;
+	for (var i = 0; i < enemys.length; ++i) {
+		var enemy = enemys[i];
+		
+			var damage = Math.round(Math.random() * 250);
+			var ani = new TextAnimation(scene, enemy.x, enemy.y, "-" + damage, function () {
+				
+			});
+			scene.addAnimation(ani);
+			enemy.hp = Math.max(enemy.hp - damage, 0);
+			enemy.checkRobotHp();
+	}
 
 
 	this.use_sprit_end(17);

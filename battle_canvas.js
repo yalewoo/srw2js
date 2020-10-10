@@ -93,6 +93,7 @@ var BattleCanvas = function (scene_main, robot, enemy) {
             this.enemy_rate = Math.floor( this.calcRadio(enemy, this.enemy_weapon, robot));
             this.player_rate = Math.floor( this.calcRadio(robot, this.weapon, enemy));
 
+
         }
         else if (this.stage == 1)
         {
