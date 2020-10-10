@@ -16,13 +16,14 @@ if (g_debug_mode_enabled) {
 (function() {
     var json = window.localStorage.getItem("srw2js_save_options");
     if (json) {
-        datas = JSON.parse(json);
-    }
-    if (datas) {
-        var keys = Object.keys(datas);
-        for (var i = 0; i < keys.length; ++i) {
-            g_options[keys[i]] = datas[keys[i]];
+        var datas = JSON.parse(json);
+        if (datas) {
+            var keys = Object.keys(datas);
+            for (var i = 0; i < keys.length; ++i) {
+                g_options[keys[i]] = datas[keys[i]];
+            }
+
         }
-       
     }
+    
 })();
