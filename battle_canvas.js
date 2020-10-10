@@ -366,6 +366,18 @@ var BattleCanvas = function (scene_main, robot, enemy) {
         if (res > 100)
             res = 100;
 
+        // 干扰
+        if (robot2.isPlayer == false) {
+            var allrobots = robot2.scene.robots.robots;
+            for (var i = 0; i < allrobots.length; ++i) {
+                if (allrobots[i].spirit[16]) {
+                    res /= 2;
+                    break;
+                }
+            }
+        }
+        
+
         return res;
     }
 

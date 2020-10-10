@@ -859,16 +859,13 @@ Robot.prototype.use_sprit_12 = function ()	//传真
 				self.scene.chuanzhenCallback = function(x, y) {
 					robot.x = x;
 					robot.y = y;
-					self.use_sprit_end(11);
+					self.use_sprit_end(12);
 				}
 				
 			});
 			
 		})(i);
 	}
-
-
-	this.use_sprit_end(12);
 }
 Robot.prototype.use_sprit_13 = function ()	//援助
 {
