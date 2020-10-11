@@ -483,7 +483,7 @@ var Robots = function (scene_main) {
         robot.setActive();
 
         var stage = this.scene.stage;
-
+        var game = this.scene.game;
         if (!this.checkCondition(g_stages[stage].quanxiang.check)) {           
             var talk_data = g_stages[stage].quanxiang.talks2;
             this.scene.talkDiag = new TalkDiag(game, talk_data);
