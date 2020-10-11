@@ -859,6 +859,13 @@ Robot.prototype.use_sprit_12 = function ()	//传真
 				self.scene.chuanzhenCallback = function(x, y) {
 					robot.x = x;
 					robot.y = y;
+					if (robot.passengers) {
+						for (var j = 0; j < robot.passengers.length; ++j) {
+							robot.passengers[j].x = x;
+							robot.passengers[j].y = y;
+
+						}
+					}
 					self.use_sprit_end(12);
 				}
 				
