@@ -68,24 +68,27 @@ var SceneMain = function (game) {
 		if (this.status == "normal") {
 			if (robot) {
 				updateRobotUI(robot);
-				if (robot.active || g_debug_mode_enabled) {
-					this.robots.selectedRobot = robot;
-					var m = this.calculateMoveRangeCore(robot, x, y, -1, false);
-					for (var i = 0; i < this.robots.enemy.length; ++i) {
-						var r = this.robots.enemy[i];
-						if (robot.canAttackRobot(r)) {
-							m[r.x][r.y] = 1;
-						}
-						else {
-							m[r.x][r.y] = -1;
-						}
-					}
-					this.setBlackEffect(m);
-					this.status = "robotSelected";
-				}
-				else {
 
-				}
+				if (robot.isPlayer) {
+					if (robot.active || g_debug_mode_enabled) {
+						this.robots.selectedRobot = robot;
+						var m = this.calculateMoveRangeCore(robot, x, y, -1, false);
+						for (var i = 0; i < this.robots.enemy.length; ++i) {
+							var r = this.robots.enemy[i];
+							if (robot.canAttackRobot(r)) {
+								m[r.x][r.y] = 1;
+							}
+							else {
+								m[r.x][r.y] = -1;
+							}
+						}
+						this.setBlackEffect(m);
+						this.status = "robotSelected";
+					}
+					else {
+
+					}
+				}			
 				
 			}
 			else {
@@ -94,8 +97,11 @@ var SceneMain = function (game) {
 				if (oldHasButton) {
 					return;
 				}
-				var e = {offsetX: x*32, offsetY:y*32};
-				this.rightClickHandler(e);
+				if (g_options.leftContext){
+					var e = { offsetX: x * 32, offsetY: y * 32 };
+					this.rightClickHandler(e);
+				}
+				
 			}
 		}
 		else if (this.status == "robotSelected") {

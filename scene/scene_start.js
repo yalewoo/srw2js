@@ -115,10 +115,19 @@ var SceneStart = function (game) {
             }
             addhpButton();
 
+            var addleftclickButton = function () {
+                var text = "左键菜单:" + (g_options.leftContext ? "开" : "关");
+                g_buttonCanvasManager.addButtonHandler(text, function () {
+                    g_options.leftContext = !g_options.leftContext;
 
-            g_buttonCanvasManager.addButtonHandler("设置后刷新页面", function () {
-                
-            }, 100, 500, 310, 80, false);
+                    var str = JSON.stringify(g_options);
+                    window.localStorage.setItem("srw2js_save_options", str);
+
+                    addleftclickButton();
+                }, 100, 500, 310, 80, false);
+            }
+            addleftclickButton();
+
 
 
         }, 100, 600, 150, 80, false);
