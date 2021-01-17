@@ -13,7 +13,15 @@ var Robot = function (robotData, scene_main) {
 			}
 		}
 	}
-	
+	this.hasPassenger = function()
+	{
+		for (var i = this.passengers.length - 1; i >= 0; i--) {
+			if (this.passengers[i].active){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 
 	this.isPlayer = robotData.isPlayer;
@@ -200,11 +208,6 @@ var Robot = function (robotData, scene_main) {
 			var m = this.scene.calculateMoveRangeCore(this, x, y, -1, false, false);
 
 			this.scene.setBlackEffect(m);
-
-			if (this.drawIgnoreMainShip)
-			{
-				this.drawIgnoreMainShip = false;
-			}
 		}
 		else if (this.inAIMove)
 		{

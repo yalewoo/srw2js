@@ -43,6 +43,11 @@ var SceneMain = function (game) {
 			return;
 		}
 
+		if (this.inAIActions)
+		{
+			return;
+		}
+
 
 		var x = Math.floor(event.offsetX / 32);
 		var y = Math.floor(event.offsetY / 32);
@@ -245,7 +250,7 @@ var SceneMain = function (game) {
 
 
 
-		
+		log(this.status)
 		
 		
 
@@ -256,9 +261,11 @@ var SceneMain = function (game) {
 		var robot = this.robots.selectedRobot;
 		if (robot.afterMove) {
 			robot.inCancelMove = true;
-			robot.moveTo(robot.xOriginal, robot.yOriginal);
+			robot.moveTo(robot.xOriginal, robot.yOriginal, function() {
+				self.status = "robotSelected";
+			});
 			self.setBlackEffect(null);
-			this.status = "robotSelected";
+			this.status = "robotMoving";
 		}
 		else {
 			
@@ -310,10 +317,13 @@ var SceneMain = function (game) {
 		});
 
 		// 起飞
-		if (robot.pilot.id == 54 && robot.passengers.length > 0) {
+		if (robot.pilot.id == 54 && robot.hasPassenger()) {
 			g_buttonCanvasManager.addButtonForRobot("起飞", robot.x, robot.y, function () {
 				for (var i = 0; i < robot.passengers.length; ++i) {
 					var r = robot.passengers[i];
+					if (!r.active){
+						continue;
+					}
 					(function (r) {
 						g_buttonCanvasManager.addButtonForRobot(r.property.robotName, r.x, r.y, function () {
 							r.scene.robots.selectedRobot = r;
@@ -400,6 +410,11 @@ var SceneMain = function (game) {
 			return;
 		}
 
+		if (this.inAIActions)
+		{
+			return;
+		}
+
 		var x = Math.floor(e.offsetX / 32);
 		var y = Math.floor(e.offsetY / 32);
 		var robot = this.robots.getRobotAt(x, y);
@@ -414,6 +429,7 @@ var SceneMain = function (game) {
 		if (robot) {
 			self.undoSelectedRobot();
 		}
+		// 回合结束菜单
 		else{
 			g_buttonCanvasManager.addButtonHandler("回合" + this.round + "结束", self.nextRound, e.offsetX, e.offsetY, 200, 60);
 
