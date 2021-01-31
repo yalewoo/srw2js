@@ -401,6 +401,7 @@ var SceneMain = function (game) {
 
 		g_buttonCanvasManager.addButtonForRobot("待命", robot.x, robot.y, function () {
 			robot.setNotActive();
+			self.status = "normal";
 		})
 
 	}
