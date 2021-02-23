@@ -1081,7 +1081,9 @@ var SceneMain = function (game) {
 				if (data.weapon == 2) weapon = robot.weapon2;
 				if (weapon.id == 66) {
 					robot.selectedWeapon = weapon;
-					robot.attackCore(function() {
+					
+					robot.attackCore();
+					robot.attackDo(null, function() {
 						self.executeStageEventCore(i + 1, arr, callback);
 					});
 				}

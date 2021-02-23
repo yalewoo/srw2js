@@ -351,6 +351,11 @@ var Robot = function (robotData, scene_main) {
 			var m = this.scene.calculateMoveRangeCore(this, this.x, this.y, this.selectedWeapon.range, true, true);
 			this.scene.setBlackEffect(m);
 			
+			if (callback)
+			{
+				callback();
+			}
+			
 		
 	}
 
@@ -358,13 +363,7 @@ var Robot = function (robotData, scene_main) {
 	{
 		var self = this;
 
-		if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
-		{
-			enemy.addHp(this.hp_total / 2);
-
-			this.setNotActive();
-		}
-		else if (this.selectedWeapon.id == 66) {
+if (this.selectedWeapon.id == 66) {
 			this.scene.setBlackEffect(null);
 			this.scene.game.musicManager.PlayOnceFromStart("weapon66");
 
@@ -394,6 +393,12 @@ var Robot = function (robotData, scene_main) {
 			});
 			this.scene.addAnimation(ani);
 			
+		}
+		else if (this.isPlayer == enemy.isPlayer && this.selectedWeapon.id == 164)
+		{
+			enemy.addHp(this.hp_total / 2);
+
+			this.setNotActive();
 		}
 		else
 		{
