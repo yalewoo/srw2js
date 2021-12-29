@@ -372,6 +372,7 @@ if (this.selectedWeapon.id == 66) {
 			var ani = new Weapon66(this.scene, this.x, this.y, function () {
 				var robots = robot.scene.robots;
 				var enemys = robots.enemy;
+				var oldrobotvalue = robot.level;
 
 				for (var i = 0; i < enemys.length; ++i) {
 					var enemy = enemys[i];
@@ -384,7 +385,25 @@ if (this.selectedWeapon.id == 66) {
 						});
 						scene.addAnimation(ani);
 						enemy.hp = Math.max(enemy.hp - damage, 0);
+						
+						// 获得经验
+						var diffLevel = enemy.level - oldrobotvalue;
+						var exp = enemy.property.exp_dievalue * enemy.level;
+						if (diffLevel >= 0) {
+							diffLevel = diffLevel > 8 ? 8 : diffLevel;
+							exp = exp * (diffLevel + 2) * 0.5;
+						}
+						else {
+							diffLevel = diffLevel < -5 ? -5 : diffLevel;
+							exp = exp / (diffLevel * -1 * 2);
+						}
+						robot.getExp(exp);
+
+						var money = enemy.property.money * 10;
+						scene_main.getMoney(money);
+
 						enemy.checkRobotHp();
+
 					}
 				}
 
